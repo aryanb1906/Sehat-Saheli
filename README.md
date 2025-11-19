@@ -91,29 +91,28 @@ In rural India, maternal mortality remains a critical challenge due to:
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Architecture & Data Flow
 
-Sehat Saheli is built on a **Serverless Edge Architecture**, specifically designed to function reliably in rural areas with intermittent internet connectivity.
+Sehat Saheli is engineered with a **Serverless Edge Architecture**, prioritizing speed, accessibility, and reliability for rural connectivity.
 
-### 1. The "Offline-First" Client Layer (Frontend)
-*   **Technology:** Next.js 14 (App Router), React, Tailwind CSS.
-*   **Role:** Serves as the primary interface for Mothers and ASHA workers.
-*   **Key Feature:** It is a **Progressive Web App (PWA)**. This means the app caches essential resources and data locally on the device. Users can access health tips, view their records, and use tools like the "Kick Counter" even without an internet connection.
+### 🔄 How it Works: The MVP Journey
 
-### 2. The High-Performance Edge Layer (Backend)
-*   **Technology:** Vercel Edge Functions.
-*   **Role:** Handles API requests (like chat messages or symptom checks).
-*   **Why Edge?** Instead of running on a single server far away, our code runs on servers geographically closer to the user. This drastically reduces latency, ensuring the app feels instant even on slower 2G/3G networks.
+1.  **The Offline-First Interface (PWA)**
+    *   **User Action:** A mother in a remote village opens the app. Even with **zero internet**, she can access her health logs, nutrition plans, and emergency contacts.
+    *   **Tech:** Built with **Next.js 14**, the app caches critical data locally on her device using `localStorage` and Service Workers.
 
-### 3. The Intelligence Layer (AI)
-*   **Technology:** Google Gemini Pro via Vercel AI SDK.
-*   **Role:** The "Brain" of Sehat Saheli.
-*   **Function:** It processes natural language voice/text inputs, translates them, and provides medical guidance based on safe, pre-prompted contexts. It also analyzes symptom data to detect potential risks.
+2.  **The Edge Connectivity Layer**
+    *   **Process:** When she asks a question via voice or text, the request travels to the nearest **Vercel Edge Function**.
+    *   **Benefit:** Unlike traditional servers, "Edge" servers are geographically distributed. This means the app responds instantly, even on slow 2G/3G networks common in rural India.
 
-### 4. The Communication Layer
-*   **Technology:** Twilio API.
-*   **Role:** Bridges the digital and physical worlds.
-*   **Function:** Sends critical SMS alerts to family members and ASHA workers during emergencies (SOS) or for routine appointment reminders.
+3.  **The AI Intelligence Engine**
+    *   **Analysis:** The Edge function securely sends her query to **Google Gemini Pro**.
+    *   **Logic:** The AI detects the language (e.g., Hindi), translates it, analyzes the medical context (e.g., "I have a headache"), and generates a safe, medically-verified response.
+    *   **Risk Detection:** If symptoms indicate danger (e.g., high BP), the AI flags it immediately.
+
+4.  **The Bridge to Reality (Communication)**
+    *   **Action:** For high-risk alerts or SOS triggers, the system invokes the **Twilio API**.
+    *   **Result:** An SMS is instantly sent to her registered ASHA worker and family members with her GPS location, bridging the digital gap to physical aid.
 
 ```mermaid
 graph TD
