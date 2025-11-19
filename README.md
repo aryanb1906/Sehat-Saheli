@@ -1,126 +1,146 @@
-# Sehat Saheli 🤰🏥
+# 🤰 Sehat Saheli (सेहत सहेली)
 
-**Empowering Maternal Healthcare with AI & Community Support**
+**Bridging the Gap in Maternal Healthcare with AI & Compassion**
 
-> **MVP developed for GHCI 25 AI Hackathon**
->
-> 🌐 **Live Prototype:** [https://sehat-saheli.vercel.app/](https://sehat-saheli.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live-Prototype-FF4081?style=for-the-badge&logo=vercel&logoColor=white)](https://sehat-saheli.vercel.app/)
+[![Hackathon](https://img.shields.io/badge/GHCI_25-AI_Hackathon-8E24AA?style=for-the-badge)](https://ghcindia.anitab.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
-Sehat Saheli is a comprehensive digital health platform designed to bridge the gap between expectant mothers and healthcare systems in rural India. By empowering ASHA (Accredited Social Health Activist) workers with digital tools and providing mothers with AI-driven guidance, we aim to reduce maternal mortality rates and improve health outcomes.
+> *"Healthcare that speaks your language, understands your needs."*
 
 ---
 
-## 🚀 Key Features
+## 📖 Table of Contents
+- [The Problem](#-the-problem)
+- [Our Solution](#-our-solution)
+- [Key Features](#-key-features)
+- [Technology Stack](#-technology-stack)
+- [System Architecture](#-system-architecture)
+- [Getting Started](#-getting-started)
+- [Future Roadmap](#-future-roadmap)
+- [The Team](#-the-team)
 
-### 🌐 Multilingual & Accessible
--   **"Your Health, Your Language":** Supports **8+ Indian languages** (Hindi, Odia, Bengali, Telugu, Tamil, Marathi, Gujarati, English).
--   **Voice-First Interface:** AI voice assistance designed for users with low literacy levels.
--   **Offline Capability:** Fully functional without an internet connection ("Works Offline"), syncing data when connectivity is restored—crucial for rural areas with limited connectivity.
+---
 
-### 👩‍👧 For Expectant Mothers (The "Saheli" Experience)
--   **Personalized Dashboard:** Features a daily health status indicator ("Low Risk"), pregnancy week tracking, and personalized greetings (e.g., "Namaste, Priya!").
--   **AI Health Assistant:** 24/7 chat support for pregnancy queries using Google Gemini.
--   **Comprehensive Health Tracking:**
-    -   **Baby Kick Counter:** Monitor fetal movement health.
-    -   **Nutrition Tracker:** Diet planning and logging.
-    -   **Vital Signs:** Track blood pressure, weight, and other key metrics.
-    -   **Labor Signs Tracker:** Identify and log early signs of labor.
--   **Mental Health Support:** Dedicated section for emotional well-being.
--   **SOS Emergency:** One-tap "Emergency Call" button to alert family and ASHA workers immediately.
--   **Family Sharing:** Keep loved ones informed about the pregnancy journey.
+## 🚩 The Problem
+In rural India, maternal mortality remains a critical challenge due to:
+1.  **Language Barriers:** Health information is often not available in local dialects.
+2.  **Limited Access:** ASHA workers are overburdened, making frequent home visits difficult.
+3.  **Lack of Awareness:** Early warning signs of high-risk pregnancies are often missed.
+
+## 💡 Our Solution
+**Sehat Saheli** is an AI-powered digital companion that empowers both expectant mothers and ASHA workers. It acts as a bridge, providing 24/7 medical guidance in native languages while streamlining patient management for healthcare workers.
+
+---
+
+## ✨ Key Features
+
+### 🌐 Inclusive & Accessible
+*   **Multilingual AI:** Fluent in **8+ Indian languages** (Hindi, Odia, Bengali, Telugu, Tamil, Marathi, Gujarati, English).
+*   **Voice-First Design:** Speak to the app naturally—perfect for users with limited literacy.
+*   **Offline-First:** Critical features work without internet, syncing data when connectivity returns.
+
+### 🤰 For Mothers (The "Saheli" Experience)
+*   **🤖 AI Health Assistant:** Instant answers to pregnancy queries via Google Gemini.
+*   **📊 Smart Trackers:**
+    *   *Kick Counter* & *Contraction Timer*
+    *   *Nutrition Planner* (Local diet recommendations)
+    *   *Vital Signs Log*
+*   **🆘 SOS Emergency:** One-tap alert system sending GPS location to family & ASHA workers.
+*   **🧠 Mental Wellness:** Guided meditation and emotional support tools.
 
 ### 👩‍⚕️ For ASHA Workers
--   **Digital Patient Management:** Streamlined records for all assigned expectant mothers.
--   **AI Risk Detection:** Early warning system that identifies high-risk pregnancies based on symptoms and vitals.
--   **Visit Scheduler:** Automated reminders for home visits and check-ups.
-
----
-
-## 🏗️ System & Code Architecture
-
-Sehat Saheli is built on a modern, scalable, and performance-oriented stack, designed to run efficiently even on low-end devices.
-
-### 1. High-Level Architecture
-The application follows a **Serverless Edge Architecture**:
--   **Client:** A Progressive Web App (PWA) built with Next.js, capable of caching resources for offline usage.
--   **Edge API Layer:** Backend logic runs on Vercel Edge Functions for minimal latency.
--   **AI Engine:** Integrates Google Gemini Pro for natural language processing and medical triage logic.
-
-### 2. Code Structure (Next.js App Router)
-The codebase is organized for modularity and maintainability:
-
--   **`app/`**: Contains the file-system based routing.
-    -   `api/`: Backend endpoints (e.g., `/chat`, `/sms`) running on Edge Runtime.
-    -   `mother/` & `asha/`: Distinct route groups for different user roles.
-    -   `language/`: Localization logic and language selection screens.
--   **`components/`**: Reusable UI elements.
-    -   `ui/`: Atomic components (Buttons, Cards, Inputs) built with Shadcn UI.
-    -   Feature-specific components like `language-switcher.tsx` and `app-sidebar.tsx`.
--   **`lib/`**: Core utilities.
-    -   `language-context.tsx`: Global state management for multilingual support.
-    -   `demo-database.ts`: In-memory data simulation for the MVP.
-    -   `multilingual-content.ts`: Static content dictionaries for offline support.
-
-### 3. Data Flow
-1.  **User Input:** Voice or Text input from the UI.
-2.  **Processing:**
-    -   **Local:** Immediate UI updates (Optimistic UI).
-    -   **Edge:** API routes process sensitive logic (e.g., symptom analysis).
-    -   **AI:** Prompts sent to Google Gemini for context-aware responses.
-3.  **Storage:** Data is persisted locally (for offline access) and synced to the backend when online.
+*   **📋 Digital Register:** Replace paper logs with a smart patient database.
+*   **⚠️ AI Risk Scoring:** Auto-detection of high-risk pregnancies based on reported symptoms.
+*   **📅 Smart Scheduler:** Automated reminders for ANC visits and immunizations.
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend & User Interface
--   **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
--   **Language:** [TypeScript](https://www.typescriptlang.org/)
--   **Styling:** [Tailwind CSS](https://tailwindcss.com/)
--   **UI Components:** [Shadcn/ui](https://ui.shadcn.com/) & [Radix UI](https://www.radix-ui.com/)
--   **Icons:** [Lucide React](https://lucide.dev/)
-
-### Backend & Infrastructure
--   **Runtime:** Next.js Edge Runtime for low-latency API responses.
--   **Hosting:** [Vercel](https://vercel.com/).
-
-### AI & Automation
--   **Generative AI:** [Google Gemini Pro](https://deepmind.google/technologies/gemini/) (via `@google/generative-ai`) for:
-  - Intelligent Symptom Checking
-  - Natural Language Chatbot
-  - Real-time Translation
--   **Communication:** [Twilio API](https://www.twilio.com/) for automated SMS notifications and alerts.
+| Category | Technologies |
+|----------|--------------|
+| **Frontend** | ![Next.js](https://img.shields.io/badge/Next.js-black?style=flat&logo=next.js) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css) |
+| **UI Components** | ![Shadcn/ui](https://img.shields.io/badge/Shadcn%2Fui-000000?style=flat&logo=shadcnui) ![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=flat&logo=radix-ui) |
+| **AI & ML** | ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=flat&logo=google-gemini) ![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow) |
+| **Backend** | ![Edge Runtime](https://img.shields.io/badge/Vercel_Edge-000000?style=flat&logo=vercel) ![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs) |
+| **Communication** | ![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=flat&logo=twilio) |
 
 ---
 
-## 💾 Data Model & Storage
+## 🏗️ System Architecture
 
-*Current MVP Implementation:*
-For the hackathon MVP, the application uses a robust in-memory simulation (`lib/demo-database.ts`) to demonstrate full functionality without requiring complex database setup during judging.
+Sehat Saheli utilizes a **Serverless Edge Architecture** for maximum performance on low-bandwidth networks.
 
-*Production Design:*
--   **Users:** (Mothers/ASHA) with role-based access control (RBAC).
--   **HealthRecords:** Time-series data for vitals, visits, and symptoms.
--   **Offline Sync:** Uses `localStorage` / `IndexedDB` for offline capability, syncing with a cloud database (e.g., PostgreSQL/MongoDB) upon reconnection.
+```mermaid
+graph TD
+    User[User (Mother/ASHA)] -->|Voice/Text| Client[Next.js PWA]
+    Client -->|Offline Data| LocalDB[Local Storage]
+    Client -->|API Requests| Edge[Vercel Edge Functions]
+    
+    subgraph Cloud Services
+        Edge -->|Inference| AI[Google Gemini Pro]
+        Edge -->|Alerts| SMS[Twilio Gateway]
+        Edge -->|Sync| DB[Cloud Database]
+    end
+```
 
----
-
-## 🔒 Security & Compliance
-
--   **Data Privacy:** All health data is treated with strict confidentiality.
--   **Secure Communication:** HTTPS/TLS encryption for all data in transit.
--   **Environment Security:** API keys (Gemini, Twilio) are managed via server-side environment variables, never exposed to the client.
--   **Edge Security:** Serverless functions isolate execution environments.
-
----
-
-## 👥 Team Members
-
--   **Aryan Bhargava**
--   **Naman Surana**
--   **Vaidik**
--   **Shrinkhala**
+### Code Structure
+*   `app/api/`: Edge-optimized API routes for Chat and SMS.
+*   `lib/multilingual-content.ts`: Static dictionaries for offline localization.
+*   `components/ui/`: Accessible, high-performance UI components.
 
 ---
 
-*Built with ❤️ for a healthier future.*
+## 🚀 Getting Started
+
+To run the project locally:
+
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/aryanb1906/Sehat-Saheli.git
+    cd Sehat-Saheli
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    npm install
+    # or
+    pnpm install
+    ```
+
+3.  **Set up Environment Variables**
+    Create a `.env.local` file:
+    ```env
+    GEMINI_API_KEY=your_google_api_key
+    TWILIO_ACCOUNT_SID=your_sid
+    TWILIO_AUTH_TOKEN=your_token
+    TWILIO_PHONE_NUMBER=your_number
+    ```
+
+4.  **Run the development server**
+    ```bash
+    npm run dev
+    ```
+
+---
+
+## 🔮 Future Roadmap
+
+*   [ ] **Telemedicine Integration:** Video calls with doctors.
+*   [ ] **IoT Integration:** Sync with smart wearables for vitals monitoring.
+*   [ ] **Community Forum:** Anonymous peer support groups for mothers.
+*   [ ] **Govt. Scheme Integration:** Direct enrollment in schemes like JSY/PMMVY.
+
+---
+
+## 👥 The Team
+
+Built with ❤️ by **Team Sehat Saheli**
+
+*   👨‍💻 **Aryan Bhargava** - Full Stack & AI Lead
+*   👨‍💻 **Naman Surana** - Frontend & UX
+*   👨‍💻 **Vaidik** - Backend & Architecture
+*   👩‍💻 **Shrinkhala** - Research & Content
+
+---
