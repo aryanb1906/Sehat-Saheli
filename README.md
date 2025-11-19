@@ -108,22 +108,22 @@ Sehat Saheli is built on a **Serverless Edge Architecture**, specifically design
 
 ```mermaid
 graph TD
-    subgraph User_Device [📱 User Device (Offline Capable)]
+    subgraph User_Device ["📱 User Device (Offline Capable)"]
         UI[Next.js PWA Interface]
         LocalDB[(Local Storage / Cache)]
         UI <--> LocalDB
     end
 
-    subgraph Edge_Network [⚡ Vercel Edge Network]
+    subgraph Edge_Network ["⚡ Vercel Edge Network"]
         API[Edge API Routes]
     end
 
-    subgraph Cloud_Services [☁️ Cloud Services]
+    subgraph Cloud_Services ["☁️ Cloud Services"]
         Gemini[🧠 Google Gemini AI]
         Twilio[📡 Twilio SMS Gateway]
     end
 
-    User_Device -->|Sync & Requests| API
+    UI -->|Sync & Requests| API
     API -->|Inference| Gemini
     API -->|Alerts| Twilio
 ```
