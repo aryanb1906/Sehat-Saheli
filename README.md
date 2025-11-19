@@ -193,9 +193,9 @@ To run the project locally:
 
 Built with ❤️ by **Team Sehat Saheli**
 
-*   👨‍💻 **Aryan Bhargava** ([@aryanb1906](https://github.com/aryanb1906)) - Full Stack & AI Lead
-*   👨‍💻 **Naman Surana** ([@newman05](https://github.com/newman05)) - Frontend & UX
-*   👨‍💻 **Vaidik** ([@Vaidik-7781](https://github.com/Vaidik-7781)) - Backend & Architecture
-*   👩‍💻 **Shrinkhala** ([@Shrinkhalaa27](https://github.com/Shrinkhalaa27)) - Research & Content
+*   👨‍💻 **Aryan Bhargava** - Full Stack & AI Lead &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/aryanb1906) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/aryan-bhargava)
+*   👨‍💻 **Naman Surana** - Frontend & UX &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/newman05) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/naman-surana-work)
+*   👨‍💻 **Vaidik** - Backend & Architecture &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/Vaidik-7781) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vaidik-gupta-ss2311383/)
+*   👩‍💻 **Shrinkhala** - Research & Content &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/Shrinkhalaa27) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shrinkhala-anand-484998274/)
 
 ---
