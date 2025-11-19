@@ -114,6 +114,15 @@ Sehat Saheli is engineered with a **Serverless Edge Architecture**, prioritizing
     *   **Action:** For high-risk alerts or SOS triggers, the system invokes the **Twilio API**.
     *   **Result:** An SMS is instantly sent to her registered ASHA worker and family members with her GPS location, bridging the digital gap to physical aid.
 
+### ⚙️ Technical Architecture Breakdown
+
+| Layer | Technology | Role |
+| :--- | :--- | :--- |
+| **1. Client Layer** | **Next.js 14 (PWA)** | **Offline-First UI:** Caches resources locally. Handles user interaction, voice input, and displays health data. |
+| **2. Edge Layer** | **Vercel Edge Functions** | **Low-Latency API:** Processes requests closest to the user, ensuring speed on 2G/3G networks. |
+| **3. Intelligence Layer** | **Google Gemini Pro** | **The "Brain":** Handles natural language understanding, translation, and medical symptom analysis. |
+| **4. Communication Layer** | **Twilio API** | **SMS Gateway:** Sends critical alerts and reminders to feature phones (non-smartphones). |
+
 ```mermaid
 graph TD
     subgraph User_Device ["📱 User Device (Offline Capable)"]
