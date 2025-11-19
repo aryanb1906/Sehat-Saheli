@@ -84,25 +84,49 @@ In rural India, maternal mortality remains a critical challenge due to:
 
 ## 🏗️ System Architecture
 
-Sehat Saheli utilizes a **Serverless Edge Architecture** for maximum performance on low-bandwidth networks.
+Sehat Saheli is built on a **Serverless Edge Architecture**, specifically designed to function reliably in rural areas with intermittent internet connectivity.
+
+### 1. The "Offline-First" Client Layer (Frontend)
+*   **Technology:** Next.js 14 (App Router), React, Tailwind CSS.
+*   **Role:** Serves as the primary interface for Mothers and ASHA workers.
+*   **Key Feature:** It is a **Progressive Web App (PWA)**. This means the app caches essential resources and data locally on the device. Users can access health tips, view their records, and use tools like the "Kick Counter" even without an internet connection.
+
+### 2. The High-Performance Edge Layer (Backend)
+*   **Technology:** Vercel Edge Functions.
+*   **Role:** Handles API requests (like chat messages or symptom checks).
+*   **Why Edge?** Instead of running on a single server far away, our code runs on servers geographically closer to the user. This drastically reduces latency, ensuring the app feels instant even on slower 2G/3G networks.
+
+### 3. The Intelligence Layer (AI)
+*   **Technology:** Google Gemini Pro via Vercel AI SDK.
+*   **Role:** The "Brain" of Sehat Saheli.
+*   **Function:** It processes natural language voice/text inputs, translates them, and provides medical guidance based on safe, pre-prompted contexts. It also analyzes symptom data to detect potential risks.
+
+### 4. The Communication Layer
+*   **Technology:** Twilio API.
+*   **Role:** Bridges the digital and physical worlds.
+*   **Function:** Sends critical SMS alerts to family members and ASHA workers during emergencies (SOS) or for routine appointment reminders.
 
 ```mermaid
 graph TD
-    User[User (Mother/ASHA)] -->|Voice/Text| Client[Next.js PWA]
-    Client -->|Offline Data| LocalDB[Local Storage]
-    Client -->|API Requests| Edge[Vercel Edge Functions]
-    
-    subgraph Cloud Services
-        Edge -->|Inference| AI[Google Gemini Pro]
-        Edge -->|Alerts| SMS[Twilio Gateway]
-        Edge -->|Sync| DB[Cloud Database]
+    subgraph User_Device [📱 User Device (Offline Capable)]
+        UI[Next.js PWA Interface]
+        LocalDB[(Local Storage / Cache)]
+        UI <--> LocalDB
     end
-```
 
-### Code Structure
-*   `app/api/`: Edge-optimized API routes for Chat and SMS.
-*   `lib/multilingual-content.ts`: Static dictionaries for offline localization.
-*   `components/ui/`: Accessible, high-performance UI components.
+    subgraph Edge_Network [⚡ Vercel Edge Network]
+        API[Edge API Routes]
+    end
+
+    subgraph Cloud_Services [☁️ Cloud Services]
+        Gemini[🧠 Google Gemini AI]
+        Twilio[📡 Twilio SMS Gateway]
+    end
+
+    User_Device -->|Sync & Requests| API
+    API -->|Inference| Gemini
+    API -->|Alerts| Twilio
+```
 
 ---
 
