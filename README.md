@@ -193,9 +193,9 @@ To run the project locally:
 
 Built with ❤️ by **Team Sehat Saheli**
 
-*   👨‍💻 **Aryan Bhargava** - Full Stack & AI Lead
-*   👨‍💻 **Naman Surana** - Frontend & UX
-*   👨‍💻 **Vaidik** - Backend & Architecture
-*   👩‍💻 **Shrinkhala** - Research & ML Lead
+*   👨‍💻 **Aryan Bhargava** ([@aryanb1906](https://github.com/aryanb1906)) - Full Stack & AI Lead
+*   👨‍💻 **Naman Surana** ([@newman05](https://github.com/newman05)) - Frontend & UX
+*   👨‍💻 **Vaidik** ([@Vaidik-7781](https://github.com/Vaidik-7781)) - Backend & Architecture
+*   👩‍💻 **Shrinkhala** ([@Shrinkhalaa27](https://github.com/Shrinkhalaa27)) - Research & Content
 
 ---
