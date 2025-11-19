@@ -179,6 +179,6 @@ Built with ❤️ by **Team Sehat Saheli**
 *   👨‍💻 **Aryan Bhargava** - Full Stack & AI Lead
 *   👨‍💻 **Naman Surana** - Frontend & UX
 *   👨‍💻 **Vaidik** - Backend & Architecture
-*   👩‍💻 **Shrinkhala** - Research & Content
+*   👩‍💻 **Shrinkhala** - Research & ML Lead
 
 ---
