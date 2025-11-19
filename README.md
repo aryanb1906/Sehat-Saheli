@@ -56,6 +56,20 @@ In rural India, maternal mortality remains a critical challenge due to:
 
 ---
 
+## 📸 User Interface
+
+| **Landing Page** | **Multilingual Support** |
+|:---:|:---:|
+| ![Landing Page](public/screenshots/landing-page.png) | ![Language Selection](public/screenshots/language-selection.png) |
+| *Accessible & Welcoming Home* | *Support for 8+ Languages* |
+
+| **Smart Dashboard** | **Comprehensive Tools** |
+|:---:|:---:|
+| ![Dashboard](public/screenshots/dashboard.png) | ![Feature Menu](public/screenshots/feature-menu.png) |
+| *Personalized Health Status* | *All-in-one Health Tracker* |
+
+---
+
 ## 🛠️ Technology Stack
 
 | Category | Technologies |
