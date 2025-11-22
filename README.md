@@ -74,7 +74,7 @@ In rural India, maternal mortality remains a critical challenge due to:
 
 > **Experience our Multilingual AI Chatbot**
 >
-> [**▶️ Watch Demo Video**](https://github.com/aryanb1906/Sehat-Saheli/raw/main/public/videos/chatbot-demo.mp4)
+> [**▶️ Watch Demo Video**](https://drive.google.com/file/d/1LQS_r2vxWhAqhxQomfBfc5dpiAB3wc5T/view?usp=drive_link)
 > *(Click to watch the AI speak in Hindi!)*
 
 ---
