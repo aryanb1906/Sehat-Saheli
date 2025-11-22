@@ -23,8 +23,8 @@ export default function AppointmentRemindersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent/10 to-background">
-      <div className="sticky top-0 bg-gradient-to-r from-accent to-trust p-6 text-white z-10">
+    <div className="min-h-screen bg-linear-to-br from-accent/10 to-background">
+      <div className="sticky top-0 bg-linear-to-r from-accent to-trust p-6 text-white z-10">
         <div className="flex items-center gap-4 mb-4">
           <Button variant="ghost" size="icon" className="text-white" onClick={() => router.back()}>
             <ArrowLeft className="w-6 h-6" />
@@ -83,7 +83,7 @@ export default function AppointmentRemindersPage() {
               {reminder.message === 'pending' && (
                 <Button
                   onClick={() => sendReminder(reminder.id)}
-                  className="w-full bg-gradient-to-r from-accent to-trust hover:from-accent/90 hover:to-trust/90 text-white gap-2"
+                  className="w-full bg-linear-to-r from-accent to-trust hover:from-accent/90 hover:to-trust/90 text-white gap-2"
                 >
                   <Send className="w-4 h-4" />
                   Send Reminder via SMS

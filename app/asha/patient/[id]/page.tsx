@@ -62,9 +62,9 @@ export default function PatientDetail({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-trust/10 to-background">
+    <div className="min-h-screen bg-linear-to-br from-trust/10 to-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-trust to-accent p-6 text-white">
+      <div className="bg-linear-to-r from-trust to-accent p-6 text-white">
         <div className="flex items-center gap-4 mb-4">
           <Button onClick={() => router.back()} variant="ghost" size="icon" className="text-white">
             <ArrowLeft className="w-6 h-6" />

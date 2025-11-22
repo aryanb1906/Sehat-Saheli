@@ -11,20 +11,19 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "SehatSaheli - AI Maternal Health Companion",
   description: "Empowering Rural Women & ASHA Workers with Multilingual, Offline-first AI Support",
-  generator: "v0.app",
   keywords: ["maternal health", "ASHA", "AI health", "rural healthcare", "pregnancy tracking"],
   icons: {
     icon: [
       {
-        url: "/icon-light-32x32.png",
+        url: "/heart_icon_down.svg",
         media: "(prefers-color-scheme: light)",
       },
       {
-        url: "/icon-dark-32x32.png",
+        url: "/heart_icon_down.svg",
         media: "(prefers-color-scheme: dark)",
       },
       {
-        url: "/icon.svg",
+        url: "/heart_icon_down.svg",
         type: "image/svg+xml",
       },
     ],

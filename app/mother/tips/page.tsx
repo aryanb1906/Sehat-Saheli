@@ -50,9 +50,9 @@ export default function HealthTips() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-care/10 to-background">
+    <div className="min-h-screen bg-linear-to-br from-care/10 to-background">
       {/* Header */}
-      <div className="bg-gradient-to-r from-care to-warm p-6 text-white">
+      <div className="bg-linear-to-r from-care to-warm p-6 text-white">
         <div className="flex items-center gap-4 mb-4">
           <Button onClick={() => router.back()} variant="ghost" size="icon" className="text-white">
             <ArrowLeft className="w-6 h-6" />
@@ -77,7 +77,7 @@ export default function HealthTips() {
           </TabsList>
 
           <TabsContent value="nutrition" className="space-y-4">
-            <Card className="p-5 bg-gradient-to-br from-success/10 to-card">
+            <Card className="p-5 bg-linear-to-br from-success/10 to-card">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-success/20 rounded-full flex items-center justify-center">
                   <Apple className="w-6 h-6 text-success" />
@@ -94,7 +94,7 @@ export default function HealthTips() {
               </ul>
             </Card>
 
-            <Card className="p-5 bg-gradient-to-br from-trust/10 to-card">
+            <Card className="p-5 bg-linear-to-br from-trust/10 to-card">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-trust/20 rounded-full flex items-center justify-center">
                   <Droplets className="w-6 h-6 text-trust" />
@@ -113,7 +113,12 @@ export default function HealthTips() {
           </TabsContent>
 
           <TabsContent value="exercise" className="space-y-4">
-            <Card className="p-5 bg-gradient-to-br from-care/10 to-card">
+               <Card className="p-5 bg-alert/10 border-alert">
+              <p className="text-sm font-semibold text-center">
+                ⚠️ Always consult your doctor before starting any exercise routine
+              </p>
+            </Card>
+            <Card className="p-5 bg-linear-to-br from-care/10 to-card">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-care/20 rounded-full flex items-center justify-center">
                   <Activity className="w-6 h-6 text-care" />
@@ -130,15 +135,11 @@ export default function HealthTips() {
               </ul>
             </Card>
 
-            <Card className="p-5 bg-alert/10 border-alert">
-              <p className="text-sm font-semibold text-center">
-                ⚠️ Always consult your doctor before starting any exercise routine
-              </p>
-            </Card>
+         
           </TabsContent>
 
           <TabsContent value="wellness" className="space-y-4">
-            <Card className="p-5 bg-gradient-to-br from-warm/10 to-card">
+            <Card className="p-5 bg-linear-to-br from-warm/10 to-card">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-warm/20 rounded-full flex items-center justify-center">
                   <Moon className="w-6 h-6 text-warm" />
@@ -155,7 +156,7 @@ export default function HealthTips() {
               </ul>
             </Card>
 
-            <Card className="p-5 bg-gradient-to-br from-care/10 to-card">
+            <Card className="p-5 bg-linear-to-br from-care/10 to-card">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-care/20 rounded-full flex items-center justify-center">
                   <Baby className="w-6 h-6 text-care" />
@@ -173,7 +174,7 @@ export default function HealthTips() {
           </TabsContent>
         </Tabs>
 
-        <Card className="p-5 mt-6 bg-gradient-to-br from-alert/10 to-card border-alert">
+        <Card className="p-5 mt-6 bg-linear-to-br from-alert/10 to-card border-alert">
           <h2 className="text-xl font-bold mb-4">{content.emergencyTitle}</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-card rounded-lg">
