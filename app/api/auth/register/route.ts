@@ -39,16 +39,18 @@ export async function POST(req: NextRequest) {
         }
 
         const email = parsed.data.email.toLowerCase()
-        let existing = findDevUserByEmail(email)
+        const devExisting = findDevUserByEmail(email)
+        let dbExisting = null
         if (hasDb) {
             try {
-                existing = await prisma.user.findUnique({ where: { email } })
+                dbExisting = await prisma.user.findUnique({ where: { email } })
             } catch (error) {
                 if (!useDevFallback) {
                     throw error
                 }
             }
         }
+        const existing = dbExisting || devExisting
 
         if (existing) {
             return NextResponse.json({ error: "Email already registered" }, { status: 409 })

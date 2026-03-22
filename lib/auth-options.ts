@@ -32,7 +32,10 @@ const providers: NextAuthOptions["providers"] = [
             let user = findDevUserByEmail(normalizedEmail)
             if (hasDb) {
                 try {
-                    user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+                    const dbUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+                    if (dbUser) {
+                        user = dbUser
+                    }
                 } catch {
                     if (!useDevFallback) {
                         throw new Error("Authentication backend unavailable")
