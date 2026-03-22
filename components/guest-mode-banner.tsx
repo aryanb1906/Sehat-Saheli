@@ -24,9 +24,9 @@ export function GuestModeBanner() {
     const callbackUrl = encodeURIComponent(pathname || "/role-select")
 
     return (
-        <div className="sticky top-0 z-50 border-b border-warm/20 bg-gradient-to-r from-warm/15 to-care/15 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-            <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2">
-                <p className="text-sm text-foreground">
+        <div className="sticky top-0 z-50 px-3 pt-2 md:px-5">
+            <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-xl border border-warm/25 bg-gradient-to-r from-warm/15 to-care/15 px-4 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/85 md:px-5">
+                <p className="text-sm font-medium text-foreground">
                     Guest Mode is active. Your data may not be saved permanently.
                 </p>
                 <Button
