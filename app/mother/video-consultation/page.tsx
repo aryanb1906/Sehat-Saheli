@@ -6,6 +6,7 @@ import { ArrowLeft, Video, Calendar, Clock, Phone, Star, MessageSquare } from "l
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useSession } from "next-auth/react"
 import { useLanguage } from "@/lib/language-context"
 import { useToast } from "@/hooks/use-toast"
 
@@ -23,8 +24,10 @@ interface Consultation {
 
 export default function VideoConsultationPage() {
     const router = useRouter()
+    const { data: session } = useSession()
     const { content } = useLanguage()
     const { toast } = useToast()
+    const patientId = (session?.user?.id as string) || "demo-mother"
     const [consultations, setConsultations] = useState<Consultation[]>([])
     const [loading, setLoading] = useState(true)
     const [showScheduleForm, setShowScheduleForm] = useState(false)
@@ -40,11 +43,11 @@ export default function VideoConsultationPage() {
 
     useEffect(() => {
         fetchConsultations()
-    }, [])
+    }, [patientId])
 
     const fetchConsultations = async () => {
         try {
-            const response = await fetch("/api/video-consultation?docId=doc_001")
+            const response = await fetch(`/api/video-consultation?patientId=${patientId}`)
             const data = await response.json()
             setConsultations(data.consultations)
         } catch (error) {
@@ -95,6 +98,7 @@ export default function VideoConsultationPage() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         action: "book-consultation",
+                        patientId,
                         data: formData,
                     }),
                 })
@@ -183,9 +187,8 @@ export default function VideoConsultationPage() {
                             {[1, 2, 3].map((step) => (
                                 <div
                                     key={step}
-                                    className={`flex-1 h-2 rounded-full transition ${
-                                        step <= formStep ? "bg-trust" : "bg-gray-200"
-                                    }`}
+                                    className={`flex-1 h-2 rounded-full transition ${step <= formStep ? "bg-trust" : "bg-gray-200"
+                                        }`}
                                 />
                             ))}
                         </div>
@@ -201,11 +204,10 @@ export default function VideoConsultationPage() {
                                             <button
                                                 key={spec}
                                                 onClick={() => setFormData({ ...formData, specialty: spec })}
-                                                className={`p-4 rounded-lg border-2 text-sm font-semibold transition h-14 ${
-                                                    formData.specialty === spec
+                                                className={`p-4 rounded-lg border-2 text-sm font-semibold transition h-14 ${formData.specialty === spec
                                                         ? "border-trust bg-trust/10 text-trust"
                                                         : "border-gray-200 hover:border-trust/30"
-                                                }`}
+                                                    }`}
                                             >
                                                 {spec}
                                             </button>
@@ -234,9 +236,8 @@ export default function VideoConsultationPage() {
                                             setFormData({ ...formData, date: e.target.value })
                                             if (formErrors.date) setFormErrors({ ...formErrors, date: "" })
                                         }}
-                                        className={`w-full p-3 border rounded-lg h-11 leading-relaxed ${
-                                            formErrors.date ? "border-alert" : "border-gray-300"
-                                        }`}
+                                        className={`w-full p-3 border rounded-lg h-11 leading-relaxed ${formErrors.date ? "border-alert" : "border-gray-300"
+                                            }`}
                                     />
                                     {formErrors.date && (
                                         <p className="text-alert text-sm mt-1 leading-relaxed">{formErrors.date}</p>
@@ -253,9 +254,8 @@ export default function VideoConsultationPage() {
                                             setFormData({ ...formData, time: e.target.value })
                                             if (formErrors.time) setFormErrors({ ...formErrors, time: "" })
                                         }}
-                                        className={`w-full p-3 border rounded-lg h-11 leading-relaxed ${
-                                            formErrors.time ? "border-alert" : "border-gray-300"
-                                        }`}
+                                        className={`w-full p-3 border rounded-lg h-11 leading-relaxed ${formErrors.time ? "border-alert" : "border-gray-300"
+                                            }`}
                                     />
                                     {formErrors.time && (
                                         <p className="text-alert text-sm mt-1 leading-relaxed">{formErrors.time}</p>
@@ -284,9 +284,8 @@ export default function VideoConsultationPage() {
                                             setFormData({ ...formData, reason: e.target.value })
                                             if (formErrors.reason) setFormErrors({ ...formErrors, reason: "" })
                                         }}
-                                        className={`w-full p-3 border rounded-lg leading-relaxed ${
-                                            formErrors.reason ? "border-alert" : "border-gray-300"
-                                        }`}
+                                        className={`w-full p-3 border rounded-lg leading-relaxed ${formErrors.reason ? "border-alert" : "border-gray-300"
+                                            }`}
                                         rows={3}
                                         placeholder="Describe your health concern..."
                                     />
@@ -376,9 +375,8 @@ export default function VideoConsultationPage() {
                                         </p>
                                     </div>
                                     <span
-                                        className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${
-                                            getStatusBadge(consultation.status).color
-                                        }`}
+                                        className={`px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap ${getStatusBadge(consultation.status).color
+                                            }`}
                                     >
                                         {getStatusBadge(consultation.status).label}
                                     </span>
@@ -412,11 +410,10 @@ export default function VideoConsultationPage() {
                                             {[...Array(5)].map((_, i) => (
                                                 <Star
                                                     key={i}
-                                                    className={`w-4 h-4 ${
-                                                        i < (consultation.rating ?? 0)
+                                                    className={`w-4 h-4 ${i < (consultation.rating ?? 0)
                                                             ? "fill-warning text-warning"
                                                             : "text-gray-300"
-                                                    }`}
+                                                        }`}
                                                 />
                                             ))}
                                         </div>

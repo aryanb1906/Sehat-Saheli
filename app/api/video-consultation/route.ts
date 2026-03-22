@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import type { VideoConsultation as PrismaVideoConsultation } from "@prisma/client";
 
 interface VideoConsultation {
     id: string;
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
             });
         }
 
-        const mapped: VideoConsultation[] = dbConsultations.map((row) => ({
+        const mapped: VideoConsultation[] = dbConsultations.map((row: PrismaVideoConsultation) => ({
             id: row.id,
             doctorName: row.doctorName,
             specialization: row.specialization,
@@ -105,8 +106,8 @@ export async function POST(req: NextRequest) {
                 doctorId: z.string().optional(),
                 doctorName: z.string().optional(),
                 specialty: z.string().optional(),
-                date: z.string(),
-                time: z.string(),
+                date: z.string().optional(),
+                time: z.string().optional(),
                 reason: z.string().optional(),
                 data: z
                     .object({
@@ -117,6 +118,11 @@ export async function POST(req: NextRequest) {
                     })
                     .optional(),
             })
+            .refine((val) => {
+                const hasNested = !!val.data
+                const hasFlat = !!val.date && !!val.time
+                return hasNested || hasFlat
+            }, "date/time or data payload required")
             .safeParse(body);
 
         if (!parsed.success) {
