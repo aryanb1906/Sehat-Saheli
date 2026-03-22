@@ -26,7 +26,7 @@ function toRiskLabel(risk: string): Risk {
 }
 
 export async function GET(req: NextRequest) {
-    const rl = rateLimit(`asha-patients:${clientIp(req)}`, 100, 60_000)
+    const rl = await rateLimit(`asha-patients:${clientIp(req)}`, 100, 60_000)
     if (!rl.allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 })
 
     const { searchParams } = new URL(req.url)
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const rl = rateLimit(`asha-patients-create:${clientIp(req)}`, 20, 60_000)
+    const rl = await rateLimit(`asha-patients-create:${clientIp(req)}`, 20, 60_000)
     if (!rl.allowed) return NextResponse.json({ error: "Too many create requests" }, { status: 429 })
 
     const raw = await req.json()

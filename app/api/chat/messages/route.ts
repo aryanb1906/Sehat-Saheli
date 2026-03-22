@@ -13,7 +13,7 @@ const sendMessageSchema = z.object({
 
 export async function GET(req: NextRequest) {
     const ip = clientIp(req)
-    const rl = rateLimit(`chat-messages-get:${ip}`, 120, 60_000)
+    const rl = await rateLimit(`chat-messages-get:${ip}`, 120, 60_000)
     if (!rl.allowed) {
         return NextResponse.json({ error: "Too many requests" }, { status: 429 })
     }
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     const ip = clientIp(req)
-    const rl = rateLimit(`chat-messages-post:${ip}`, 60, 60_000)
+    const rl = await rateLimit(`chat-messages-post:${ip}`, 60, 60_000)
     if (!rl.allowed) {
         return NextResponse.json({ error: "Too many messages sent" }, { status: 429 })
     }

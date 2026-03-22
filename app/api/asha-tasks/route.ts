@@ -19,7 +19,7 @@ interface Task {
 
 export async function GET(req: NextRequest) {
     try {
-        const rl = rateLimit(`asha-tasks-get:${clientIp(req)}`, 100, 60_000)
+        const rl = await rateLimit(`asha-tasks-get:${clientIp(req)}`, 100, 60_000)
         if (!rl.allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 })
 
         const { searchParams } = new URL(req.url);
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const rl = rateLimit(`asha-tasks-post:${clientIp(req)}`, 40, 60_000)
+        const rl = await rateLimit(`asha-tasks-post:${clientIp(req)}`, 40, 60_000)
         if (!rl.allowed) return NextResponse.json({ error: "Too many create requests" }, { status: 429 })
 
         const body = await req.json();
@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
-        const rl = rateLimit(`asha-tasks-put:${clientIp(req)}`, 60, 60_000)
+        const rl = await rateLimit(`asha-tasks-put:${clientIp(req)}`, 60, 60_000)
         if (!rl.allowed) return NextResponse.json({ error: "Too many update requests" }, { status: 429 })
 
         const body = await req.json();

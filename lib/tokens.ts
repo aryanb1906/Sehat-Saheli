@@ -1,10 +1,15 @@
 import jwt from "jsonwebtoken"
+import { getAuthSecret } from "@/lib/env"
 
 const ACCESS_EXPIRES_IN = "15m"
 const REFRESH_EXPIRES_IN = "30d"
 
 function getSecret() {
-    return process.env.AUTH_SECRET || "dev-secret-change-me"
+    const secret = getAuthSecret()
+    if (!secret && process.env.NODE_ENV === "production") {
+        throw new Error("AUTH_SECRET is required in production")
+    }
+    return secret || "dev-secret-change-me"
 }
 
 export function createAccessToken(payload: Record<string, unknown>) {

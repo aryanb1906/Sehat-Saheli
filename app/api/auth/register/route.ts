@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { hash } from "bcryptjs"
 import { z } from "zod"
+import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
+import { createDevUser, findDevUserByEmail } from "@/lib/dev-auth-store"
+import { hasDatabaseUrl } from "@/lib/env"
 
 const registerSchema = z.object({
     name: z.string().min(2),
@@ -13,8 +16,9 @@ const registerSchema = z.object({
 
 export async function POST(req: NextRequest) {
     try {
+        const hasDb = hasDatabaseUrl()
         const ip = clientIp(req)
-        const rl = rateLimit(`auth-register:${ip}`, 10, 60_000)
+        const rl = await rateLimit(`auth-register:${ip}`, 10, 60_000)
         if (!rl.allowed) {
             const retryAfter = Math.max(1, Math.ceil((rl.resetAt - Date.now()) / 1000))
             return NextResponse.json(
@@ -34,27 +38,65 @@ export async function POST(req: NextRequest) {
         }
 
         const email = parsed.data.email.toLowerCase()
-        const existing = await prisma.user.findUnique({ where: { email } })
+        const existing = hasDb
+            ? await prisma.user.findUnique({ where: { email } })
+            : findDevUserByEmail(email)
 
         if (existing) {
             return NextResponse.json({ error: "Email already registered" }, { status: 409 })
         }
 
         const passwordHash = await hash(parsed.data.password, 12)
-        const user = await prisma.user.create({
-            data: {
+        const user = hasDb
+            ? await prisma.user.create({
+                data: {
+                    name: parsed.data.name,
+                    email,
+                    role: parsed.data.role,
+                    passwordHash,
+                },
+            })
+            : createDevUser({
                 name: parsed.data.name,
                 email,
                 role: parsed.data.role,
                 passwordHash,
-            },
-        })
+            })
 
         return NextResponse.json({
             success: true,
             user: { id: user.id, name: user.name, email: user.email, role: user.role },
         })
-    } catch (error) {
-        return NextResponse.json({ error: "Registration failed" }, { status: 500 })
+    } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === "P2021" || error.code === "P2022") {
+                return NextResponse.json(
+                    {
+                        error:
+                            "Database schema is not initialized. Run: npm run prisma:push and npm run prisma:seed",
+                    },
+                    { status: 503 },
+                )
+            }
+        }
+
+        if (error instanceof Prisma.PrismaClientInitializationError) {
+            return NextResponse.json(
+                {
+                    error:
+                        "Database connection failed. Check DATABASE_URL and ensure the database is running.",
+                },
+                { status: 503 },
+            )
+        }
+
+        const message = error instanceof Error ? error.message : "Unknown error"
+        return NextResponse.json(
+            {
+                error: "Registration failed. Please verify backend setup.",
+                details: process.env.NODE_ENV === "production" ? undefined : message,
+            },
+            { status: 500 },
+        )
     }
 }

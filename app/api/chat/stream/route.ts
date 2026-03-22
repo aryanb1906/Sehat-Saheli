@@ -6,7 +6,7 @@ export const runtime = "nodejs"
 
 export async function GET(req: NextRequest) {
     const ip = clientIp(req)
-    const rl = rateLimit(`chat-stream:${ip}`, 30, 60_000)
+    const rl = await rateLimit(`chat-stream:${ip}`, 30, 60_000)
     if (!rl.allowed) {
         return new Response("Too many stream requests", { status: 429 })
     }

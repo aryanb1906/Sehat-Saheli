@@ -20,7 +20,7 @@ interface VideoConsultation {
 export async function GET(req: NextRequest) {
     try {
         const ip = clientIp(req)
-        const rl = rateLimit(`video-consultation-get:${ip}`, 90, 60_000)
+        const rl = await rateLimit(`video-consultation-get:${ip}`, 90, 60_000)
         if (!rl.allowed) {
             return NextResponse.json({ error: "Too many requests" }, { status: 429 })
         }
@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const ip = clientIp(req)
-        const rl = rateLimit(`video-consultation-post:${ip}`, 30, 60_000)
+        const rl = await rateLimit(`video-consultation-post:${ip}`, 30, 60_000)
         if (!rl.allowed) {
             return NextResponse.json({ error: "Too many booking attempts" }, { status: 429 })
         }
@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     try {
         const ip = clientIp(req)
-        const rl = rateLimit(`video-consultation-put:${ip}`, 30, 60_000)
+        const rl = await rateLimit(`video-consultation-put:${ip}`, 30, 60_000)
         if (!rl.allowed) {
             return NextResponse.json({ error: "Too many update attempts" }, { status: 429 })
         }

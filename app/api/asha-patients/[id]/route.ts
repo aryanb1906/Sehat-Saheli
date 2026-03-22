@@ -51,7 +51,7 @@ export async function GET(_: NextRequest, context: { params: Promise<{ id: strin
 
 export async function PUT(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     const { id } = await context.params
-    const rl = rateLimit(`asha-patient-update:${clientIp(req)}`, 30, 60_000)
+    const rl = await rateLimit(`asha-patient-update:${clientIp(req)}`, 30, 60_000)
     if (!rl.allowed) return NextResponse.json({ error: "Too many updates" }, { status: 429 })
 
     const body = await req.json()

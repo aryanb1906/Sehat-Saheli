@@ -15,7 +15,7 @@ const refreshSchema = z.object({
 
 export async function POST(req: NextRequest) {
     const ip = clientIp(req)
-    const rl = rateLimit(`auth-token-issue:${ip}`, 20, 60_000)
+    const rl = await rateLimit(`auth-token-issue:${ip}`, 20, 60_000)
     if (!rl.allowed) {
         return NextResponse.json({ error: "Too many token requests" }, { status: 429 })
     }
@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     const ip = clientIp(req)
-    const rl = rateLimit(`auth-token-refresh:${ip}`, 30, 60_000)
+    const rl = await rateLimit(`auth-token-refresh:${ip}`, 30, 60_000)
     if (!rl.allowed) {
         return NextResponse.json({ error: "Too many refresh attempts" }, { status: 429 })
     }

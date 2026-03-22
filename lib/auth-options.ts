@@ -5,6 +5,11 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
+import { assertCriticalEnv, getAuthSecret, hasDatabaseUrl } from "@/lib/env"
+import { findDevUserByEmail } from "@/lib/dev-auth-store"
+
+assertCriticalEnv()
+const hasDb = hasDatabaseUrl()
 
 const credentialSchema = z.object({
     email: z.string().email(),
@@ -22,9 +27,10 @@ const providers: NextAuthOptions["providers"] = [
             const parsed = credentialSchema.safeParse(raw)
             if (!parsed.success) return null
 
-            const user = await prisma.user.findUnique({
-                where: { email: parsed.data.email.toLowerCase() },
-            })
+            const normalizedEmail = parsed.data.email.toLowerCase()
+            const user = hasDb
+                ? await prisma.user.findUnique({ where: { email: normalizedEmail } })
+                : findDevUserByEmail(normalizedEmail)
 
             if (!user?.passwordHash) return null
 
@@ -52,7 +58,8 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 }
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
+    ...(hasDb ? { adapter: PrismaAdapter(prisma) } : {}),
+    secret: getAuthSecret() || "dev-secret-change-me",
     session: { strategy: "jwt" },
     providers,
     callbacks: {

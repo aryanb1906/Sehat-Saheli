@@ -15,7 +15,7 @@ interface LabReport {
 
 export async function GET(req: NextRequest) {
     try {
-        const rl = rateLimit(`lab-reports-get:${clientIp(req)}`, 100, 60_000)
+        const rl = await rateLimit(`lab-reports-get:${clientIp(req)}`, 100, 60_000)
         if (!rl.allowed) {
             return NextResponse.json({ error: "Too many requests" }, { status: 429 })
         }
@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
-        const rl = rateLimit(`lab-reports-post:${clientIp(req)}`, 40, 60_000)
+        const rl = await rateLimit(`lab-reports-post:${clientIp(req)}`, 40, 60_000)
         if (!rl.allowed) {
             return NextResponse.json({ error: "Too many uploads" }, { status: 429 })
         }

@@ -13,6 +13,14 @@ async function upsertUser({ name, email, role, password }) {
 }
 
 async function main() {
+    // Reset demo domain data to keep seeding idempotent.
+    await prisma.labReport.deleteMany({})
+    await prisma.ashaTask.deleteMany({})
+    await prisma.patientAppointment.deleteMany({})
+    await prisma.patientHealthLog.deleteMany({})
+    await prisma.patientProfile.deleteMany({})
+    await prisma.videoConsultation.deleteMany({})
+
     const mother = await upsertUser({
         name: "Demo Mother",
         email: "mother@sehat.dev",
