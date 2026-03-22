@@ -3,11 +3,11 @@
 import { useEffect } from "react"
 
 export function PwaRegister() {
-  useEffect(() => {
-    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {})
-    }
-  }, [])
+    useEffect(() => {
+        if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js").catch(() => { })
+        }
+    }, [])
 
-  return null
+    return null
 }

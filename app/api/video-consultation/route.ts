@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 interface VideoConsultation {
     id: string;
@@ -17,6 +18,12 @@ interface VideoConsultation {
 
 export async function GET(req: NextRequest) {
     try {
+        const ip = clientIp(req)
+        const rl = rateLimit(`video-consultation-get:${ip}`, 90, 60_000)
+        if (!rl.allowed) {
+            return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+        }
+
         const consultations: VideoConsultation[] = [
             {
                 id: "vc_001",
@@ -42,7 +49,7 @@ export async function GET(req: NextRequest) {
         ];
 
         const { searchParams } = new URL(req.url);
-        const patientId = searchParams.get("patientId") || "demo-mother";
+        const patientId = z.string().min(1).safeParse(searchParams.get("patientId") || "demo-mother").data || "demo-mother";
 
         const dbConsultations = await prisma.videoConsultation.findMany({
             where: { patientId },
@@ -85,6 +92,12 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const ip = clientIp(req)
+        const rl = rateLimit(`video-consultation-post:${ip}`, 30, 60_000)
+        if (!rl.allowed) {
+            return NextResponse.json({ error: "Too many booking attempts" }, { status: 429 })
+        }
+
         const body = await req.json();
         const parsed = z
             .object({
@@ -112,17 +125,17 @@ export async function POST(req: NextRequest) {
 
         const payload = parsed.data.data
             ? {
-                  specialty: parsed.data.data.specialty,
-                  date: parsed.data.data.date,
-                  time: parsed.data.data.time,
-                  reason: parsed.data.data.reason,
-              }
+                specialty: parsed.data.data.specialty,
+                date: parsed.data.data.date,
+                time: parsed.data.data.time,
+                reason: parsed.data.data.reason,
+            }
             : {
-                  specialty: parsed.data.specialty || "General Checkup",
-                  date: parsed.data.date,
-                  time: parsed.data.time,
-                  reason: parsed.data.reason,
-              };
+                specialty: parsed.data.specialty || "General Checkup",
+                date: parsed.data.date,
+                time: parsed.data.time,
+                reason: parsed.data.reason,
+            };
 
         const patientId = parsed.data.patientId || "demo-mother";
         const doctorId = parsed.data.doctorId;
@@ -167,8 +180,24 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
+        const ip = clientIp(req)
+        const rl = rateLimit(`video-consultation-put:${ip}`, 30, 60_000)
+        if (!rl.allowed) {
+            return NextResponse.json({ error: "Too many update attempts" }, { status: 429 })
+        }
+
         const body = await req.json();
-        const { consultationId, rating, notes } = body;
+        const parsed = z.object({
+            consultationId: z.string().min(1),
+            rating: z.number().int().min(1).max(5).optional(),
+            notes: z.string().max(2000).optional(),
+        }).safeParse(body)
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+        }
+
+        const { consultationId, rating, notes } = parsed.data;
 
         await prisma.videoConsultation.update({
             where: { id: consultationId },

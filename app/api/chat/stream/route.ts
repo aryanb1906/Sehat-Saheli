@@ -1,13 +1,20 @@
 import { NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
+import { clientIp, rateLimit } from "@/lib/rate-limit"
 
 export const runtime = "nodejs"
 
 export async function GET(req: NextRequest) {
+    const ip = clientIp(req)
+    const rl = rateLimit(`chat-stream:${ip}`, 30, 60_000)
+    if (!rl.allowed) {
+        return new Response("Too many stream requests", { status: 429 })
+    }
+
     const { searchParams } = new URL(req.url)
     const roomId = searchParams.get("roomId")
 
-    if (!roomId) {
+    if (!roomId || roomId.length < 4) {
         return new Response("roomId is required", { status: 400 })
     }
 

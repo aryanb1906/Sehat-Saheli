@@ -252,6 +252,7 @@ The following high-priority foundation work has been implemented in this update:
       - `GET/POST /api/chat/messages`
       - `GET /api/chat/stream` (SSE stream for near real-time updates)
     - Database-backed conversation and message storage.
+        - Mother chat screen now supports **Doctor Chat mode** wired to these endpoints.
 
 4. **Video Consultation Persistence**
     - `app/api/video-consultation/route.ts` migrated from mock-only to DB-backed CRUD.
@@ -262,6 +263,25 @@ The following high-priority foundation work has been implemented in this update:
     - Package import optimization for `lucide-react` and `recharts`.
     - Web Vitals capture hook added.
     - PWA basics added: manifest + service worker registration.
+
+### ✅ Additional Improvements Completed (Follow-up Batch)
+
+- **Frontend wiring completed:**
+    - `app/mother/talk/page.tsx` now supports two modes:
+        - `AI Saheli` (existing Gemini flow)
+        - `Doctor Chat` (real-time + persisted via `/api/chat/messages` and `/api/chat/stream`)
+- **API hardening completed:**
+    - Added shared in-memory rate limiter utility in `lib/rate-limit.ts`.
+    - Applied throttling to:
+        - `/api/auth/register`
+        - `/api/auth/token`
+        - `/api/chat/messages`
+        - `/api/chat/stream`
+        - `/api/video-consultation`
+    - Strengthened Zod validation for token refresh and consultation update payloads.
+- **First-run developer bootstrap completed:**
+    - Added Prisma seed script `prisma/seed.js`.
+    - Added command: `npm run prisma:seed` for demo users/chat/consultation data.
 
 ### New Environment Variables
 
@@ -282,6 +302,7 @@ GEMINI_API_KEY=""
 npm install
 npm run prisma:generate
 npm run prisma:push
+npm run prisma:seed
 npm run dev
 ```
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
+import { clientIp, rateLimit } from "@/lib/rate-limit"
 
 const sendMessageSchema = z.object({
     roomId: z.string().optional(),
@@ -11,6 +12,12 @@ const sendMessageSchema = z.object({
 })
 
 export async function GET(req: NextRequest) {
+    const ip = clientIp(req)
+    const rl = rateLimit(`chat-messages-get:${ip}`, 120, 60_000)
+    if (!rl.allowed) {
+        return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    }
+
     const { searchParams } = new URL(req.url)
     const roomId = searchParams.get("roomId")
     const motherId = searchParams.get("motherId")
@@ -38,6 +45,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+    const ip = clientIp(req)
+    const rl = rateLimit(`chat-messages-post:${ip}`, 60, 60_000)
+    if (!rl.allowed) {
+        return NextResponse.json({ error: "Too many messages sent" }, { status: 429 })
+    }
+
     const raw = await req.json()
     const parsed = sendMessageSchema.safeParse(raw)
 

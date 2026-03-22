@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useLanguage } from "@/lib/language-context"
+import { useSession } from "next-auth/react"
 
 interface Message {
   id: string
@@ -16,22 +17,105 @@ interface Message {
   content: string
 }
 
+interface DoctorMessage {
+  id: string
+  senderId: string
+  content: string
+  createdAt: string
+}
+
 export default function TalkToSaheli() {
   const router = useRouter()
   const { language, content } = useLanguage()
+  const { data: session } = useSession()
   const [isListening, setIsListening] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
+  const [doctorMessages, setDoctorMessages] = useState<DoctorMessage[]>([])
+  const [chatMode, setChatMode] = useState<"ai" | "doctor">("ai")
+  const [roomId, setRoomId] = useState<string | null>(null)
+  const [doctorLoading, setDoctorLoading] = useState(false)
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const motherId = (session?.user?.id as string) || "demo-mother"
+  const doctorId = "demo-doctor"
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+  }, [messages, doctorMessages])
+
+  useEffect(() => {
+    const fetchDoctorChat = async () => {
+      try {
+        setDoctorLoading(true)
+        const res = await fetch(`/api/chat/messages?motherId=${motherId}&doctorId=${doctorId}`)
+        const data = await res.json()
+        if (data?.roomId) setRoomId(data.roomId)
+        setDoctorMessages(data?.messages || [])
+      } catch (error) {
+        console.error("Failed to load doctor messages", error)
+      } finally {
+        setDoctorLoading(false)
+      }
+    }
+
+    fetchDoctorChat()
+  }, [motherId])
+
+  useEffect(() => {
+    if (!roomId) return
+
+    const source = new EventSource(`/api/chat/stream?roomId=${roomId}`)
+    source.onmessage = (event) => {
+      const incoming = JSON.parse(event.data) as DoctorMessage
+      setDoctorMessages((prev) => {
+        if (prev.some((msg) => msg.id === incoming.id)) return prev
+        return [...prev, incoming]
+      })
+    }
+
+    source.onerror = () => {
+      source.close()
+    }
+
+    return () => source.close()
+  }, [roomId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || isLoading) return
+
+    if (chatMode === "doctor") {
+      try {
+        setIsLoading(true)
+        const res = await fetch("/api/chat/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomId,
+            motherId,
+            doctorId,
+            senderId: motherId,
+            content: input.trim(),
+          }),
+        })
+
+        if (!res.ok) {
+          throw new Error("Failed to send doctor message")
+        }
+
+        const data = await res.json()
+        setRoomId(data.roomId)
+        setDoctorMessages((prev) => [...prev, data.message])
+        setInput("")
+      } catch (error) {
+        console.error(error)
+      } finally {
+        setIsLoading(false)
+      }
+
+      return
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -221,11 +305,27 @@ export default function TalkToSaheli() {
             <p className="text-white/80 text-sm">{content.chatSubtitle}</p>
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-2 max-w-xs">
+          <Button
+            variant={chatMode === "ai" ? "default" : "secondary"}
+            className="h-10"
+            onClick={() => setChatMode("ai")}
+          >
+            AI Saheli
+          </Button>
+          <Button
+            variant={chatMode === "doctor" ? "default" : "secondary"}
+            className="h-10"
+            onClick={() => setChatMode("doctor")}
+          >
+            Doctor Chat
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
       <div className="flex-1 p-6 space-y-4 overflow-y-auto">
-        {messages.length === 0 && (
+        {chatMode === "ai" && messages.length === 0 && (
           <div className="flex justify-start">
             <Card className="p-4 bg-card border-2">
               <p className="text-sm leading-relaxed">
@@ -235,7 +335,7 @@ export default function TalkToSaheli() {
           </div>
         )}
 
-        {messages.map((message) => (
+        {chatMode === "ai" && messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
             <Card className={`p-4 max-w-[80%] ${message.role === "user" ? "bg-trust text-white" : "bg-card border-2"}`}>
               <div className="flex items-start gap-2">
@@ -255,7 +355,28 @@ export default function TalkToSaheli() {
           </div>
         ))}
 
-        {isLoading && (
+        {chatMode === "doctor" && doctorMessages.length === 0 && !doctorLoading && (
+          <div className="flex justify-start">
+            <Card className="p-4 bg-card border-2">
+              <p className="text-sm leading-relaxed">
+                Start a conversation with your doctor. Messages are synced in near real-time.
+              </p>
+            </Card>
+          </div>
+        )}
+
+        {chatMode === "doctor" && doctorMessages.map((message) => {
+          const mine = message.senderId === motherId
+          return (
+            <div key={message.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+              <Card className={`p-4 max-w-[80%] ${mine ? "bg-trust text-white" : "bg-card border-2"}`}>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+              </Card>
+            </div>
+          )
+        })}
+
+        {isLoading && chatMode === "ai" && (
           <div className="flex justify-start">
             <Card className="p-4">
               <div className="flex items-center gap-2">
@@ -279,19 +400,21 @@ export default function TalkToSaheli() {
           </div>
         )}
         <form onSubmit={handleSubmit} className="flex gap-2">
-          <Button
-            type="button"
-            onClick={handleVoiceInput}
-            size="icon"
-            className={`${isListening ? "bg-alert animate-pulse" : "bg-trust hover:bg-trust/90"}`}
-            disabled={isLoading}
-          >
-            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-          </Button>
+          {chatMode === "ai" && (
+            <Button
+              type="button"
+              onClick={handleVoiceInput}
+              size="icon"
+              className={`${isListening ? "bg-alert animate-pulse" : "bg-trust hover:bg-trust/90"}`}
+              disabled={isLoading}
+            >
+              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            </Button>
+          )}
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={content.typePlaceholder}
+            placeholder={chatMode === "ai" ? content.typePlaceholder : "Type your message to doctor..."}
             className="min-h-[48px] max-h-[120px] resize-none"
             disabled={isLoading}
             onKeyDown={(e) => {
