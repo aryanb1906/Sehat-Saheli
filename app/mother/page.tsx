@@ -12,6 +12,7 @@ import {
   Dumbbell,
   FileText,
   Heart,
+  MapPin,
   Menu,
   MessageCircle,
   Mic,
@@ -24,32 +25,31 @@ import {
   Utensils,
   Video,
   Zap,
-  MapPin,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { NotificationCenter } from "@/components/notification-center"
 import { AppSidebar } from "@/components/app-sidebar"
 import { useLanguage } from "@/lib/language-context"
+import { DashboardSection } from "@/components/dashboard-section"
 
 type RiskStatus = "Low" | "Medium" | "High"
 type ToolCategory = "tracking" | "medical" | "support"
-
-type IconProps = { className?: string }
-type IconType = (props: IconProps) => JSX.Element
 
 interface PrimaryAction {
   title: string
   subtitle: string
   route: string
-  icon: IconType
+  icon: LucideIcon
   tone: "primary" | "soft" | "danger"
 }
 
 interface ToolItem {
   label: string
   route: string
-  icon: IconType
+  icon: LucideIcon
 }
 
 const RISK_META: Record<RiskStatus, { value: number; chip: string; reason: string }> = {
@@ -79,6 +79,7 @@ export default function MotherDashboard() {
   const [pregnancyWeek, setPregnancyWeek] = useState(24)
   const [riskStatus, setRiskStatus] = useState<RiskStatus>("Low")
   const [activeCategory, setActiveCategory] = useState<ToolCategory>("tracking")
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
     const savedRisk = localStorage.getItem("motherRiskStatus")
@@ -88,13 +89,17 @@ export default function MotherDashboard() {
     if (savedRisk === "Low" || savedRisk === "Medium" || savedRisk === "High") {
       setRiskStatus(savedRisk)
     }
+
     if (savedWeek) {
       const week = Number.parseInt(savedWeek, 10)
       if (!Number.isNaN(week)) setPregnancyWeek(week)
     }
+
     if (savedName) {
       setUserName(savedName)
     }
+
+    setHydrated(true)
   }, [])
 
   const primaryActions = useMemo<PrimaryAction[]>(
@@ -160,12 +165,12 @@ export default function MotherDashboard() {
   const riskMeta = RISK_META[riskStatus]
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FDF2F4] via-background to-background">
+    <div className="min-h-screen bg-gradient-to-b from-[#FDF2F4] via-background to-background dark:from-[#1A1418] dark:via-[#12141A] dark:to-[#111318]">
       <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} role="mother" />
 
       <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
-        <Card className="overflow-hidden border-border/70 bg-white shadow-sm">
-          <div className="bg-gradient-to-r from-[#FADADD] to-[#F5E2F7] px-5 py-6 md:px-7">
+        <Card className="animate-fade-up overflow-hidden border-border/70 bg-white shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+          <div className="bg-gradient-to-r from-[#FADADD] to-[#F5E2F7] px-5 py-6 dark:from-[#3E2A35] dark:to-[#3A2B46] md:px-7">
             <div className="mb-5 flex items-center justify-between">
               <Button
                 variant="ghost"
@@ -180,22 +185,36 @@ export default function MotherDashboard() {
 
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                  Namaste, {userName} 🌸
-                </h1>
-                <p className="mt-2 text-sm font-medium text-foreground/80 md:text-base">
-                  You are doing great today 💛
-                </p>
+                {hydrated ? (
+                  <>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white md:text-4xl">
+                      Namaste, {userName} 🌸
+                    </h1>
+                    <p className="mt-2 text-sm font-medium text-foreground/80 dark:text-white/85 md:text-base">
+                      You are doing great today 💛
+                    </p>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-64 bg-white/60 dark:bg-white/20" />
+                    <Skeleton className="h-4 w-52 bg-white/50 dark:bg-white/20" />
+                  </div>
+                )}
               </div>
-              <div className="rounded-xl border border-white/60 bg-white/65 px-4 py-3 backdrop-blur-sm">
+
+              <div className="rounded-xl border border-white/60 bg-white/65 px-4 py-3 backdrop-blur-sm dark:border-white/20 dark:bg-white/10">
                 <p className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Pregnancy Week</p>
-                <p className="mt-1 text-xl font-bold text-foreground">Week {pregnancyWeek}</p>
+                {hydrated ? (
+                  <p className="mt-1 text-xl font-bold text-foreground dark:text-white">Week {pregnancyWeek}</p>
+                ) : (
+                  <Skeleton className="mt-2 h-6 w-24 bg-white/55 dark:bg-white/20" />
+                )}
               </div>
             </div>
           </div>
 
-          <div className="grid gap-4 border-t border-border/70 bg-[#FCFCFC] p-5 md:grid-cols-[1.4fr_1fr] md:p-6">
-            <Card className="border border-[#DFF5E1] bg-[#F4FFF5] p-5 shadow-none">
+          <div className="grid gap-4 border-t border-border/70 bg-[#FCFCFC] p-5 dark:bg-[#141925] md:grid-cols-[1.4fr_1fr] md:p-6">
+            <Card className="border border-[#DFF5E1] bg-[#F4FFF5] p-5 shadow-none dark:border-[#2C4A37] dark:bg-[#1A2A22]">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Risk Indicator</p>
@@ -212,10 +231,18 @@ export default function MotherDashboard() {
                   style={{ width: `${riskMeta.value}%` }}
                 />
               </div>
-              <p className="mt-3 text-sm text-foreground/80">{riskMeta.reason}</p>
+
+              {hydrated ? (
+                <p className="mt-3 text-sm text-foreground/80 dark:text-white/80">{riskMeta.reason}</p>
+              ) : (
+                <div className="mt-3 space-y-2">
+                  <Skeleton className="h-4 w-full dark:bg-white/15" />
+                  <Skeleton className="h-4 w-40 dark:bg-white/15" />
+                </div>
+              )}
             </Card>
 
-            <Card className="border border-[#E3F2FD] bg-[#F5FAFF] p-5 shadow-none">
+            <Card className="border border-[#E3F2FD] bg-[#F5FAFF] p-5 shadow-none dark:border-[#2A3E52] dark:bg-[#1A2533]">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Today at a Glance</p>
               <h3 className="mt-2 text-lg font-semibold text-foreground">Stay hydrated and complete your health log</h3>
               <p className="mt-1 text-sm text-muted-foreground">Small daily updates improve recommendations and early alerts.</p>
@@ -226,12 +253,7 @@ export default function MotherDashboard() {
           </div>
         </Card>
 
-        <section className="mt-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Primary Actions</h2>
-            <p className="text-sm font-medium text-muted-foreground">Most-used features</p>
-          </div>
-
+        <DashboardSection title="Primary Actions" subtitle="Most-used features" className="mt-6 animate-fade-up animate-fade-up-delay-1">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {primaryActions.map((action) => {
               const Icon = action.icon
@@ -262,11 +284,10 @@ export default function MotherDashboard() {
               )
             })}
           </div>
-        </section>
+        </DashboardSection>
 
-        <section className="mt-6 space-y-3">
-          <h2 className="text-xl font-bold tracking-tight text-foreground">Daily Insights</h2>
-          <Card className="border-border/70 bg-white p-5 shadow-sm">
+        <DashboardSection title="Daily Insights" className="mt-6 animate-fade-up animate-fade-up-delay-2">
+          <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
             <div className="space-y-4">
               <div className="rounded-xl border border-warning/25 bg-warning/10 p-3">
                 <p className="text-sm font-semibold text-foreground">🟡 Today's Tip</p>
@@ -282,15 +303,10 @@ export default function MotherDashboard() {
               </div>
             </div>
           </Card>
-        </section>
+        </DashboardSection>
 
-        <section className="mt-6 space-y-3 pb-20">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Tools</h2>
-            <p className="text-sm font-medium text-muted-foreground">Organized by category</p>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 rounded-xl border border-border/80 bg-white p-2">
+        <DashboardSection title="Tools" subtitle="Organized by category" className="mt-6 animate-fade-up animate-fade-up-delay-3 pb-20">
+          <div className="grid grid-cols-3 gap-2 rounded-xl border border-border/80 bg-white p-2 dark:border-[#2A3040] dark:bg-[#1A1E27]">
             <button
               onClick={() => setActiveCategory("tracking")}
               className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
@@ -317,27 +333,40 @@ export default function MotherDashboard() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {toolsByCategory[activeCategory].map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.route}
-                  onClick={() => router.push(item.route)}
-                  className="flex min-h-[88px] items-center justify-between rounded-xl border border-border/80 bg-white px-4 py-3 text-left shadow-sm transition-all duration-200 hover:border-trust/40 hover:bg-trust/5 hover:shadow-md active:scale-[0.99]"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-trust/10 text-trust">
-                      <Icon className="h-5 w-5" />
+          {hydrated ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {toolsByCategory[activeCategory].map((item) => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.route}
+                    onClick={() => router.push(item.route)}
+                    className="flex min-h-[88px] items-center justify-between rounded-xl border border-border/80 bg-white px-4 py-3 text-left shadow-sm transition-all duration-200 hover:border-trust/40 hover:bg-trust/5 hover:shadow-md active:scale-[0.99] dark:border-[#2A3040] dark:bg-[#1A1E27] dark:hover:bg-trust/20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-trust/10 text-trust">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <p className="text-sm font-semibold text-foreground dark:text-white">{item.label}</p>
                     </div>
-                    <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="border-border/70 bg-white p-4 dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-lg dark:bg-white/15" />
+                    <Skeleton className="h-4 w-36 dark:bg-white/15" />
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </button>
-              )
-            })}
-          </div>
-        </section>
+                </Card>
+              ))}
+            </div>
+          )}
+        </DashboardSection>
       </div>
 
       <button

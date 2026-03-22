@@ -6,9 +6,11 @@ import { Users, AlertTriangle, CheckCircle, TrendingUp, Search, Menu, BarChart3,
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useLanguage } from "@/lib/language-context"
 import { NotificationCenter } from "@/components/notification-center"
 import { AppSidebar } from "@/components/app-sidebar"
+import { DashboardSection } from "@/components/dashboard-section"
 
 interface Patient {
   id: string
@@ -66,12 +68,12 @@ export default function ASHADashboard() {
   const followUps = Math.max(0, stats.medium + stats.high)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-trust/10 via-background to-background">
+    <div className="min-h-screen bg-gradient-to-b from-trust/10 via-background to-background dark:from-[#141B28] dark:via-[#12141A] dark:to-[#111318]">
       <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} role="asha" />
 
       <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
-        <Card className="overflow-hidden border-border/70 bg-white shadow-sm">
-          <div className="bg-gradient-to-r from-trust to-accent px-5 py-6 text-white md:px-7">
+        <Card className="animate-fade-up overflow-hidden border-border/70 bg-white shadow-sm dark:bg-[#1A1E27] dark:border-[#2A3040]">
+          <div className="bg-gradient-to-r from-trust to-accent px-5 py-6 text-white dark:from-[#2A3D56] dark:to-[#3A3552] md:px-7">
             <div className="mb-5 flex items-center justify-between">
               <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => setSidebarOpen(true)}>
                 <Menu className="w-6 h-6" />
@@ -98,42 +100,42 @@ export default function ASHADashboard() {
             </div>
           </div>
 
-          <div className="grid gap-4 border-t border-border/70 bg-muted/20 p-5 md:grid-cols-4 md:p-6">
-            <Card className="border-border/70 bg-white p-4 shadow-none">
+          <div className="grid gap-4 border-t border-border/70 bg-muted/20 p-5 dark:bg-[#141925] md:grid-cols-4 md:p-6">
+            <Card className="border-border/70 bg-white p-4 shadow-none dark:bg-[#1A1E27] dark:border-[#2A3040]">
               <div className="flex items-center gap-3">
                 <Users className="w-7 h-7 text-trust" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+                  <p className="text-2xl font-bold text-foreground dark:text-white">{stats.total}</p>
                   <p className="text-xs font-medium text-muted-foreground">{content.totalPatients || "Total Patients"}</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="border-alert/30 bg-alert/10 p-4 shadow-none">
+            <Card className="border-alert/30 bg-alert/10 p-4 shadow-none dark:bg-alert/20">
               <div className="flex items-center gap-3">
                 <AlertTriangle className="w-7 h-7 text-alert" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{stats.high}</p>
+                  <p className="text-2xl font-bold text-foreground dark:text-white">{stats.high}</p>
                   <p className="text-xs font-medium text-muted-foreground">{content.highRisk || "High Risk"}</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="border-warning/30 bg-warning/10 p-4 shadow-none">
+            <Card className="border-warning/30 bg-warning/10 p-4 shadow-none dark:bg-warning/20">
               <div className="flex items-center gap-3">
                 <TrendingUp className="w-7 h-7 text-warning" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{stats.medium}</p>
+                  <p className="text-2xl font-bold text-foreground dark:text-white">{stats.medium}</p>
                   <p className="text-xs font-medium text-muted-foreground">{content.mediumRisk || "Medium Risk"}</p>
                 </div>
               </div>
             </Card>
 
-            <Card className="border-success/30 bg-success/10 p-4 shadow-none">
+            <Card className="border-success/30 bg-success/10 p-4 shadow-none dark:bg-success/20">
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-7 h-7 text-success" />
                 <div>
-                  <p className="text-2xl font-bold text-foreground">{stats.low}</p>
+                  <p className="text-2xl font-bold text-foreground dark:text-white">{stats.low}</p>
                   <p className="text-xs font-medium text-muted-foreground">{content.lowRisk || "Low Risk"}</p>
                 </div>
               </div>
@@ -141,11 +143,7 @@ export default function ASHADashboard() {
           </div>
         </Card>
 
-        <section className="mt-7 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Quick Actions</h2>
-            <p className="text-sm font-medium text-muted-foreground">Daily workflow</p>
-          </div>
+        <DashboardSection title="Quick Actions" subtitle="Daily workflow" className="mt-7 animate-fade-up animate-fade-up-delay-1">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <button
               className="group flex min-h-[126px] flex-col justify-between rounded-xl bg-trust p-5 text-left text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
@@ -189,11 +187,10 @@ export default function ASHADashboard() {
               </div>
             </button>
           </div>
-        </section>
+        </DashboardSection>
 
-        <section className="mt-7 space-y-3">
-          <h2 className="text-xl font-bold tracking-tight text-foreground">Daily Insights</h2>
-          <Card className="border-border/70 bg-white p-5 shadow-sm">
+        <DashboardSection title="Daily Insights" className="mt-7 animate-fade-up animate-fade-up-delay-2">
+          <Card className="border-border/70 bg-white p-5 shadow-sm dark:bg-[#1A1E27] dark:border-[#2A3040]">
             <div className="space-y-4">
               <div className="rounded-xl border border-warning/25 bg-warning/10 p-3">
                 <p className="text-sm font-semibold text-foreground">🟡 Today's Priority</p>
@@ -209,15 +206,11 @@ export default function ASHADashboard() {
               </div>
             </div>
           </Card>
-        </section>
+        </DashboardSection>
 
-        <section className="mt-7 space-y-3 pb-24 md:pb-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight text-foreground">Patient Directory</h2>
-            <p className="text-sm font-medium text-muted-foreground">Search and open profile</p>
-          </div>
+        <DashboardSection title="Patient Directory" subtitle="Search and open profile" className="mt-7 animate-fade-up animate-fade-up-delay-3 pb-24 md:pb-8">
 
-          <Card className="border-border/70 bg-white p-3 shadow-sm md:p-4">
+          <Card className="border-border/70 bg-white p-3 shadow-sm dark:bg-[#1A1E27] dark:border-[#2A3040] md:p-4">
             <div className="flex items-center gap-3">
               <Search className="w-5 h-5 text-muted-foreground" />
               <Input
@@ -230,13 +223,21 @@ export default function ASHADashboard() {
           </Card>
 
           {loading ? (
-            <Card className="p-4 border-border/70 bg-white">
-              <p className="text-sm text-muted-foreground">Loading patients...</p>
-            </Card>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Card key={index} className="border-border/70 bg-white p-4 shadow-sm dark:bg-[#1A1E27] dark:border-[#2A3040]">
+                  <div className="space-y-3">
+                    <Skeleton className="h-5 w-40 dark:bg-white/15" />
+                    <Skeleton className="h-4 w-56 dark:bg-white/15" />
+                    <Skeleton className="h-3 w-44 dark:bg-white/15" />
+                  </div>
+                </Card>
+              ))}
+            </div>
           ) : filteredPatients.map((patient) => (
             <Card
               key={patient.id}
-              className="cursor-pointer border-border/80 bg-white p-4 shadow-sm transition-all hover:border-trust/40 hover:bg-trust/5"
+              className="cursor-pointer border-border/80 bg-white p-4 shadow-sm transition-all hover:border-trust/40 hover:bg-trust/5 dark:bg-[#1A1E27] dark:border-[#2A3040] dark:hover:bg-trust/20"
               onClick={() => router.push(`/asha/patient/${patient.id}`)}
             >
               <div className="flex items-center justify-between">
@@ -257,11 +258,11 @@ export default function ASHADashboard() {
           ))}
 
           {!loading && filteredPatients.length === 0 && (
-            <Card className="border-border/70 bg-white p-6 text-center shadow-sm">
+            <Card className="border-border/70 bg-white p-6 text-center shadow-sm dark:bg-[#1A1E27] dark:border-[#2A3040]">
               <p className="text-sm text-muted-foreground">No patients found for this search.</p>
             </Card>
           )}
-        </section>
+        </DashboardSection>
       </div>
 
       <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-white/95 p-2 shadow-lg backdrop-blur md:hidden">

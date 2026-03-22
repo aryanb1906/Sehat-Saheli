@@ -6,25 +6,30 @@
 :root {
   /* Updated to "Calm Care" theme with warm, soft gradients */
   --background: oklch(0.99 0.005 90);
-  --foreground: oklch(0.15 0.02 270); /* #222222 equivalent */
+  --foreground: oklch(0.15 0.02 270);
+  /* #222222 equivalent */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0.02 270);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.15 0.02 270);
 
   /* Primary gradient colors - Warm peach/pink tones */
-  --primary: oklch(0.73 0.11 15); /* Warm pink-peach */
+  --primary: oklch(0.73 0.11 15);
+  /* Warm pink-peach */
   --primary-foreground: oklch(0.99 0 0);
 
   /* Secondary soft background */
-  --secondary: oklch(0.98 0.01 15); /* #FFF6F6 soft pink background */
+  --secondary: oklch(0.98 0.01 15);
+  /* #FFF6F6 soft pink background */
   --secondary-foreground: oklch(0.15 0.02 270);
 
   --muted: oklch(0.97 0.005 270);
-  --muted-foreground: oklch(0.45 0.02 270); /* #555555 equivalent */
+  --muted-foreground: oklch(0.45 0.02 270);
+  /* #555555 equivalent */
 
   /* Accent gradient - Purple to pink */
-  --accent: oklch(0.63 0.12 295); /* Purple accent */
+  --accent: oklch(0.63 0.12 295);
+  /* Purple accent */
   --accent-foreground: oklch(0.99 0 0);
 
   /* Health status colors */
@@ -33,11 +38,16 @@
   --alert: oklch(0.55 0.22 25);
 
   /* Calm Care custom colors */
-  --warm: oklch(0.73 0.11 15); /* #FF9A9E to #FAD0C4 gradient start */
-  --warm-end: oklch(0.88 0.06 25); /* gradient end */
-  --care: oklch(0.73 0.1 340); /* Pink accent #FFE3E3 */
-  --trust: oklch(0.6 0.13 245); /* Trustworthy blue #4BA3C3 */
-  --button-gradient: oklch(0.65 0.18 355); /* #FF758C to #FF7EB3 */
+  --warm: oklch(0.73 0.11 15);
+  /* #FF9A9E to #FAD0C4 gradient start */
+  --warm-end: oklch(0.88 0.06 25);
+  /* gradient end */
+  --care: oklch(0.73 0.1 340);
+  /* Pink accent #FFE3E3 */
+  --trust: oklch(0.6 0.13 245);
+  /* Trustworthy blue #4BA3C3 */
+  --button-gradient: oklch(0.65 0.18 355);
+  /* #FF758C to #FF7EB3 */
 
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.99 0 0);
@@ -46,7 +56,8 @@
   --input: oklch(0.93 0.005 270);
   --ring: oklch(0.73 0.11 15);
 
-  --radius: 1rem; /* 2xl rounded corners */
+  --radius: 1rem;
+  /* 2xl rounded corners */
 
   --chart-1: oklch(0.73 0.11 15);
   --chart-2: oklch(0.63 0.12 295);
@@ -159,6 +170,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -166,6 +178,44 @@
 
 /* Added custom gradient utilities for Calm Care theme */
 @layer utilities {
+  @keyframes dashboard-fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: dashboard-fade-up 420ms ease-out both;
+  }
+
+  .animate-fade-up-delay-1 {
+    animation-delay: 70ms;
+  }
+
+  .animate-fade-up-delay-2 {
+    animation-delay: 140ms;
+  }
+
+  .animate-fade-up-delay-3 {
+    animation-delay: 210ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .animate-fade-up,
+    .animate-fade-up-delay-1,
+    .animate-fade-up-delay-2,
+    .animate-fade-up-delay-3 {
+      animation: none;
+    }
+  }
+
   .bg-gradient-calm {
     background: linear-gradient(135deg, oklch(0.73 0.11 15) 0%, oklch(0.88 0.06 25) 100%);
   }
