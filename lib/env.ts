@@ -30,3 +30,7 @@ export function hasRedisRateLimitConfig() {
 export function hasDatabaseUrl() {
     return Boolean(process.env.DATABASE_URL)
 }
+
+export function canUseDevAuthFallback() {
+    return process.env.NODE_ENV !== "production" && process.env.DISABLE_DEV_AUTH_FALLBACK !== "true"
+}

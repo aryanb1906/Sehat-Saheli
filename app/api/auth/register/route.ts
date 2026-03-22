@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
 import { createDevUser, findDevUserByEmail } from "@/lib/dev-auth-store"
-import { hasDatabaseUrl } from "@/lib/env"
+import { canUseDevAuthFallback, hasDatabaseUrl } from "@/lib/env"
 
 const registerSchema = z.object({
     name: z.string().min(2),
@@ -17,6 +17,7 @@ const registerSchema = z.object({
 export async function POST(req: NextRequest) {
     try {
         const hasDb = hasDatabaseUrl()
+        const useDevFallback = canUseDevAuthFallback()
         const ip = clientIp(req)
         const rl = await rateLimit(`auth-register:${ip}`, 10, 60_000)
         if (!rl.allowed) {
@@ -38,30 +39,53 @@ export async function POST(req: NextRequest) {
         }
 
         const email = parsed.data.email.toLowerCase()
-        const existing = hasDb
-            ? await prisma.user.findUnique({ where: { email } })
-            : findDevUserByEmail(email)
+        let existing = findDevUserByEmail(email)
+        if (hasDb) {
+            try {
+                existing = await prisma.user.findUnique({ where: { email } })
+            } catch (error) {
+                if (!useDevFallback) {
+                    throw error
+                }
+            }
+        }
 
         if (existing) {
             return NextResponse.json({ error: "Email already registered" }, { status: 409 })
         }
 
         const passwordHash = await hash(parsed.data.password, 12)
-        const user = hasDb
-            ? await prisma.user.create({
-                data: {
+        let user
+
+        if (hasDb) {
+            try {
+                user = await prisma.user.create({
+                    data: {
+                        name: parsed.data.name,
+                        email,
+                        role: parsed.data.role,
+                        passwordHash,
+                    },
+                })
+            } catch (error) {
+                if (!useDevFallback) {
+                    throw error
+                }
+                user = createDevUser({
                     name: parsed.data.name,
                     email,
                     role: parsed.data.role,
                     passwordHash,
-                },
-            })
-            : createDevUser({
+                })
+            }
+        } else {
+            user = createDevUser({
                 name: parsed.data.name,
                 email,
                 role: parsed.data.role,
                 passwordHash,
             })
+        }
 
         return NextResponse.json({
             success: true,

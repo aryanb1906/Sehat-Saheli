@@ -5,11 +5,12 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { compare } from "bcryptjs"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { assertCriticalEnv, getAuthSecret, hasDatabaseUrl } from "@/lib/env"
+import { assertCriticalEnv, canUseDevAuthFallback, getAuthSecret, hasDatabaseUrl } from "@/lib/env"
 import { findDevUserByEmail } from "@/lib/dev-auth-store"
 
 assertCriticalEnv()
 const hasDb = hasDatabaseUrl()
+const useDevFallback = canUseDevAuthFallback()
 
 const credentialSchema = z.object({
     email: z.string().email(),
@@ -28,9 +29,16 @@ const providers: NextAuthOptions["providers"] = [
             if (!parsed.success) return null
 
             const normalizedEmail = parsed.data.email.toLowerCase()
-            const user = hasDb
-                ? await prisma.user.findUnique({ where: { email: normalizedEmail } })
-                : findDevUserByEmail(normalizedEmail)
+            let user = findDevUserByEmail(normalizedEmail)
+            if (hasDb) {
+                try {
+                    user = await prisma.user.findUnique({ where: { email: normalizedEmail } })
+                } catch {
+                    if (!useDevFallback) {
+                        throw new Error("Authentication backend unavailable")
+                    }
+                }
+            }
 
             if (!user?.passwordHash) return null
 
