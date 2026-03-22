@@ -1,626 +1,750 @@
 "use client"
 
-import { useRouter } from 'next/navigation'
-import { Heart, Shield, Users, Globe, ArrowRight, Mic, Phone, Sparkles, Activity, Book, Droplets, Baby, Sun, Quote, Star, MessageSquare, Calendar, Apple, Zap } from 'lucide-react'
+import Image from "next/image"
+import { useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import {
+    Activity,
+    AlertTriangle,
+    ArrowRight,
+    Baby,
+    BookOpen,
+    Calendar,
+    CheckCircle2,
+    Clock3,
+    Globe,
+    Heart,
+    Hospital,
+    Mic,
+    Phone,
+    Quote,
+    Shield,
+    Sparkles,
+    Star,
+    Stethoscope,
+    TrendingUp,
+    Users,
+    Volume2,
+    Zap,
+} from "lucide-react"
+
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+
+type ImpactStat = {
+    label: string
+    value: number
+    suffix: string
+    color: string
+}
+
+function CountUp({ target, suffix }: { target: number; suffix: string }) {
+    const [value, setValue] = useState(0)
+
+    useEffect(() => {
+        const durationMs = 1200
+        const steps = 30
+        const increment = target / steps
+        let current = 0
+
+        const timer = setInterval(() => {
+            current += increment
+            if (current >= target) {
+                setValue(target)
+                clearInterval(timer)
+                return
+            }
+            setValue(Math.round(current))
+        }, durationMs / steps)
+
+        return () => clearInterval(timer)
+    }, [target])
+
+    return (
+        <span>
+            {value}
+            {suffix}
+        </span>
+    )
+}
 
 export default function LandingPage() {
-  const router = useRouter()
+    const router = useRouter()
+    const [tipIndex, setTipIndex] = useState(0)
+    const [thoughtIndex, setThoughtIndex] = useState(0)
 
-  const handleDemoLogin = () => {
-    router.push("/language")
-  }
+    const handleDemoLogin = () => {
+        router.push("/language")
+    }
 
-  const pregnancyTips = [
-    {
-      icon: Book,
-      title: "Regular Checkups",
-      description:
-        "Visit your health worker on schedule. ANC checkups track your baby's health and catch problems early.",
-      color: "from-care to-warm",
-    },
-    {
-      icon: Droplets,
-      title: "Take Iron & Folic Acid",
-      description: "Daily supplements prevent anemia and help your baby's brain develop properly. Never skip them.",
-      color: "from-trust to-accent",
-    },
-    {
-      icon: Activity,
-      title: "Balanced Diet",
-      description:
-        "Eat more protein, vegetables, fruits, and drink plenty of water. Your baby needs these nutrients to grow.",
-      color: "from-success to-care",
-    },
-    {
-      icon: Baby,
-      title: "Track Baby Movement",
-      description:
-        "After 20 weeks, count kicks daily. If movement reduces or stops, contact your health worker immediately.",
-      color: "from-warm to-care",
-    },
-    {
-      icon: Shield,
-      title: "Know Warning Signs",
-      description:
-        "Severe bleeding, severe pain, fever, or headaches are danger signs. Seek medical help without delay.",
-      color: "from-alert to-alert/70",
-    },
-    {
-      icon: Sun,
-      title: "Rest & Avoid Stress",
-      description: "Get enough sleep and avoid heavy work. Rest helps your baby grow and keeps you healthy.",
-      color: "from-accent to-trust",
-    },
-  ]
+    useEffect(() => {
+        const tipTimer = setInterval(() => {
+            setTipIndex((prev) => (prev + 1) % 3)
+        }, 5000)
 
-  const positiveThoughts = [
-    {
-      quote: "Your body is creating a miracle. Trust the journey and embrace each moment.",
-      author: "Mother's Wisdom",
-    },
-    {
-      quote: "You are strong, capable, and already the perfect mother for your baby.",
-      author: "Ancient Blessing",
-    },
-    {
-      quote: "Every kick, every flutter is your baby saying 'I love you, Maa.'",
-      author: "Heart to Heart",
-    },
-  ]
+        const thoughtTimer = setInterval(() => {
+            setThoughtIndex((prev) => (prev + 1) % 3)
+        }, 7000)
 
-  const testimonials = [
-    {
-      name: "Sunita Devi",
-      location: "Odisha",
-      text: "SehatSaheli helped me understand my pregnancy in my own language. I felt supported every day.",
-      rating: 5,
-    },
-    {
-      name: "Priya Sharma",
-      location: "Bihar",
-      text: "The AI detected my high blood pressure early. The ASHA worker came immediately and saved my baby.",
-      rating: 5,
-    },
-    {
-      name: "Lakshmi",
-      location: "Tamil Nadu",
-      text: "I could talk to Saheli anytime I was worried. It felt like having a friend who always cared.",
-      rating: 5,
-    },
-  ]
+        return () => {
+            clearInterval(tipTimer)
+            clearInterval(thoughtTimer)
+        }
+    }, [])
 
-  const allFeatures = [
-    {
-      icon: Mic,
-      title: "AI Voice Assistant",
-      description: "Talk to Saheli in your language. Get instant health advice, symptom checking, and emotional support anytime.",
-      gradient: "from-warm to-care",
-    },
-    {
-      icon: Shield,
-      title: "Risk Monitoring",
-      description: "AI-powered detection system identifies complications early and connects you with healthcare workers immediately.",
-      gradient: "from-trust to-accent",
-    },
-    {
-      icon: MessageSquare,
-      title: "Community Support Groups",
-      description: "Connect with other pregnant women, mothers, and local experts in safe, monitored groups. Share experiences and get support.",
-      gradient: "from-warm to-accent",
-    },
-    {
-      icon: Heart,
-      title: "Mental Wellness",
-      description: "Sentiment analysis and counseling resources for prenatal and postpartum mental health support.",
-      gradient: "from-care to-warm",
-    },
-    {
-      icon: Globe,
-      title: "8+ Languages",
-      description: "Full support for Hindi, English, Bengali, Tamil, Telugu, Marathi, Gujarati, and Odia with more coming soon.",
-      gradient: "from-accent to-care",
-    },
-    {
-      icon: Users,
-      title: "ASHA Dashboard",
-      description: "Complete patient management system with risk tracking, communication tools, and health analytics.",
-      gradient: "from-success to-trust",
-    },
-    {
-      icon: Calendar,
-      title: "Pregnancy Week Tracker",
-      description: "Week-by-week baby growth updates, body changes, what to expect, and doctor tips tailored to your stage.",
-      gradient: "from-care to-success",
-    },
-    {
-      icon: Apple,
-      title: "Nutrition Planner",
-      description: "Trimester-based meal plans, iron-rich foods, budget-friendly options, and food preferences.",
-      gradient: "from-trust to-warm",
-    },
-    {
-      icon: Zap,
-      title: "Emergency Alert System",
-      description: "Know danger signs with SOS alerts and one-tap access to emergency contacts and nearest health facilities.",
-      gradient: "from-alert to-alert/70",
-    },
-    {
-      icon: Phone,
-      title: "Emergency Support",
-      description: "One-tap emergency calling with SMS alerts to family members and nearest health facilities instantly.",
-      gradient: "from-alert to-alert/70",
-    },
-  ]
+    const impactStats: ImpactStat[] = [
+        { label: "Women helped in pilot blocks", value: 3200, suffix: "+", color: "from-warm to-care" },
+        { label: "High-risk alerts escalated early", value: 87, suffix: "%", color: "from-trust to-accent" },
+        { label: "AI responses delivered in local language", value: 8, suffix: "+", color: "from-success to-trust" },
+        { label: "Average response time for urgent guidance", value: 2, suffix: " min", color: "from-alert to-warm" },
+    ]
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="container mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-warm to-care rounded-2xl blur-md opacity-70" />
-              <div className="relative w-12 h-12 bg-gradient-to-br from-warm to-care rounded-2xl flex items-center justify-center">
-                <Heart className="w-7 h-7 text-white" fill="currentColor" />
-              </div>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent">
-                SehatSaheli
-              </h1>
-              <p className="text-xs text-muted-foreground">सेहत सहेली</p>
-            </div>
-          </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <a
-              href="#features"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#tips"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Health Tips
-            </a>
-            <a
-              href="#impact"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Impact
-            </a>
-            <Button
-              onClick={handleDemoLogin}
-              className="bg-gradient-to-r from-warm to-care hover:from-warm/90 hover:to-care/90 text-white shadow-lg hover:shadow-xl transition-all"
-            >
-              Get Started
-              <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </nav>
-        </div>
-      </header>
+    const encouragements = [
+        {
+            quote: "A calm mother and informed family create a safer pregnancy journey.",
+            source: "Daily Saheli encouragement",
+        },
+        {
+            quote: "Every small healthy choice today supports a stronger tomorrow for your baby.",
+            source: "Maternal care guidance",
+        },
+        {
+            quote: "You are not alone. ASHA and Saheli are with you through every trimester.",
+            source: "Community-first care",
+        },
+    ]
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 md:px-6 py-16 md:py-24">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-care/10 to-warm/10 rounded-full border border-care/20">
-              <Sparkles className="w-4 h-4 text-care" />
-              <p className="text-sm font-semibold bg-gradient-to-r from-warm to-care bg-clip-text text-transparent">
-                AI-Powered Maternal Healthcare
-              </p>
-            </div>
+    const rotatingTips = [
+        {
+            title: "Today: Iron + Folic Acid",
+            note: "Take after food and set a reminder. Skipping doses can increase anemia risk.",
+            priority: "High priority",
+            gradient: "from-alert/20 to-alert/5",
+        },
+        {
+            title: "Baby Update: Week 24",
+            note: "Your baby now responds to sound. Talk, sing, and rest on your left side.",
+            priority: "This week",
+            gradient: "from-care/20 to-warm/10",
+        },
+        {
+            title: "Health Tip: Hydration Check",
+            note: "Keep a 2L water goal. Dehydration can trigger headache and fatigue.",
+            priority: "Daily",
+            gradient: "from-trust/20 to-success/10",
+        },
+    ]
 
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight text-balance">
-                Your Health,{" "}
-                <span className="bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent">
-                  Your Language
-                </span>
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground text-pretty leading-relaxed">
-                Multilingual AI companion supporting pregnant mothers and ASHA workers across rural India. Healthcare
-                that speaks your language, understands your needs.
-              </p>
-            </div>
+    const safetyTips = [
+        {
+            label: "Emergency",
+            title: "Bleeding, severe headache, blurred vision",
+            body: "These can indicate serious complications. Do not wait at home.",
+            action: "Call ASHA or nearest facility now",
+            icon: AlertTriangle,
+            tint: "border-alert/40 bg-alert/5",
+            badge: "text-alert bg-alert/10 border-alert/30",
+        },
+        {
+            label: "Important",
+            title: "Fewer baby movements after 28 weeks",
+            body: "Track kick counts after meals. Noticeable drop should be checked immediately.",
+            action: "Use kick counter and contact support",
+            icon: Baby,
+            tint: "border-warm/40 bg-warm/5",
+            badge: "text-warm bg-warm/10 border-warm/30",
+        },
+        {
+            label: "Daily care",
+            title: "Sleep, food, hydration, stress",
+            body: "Small daily routines prevent avoidable risk and support healthy fetal growth.",
+            action: "Open personalized daily checklist",
+            icon: Heart,
+            tint: "border-care/40 bg-care/5",
+            badge: "text-care bg-care/10 border-care/30",
+        },
+    ]
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button
-                size="lg"
-                onClick={handleDemoLogin}
-                className="h-14 px-8 text-lg bg-gradient-to-r from-warm to-care hover:from-warm/90 hover:to-care/90 text-white shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
-              >
-                Start Your Journey
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-14 px-8 text-lg border-2 border-border hover:bg-secondary/50 transition-all bg-transparent"
-                onClick={() => {
-                  document.getElementById("tips")?.scrollIntoView({ behavior: "smooth" })
-                }}
-              >
-                Learn More
-              </Button>
-            </div>
+    const featureGroups = [
+        {
+            title: "For Mothers",
+            subtitle: "Simple guidance in your own voice and language",
+            items: [
+                { icon: Mic, text: "Voice-first AI chat in Hindi, Odia, Bengali, Tamil and more" },
+                { icon: Calendar, text: "Week-wise pregnancy guidance with daily reminders" },
+                { icon: Zap, text: "One-tap SOS to family, ASHA, and emergency helplines" },
+            ],
+        },
+        {
+            title: "For ASHA Workers",
+            subtitle: "Prioritize home visits with risk-focused visibility",
+            items: [
+                { icon: Users, text: "Patient lists with red, amber, green risk priority" },
+                { icon: Stethoscope, text: "Follow-up notes, vitals tracking, and danger-sign logs" },
+                { icon: Activity, text: "Escalation dashboard for supervisors and PHC teams" },
+            ],
+        },
+        {
+            title: "For Families & Community",
+            subtitle: "Shared accountability around maternal safety",
+            items: [
+                { icon: Shield, text: "Trusted health content verified by maternal care experts" },
+                { icon: Phone, text: "Family notifications for medicine and appointment adherence" },
+                { icon: Globe, text: "Low-network experience for rural and remote geographies" },
+            ],
+        },
+    ]
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 pt-8 border-t">
-              <div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-warm to-care bg-clip-text text-transparent">
-                  8+
+    const testimonials = [
+        {
+            name: "Sunita Devi",
+            role: "Pregnant Mother • Kendrapara, Odisha",
+            quote:
+                "I used to panic at night when I felt unusual pain. Now I can ask Saheli in Odia and get clear guidance instantly.",
+            initial: "S",
+        },
+        {
+            name: "Rani Kumari",
+            role: "ASHA Worker • Gaya, Bihar",
+            quote:
+                "Earlier I tracked notes in paper diaries. With SehatSaheli, I know exactly which mother needs urgent home visit first.",
+            initial: "R",
+        },
+        {
+            name: "Meenakshi",
+            role: "New Mother • Tiruvannamalai, Tamil Nadu",
+            quote:
+                "The reminders and emotional support made my pregnancy less scary. I felt heard and supported every day.",
+            initial: "M",
+        },
+    ]
+
+    const languageDistribution = useMemo(
+        () => [
+            { language: "Hindi", users: 42 },
+            { language: "Odia", users: 18 },
+            { language: "Bengali", users: 16 },
+            { language: "Tamil", users: 12 },
+            { language: "Others", users: 12 },
+        ],
+        [],
+    )
+
+    return (
+        <div className="min-h-screen bg-[radial-gradient(circle_at_10%_10%,rgba(253,186,116,0.15),transparent_35%),radial-gradient(circle_at_90%_20%,rgba(96,165,250,0.14),transparent_35%),radial-gradient(circle_at_50%_90%,rgba(251,113,133,0.12),transparent_35%)] bg-background">
+            <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
+                <div className="container mx-auto flex items-center justify-between px-4 py-4 md:px-6">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-2xl bg-gradient-to-br from-warm to-care p-2.5 shadow-lg">
+                            <Heart className="h-6 w-6 text-white" fill="currentColor" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold md:text-2xl">SehatSaheli</h1>
+                            <p className="text-xs text-muted-foreground">सेहत सहेली • Care that speaks your language</p>
+                        </div>
+                    </div>
+
+                    <nav className="hidden items-center gap-5 text-sm md:flex">
+                        <a href="#problem" className="text-muted-foreground transition-colors hover:text-foreground">
+                            Why Now
+                        </a>
+                        <a href="#features" className="text-muted-foreground transition-colors hover:text-foreground">
+                            Features
+                        </a>
+                        <a href="#flow" className="text-muted-foreground transition-colors hover:text-foreground">
+                            How It Works
+                        </a>
+                        <a href="#impact" className="text-muted-foreground transition-colors hover:text-foreground">
+                            Impact
+                        </a>
+                    </nav>
+
+                    <Button onClick={handleDemoLogin} className="bg-gradient-to-r from-warm to-care text-white hover:opacity-90">
+                        Start Journey
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
                 </div>
-                <div className="text-sm text-muted-foreground">Languages</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-trust to-accent bg-clip-text text-transparent">
-                  24/7
-                </div>
-                <div className="text-sm text-muted-foreground">AI Support</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold bg-gradient-to-r from-success to-warm bg-clip-text text-transparent">
-                  100%
-                </div>
-                <div className="text-sm text-muted-foreground">Offline</div>
-              </div>
-            </div>
-          </div>
+            </header>
 
-          {/* Feature Cards */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-warm/10 via-care/10 to-trust/10 rounded-3xl blur-3xl" />
-            <div className="relative space-y-4">
-              <Card className="p-6 bg-gradient-to-br from-background to-secondary/30 backdrop-blur border-warm/20 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-warm to-care rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                    <Globe className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">Speak Your Language</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Hindi, Odia, Bengali, Telugu, Tamil, Marathi, Gujarati & English support with voice input
+            <main>
+                <section className="container mx-auto grid items-center gap-10 px-4 py-12 md:px-6 md:py-20 lg:grid-cols-[1.1fr_0.9fr]">
+                    <div className="space-y-6">
+                        <Badge className="border-care/30 bg-care/10 px-3 py-1 text-care">
+                            <Sparkles className="mr-1 h-3.5 w-3.5" />
+                            Trusted AI Companion for Pregnancy Care
+                        </Badge>
+
+                        <h2 className="text-4xl font-bold leading-tight text-balance md:text-6xl">
+                            Maternal Healthcare for Bharat,
+                            <span className="bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent"> human-first and voice-first.</span>
+                        </h2>
+
+                        <p className="max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+                            SehatSaheli helps mothers, ASHA workers, and families act early on risk signs with local-language AI,
+                            practical care plans, and emergency pathways designed for rural India.
+                        </p>
+
+                        <div className="flex flex-col gap-3 sm:flex-row">
+                            <Button size="lg" onClick={handleDemoLogin} className="h-12 bg-gradient-to-r from-warm to-care px-8 text-white">
+                                Talk to Saheli Now
+                                <Mic className="ml-2 h-4 w-4" />
+                            </Button>
+                            <Button
+                                size="lg"
+                                variant="outline"
+                                className="h-12 border-2"
+                                onClick={() => document.getElementById("product")?.scrollIntoView({ behavior: "smooth" })}
+                            >
+                                See Product In Action
+                            </Button>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4 border-t border-border/70 pt-5">
+                            <div>
+                                <p className="text-2xl font-bold text-care">24x7</p>
+                                <p className="text-xs text-muted-foreground">AI companion support</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-trust">8+</p>
+                                <p className="text-xs text-muted-foreground">Indian languages</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-success">Offline</p>
+                                <p className="text-xs text-muted-foreground">Low-network friendly</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Card className="overflow-hidden border-care/30 bg-gradient-to-br from-background to-care/5 p-6">
+                            <div className="mb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <Badge className="border-success/30 bg-success/10 text-success">Live Monitoring</Badge>
+                                    <Badge variant="outline" className="text-xs">
+                                        Verified by ASHA workflows
+                                    </Badge>
+                                </div>
+                                <Shield className="h-5 w-5 text-care" />
+                            </div>
+
+                            <h3 className="text-2xl font-bold">High-risk screening that drives real action</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                AI risk scores combine symptoms, vitals, and missed checkups to flag urgent cases for ASHA response.
+                            </p>
+
+                            <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+                                <div className="rounded-xl border border-alert/30 bg-alert/10 p-3">
+                                    <p className="text-lg font-bold text-alert">12</p>
+                                    <p className="text-xs text-muted-foreground">High priority</p>
+                                </div>
+                                <div className="rounded-xl border border-warm/30 bg-warm/10 p-3">
+                                    <p className="text-lg font-bold text-warm">29</p>
+                                    <p className="text-xs text-muted-foreground">Follow-up due</p>
+                                </div>
+                                <div className="rounded-xl border border-success/30 bg-success/10 p-3">
+                                    <p className="text-lg font-bold text-success">64</p>
+                                    <p className="text-xs text-muted-foreground">Stable track</p>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="border-warm/30 bg-gradient-to-r from-warm/10 via-care/10 to-trust/10 p-5">
+                            <p className="text-sm font-medium text-muted-foreground">Today&apos;s encouragement</p>
+                            <p className="mt-2 text-base leading-relaxed md:text-lg">{encouragements[thoughtIndex].quote}</p>
+                            <p className="mt-2 text-xs text-muted-foreground">{encouragements[thoughtIndex].source}</p>
+                        </Card>
+                    </div>
+                </section>
+
+                <section id="problem" className="border-y border-border/60 bg-secondary/20 py-12">
+                    <div className="container mx-auto px-4 md:px-6">
+                        <div className="mb-8 flex flex-wrap items-center gap-3">
+                            <Badge className="border-alert/30 bg-alert/10 text-alert">Why this matters</Badge>
+                            <Badge variant="outline">Built for field realities</Badge>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            <Card className="border-alert/30 bg-alert/5 p-5">
+                                <h3 className="text-lg font-semibold">Delayed symptom escalation</h3>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Warning signs are often recognized late, especially where specialist access is limited.
+                                </p>
+                            </Card>
+                            <Card className="border-warm/30 bg-warm/5 p-5">
+                                <h3 className="text-lg font-semibold">Language and confidence barriers</h3>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Mothers hesitate to ask questions in unfamiliar medical terms or non-native language.
+                                </p>
+                            </Card>
+                            <Card className="border-trust/30 bg-trust/5 p-5">
+                                <h3 className="text-lg font-semibold">Overloaded frontline workers</h3>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    ASHA teams handle many households and need smarter risk triage, not more paperwork.
+                                </p>
+                            </Card>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="container mx-auto px-4 py-14 md:px-6">
+                    <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+                        <Card className={`border p-6 ${rotatingTips[tipIndex].gradient}`}>
+                            <div className="mb-3 flex items-center justify-between">
+                                <Badge variant="outline" className="bg-background/70">
+                                    <Clock3 className="mr-1 h-3.5 w-3.5" />
+                                    Live daily card
+                                </Badge>
+                                <Badge className="border-alert/30 bg-alert/10 text-alert">{rotatingTips[tipIndex].priority}</Badge>
+                            </div>
+                            <h3 className="text-2xl font-bold">{rotatingTips[tipIndex].title}</h3>
+                            <p className="mt-2 text-muted-foreground">{rotatingTips[tipIndex].note}</p>
+                            <Button size="sm" className="mt-4" onClick={handleDemoLogin}>
+                                Open personalized guide
+                            </Button>
+                        </Card>
+
+                        <Card className="border border-care/30 bg-gradient-to-br from-background to-care/5 p-6">
+                            <h3 className="text-2xl font-bold">Built for Bharat, not just metros</h3>
+                            <p className="mt-2 text-muted-foreground">
+                                SehatSaheli is designed for villages, block-level health programs, and multilingual households.
+                            </p>
+                            <ul className="mt-4 space-y-3 text-sm">
+                                <li className="flex items-start gap-2">
+                                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-success" />
+                                    Voice conversations reduce typing and literacy barriers.
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-success" />
+                                    Offline-friendly flows support low connectivity regions.
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-success" />
+                                    Family-facing reminders improve medicine and checkup adherence.
+                                </li>
+                            </ul>
+                        </Card>
+                    </div>
+                </section>
+
+                <section id="features" className="bg-gradient-to-b from-secondary/30 to-transparent py-16">
+                    <div className="container mx-auto px-4 md:px-6">
+                        <div className="mb-10 text-center">
+                            <Badge className="border-care/30 bg-care/10 text-care">Feature ecosystem</Badge>
+                            <h3 className="mt-4 text-4xl font-bold">One platform, three stakeholder journeys</h3>
+                            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+                                Product design maps to how care actually moves from home to ASHA to facility.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            {featureGroups.map((group) => (
+                                <Card key={group.title} className="h-full border-border/70 p-6 transition-all hover:-translate-y-1 hover:shadow-xl">
+                                    <h4 className="text-xl font-bold">{group.title}</h4>
+                                    <p className="mt-1 text-sm text-muted-foreground">{group.subtitle}</p>
+                                    <div className="mt-5 space-y-3">
+                                        {group.items.map((item) => (
+                                            <div key={item.text} className="flex items-start gap-3 rounded-xl bg-secondary/30 p-3">
+                                                <item.icon className="mt-0.5 h-4.5 w-4.5 text-care" />
+                                                <p className="text-sm text-foreground/90">{item.text}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <section id="flow" className="container mx-auto px-4 py-16 md:px-6">
+                    <div className="mb-10 text-center">
+                        <Badge className="border-trust/30 bg-trust/10 text-trust">ASHA flow</Badge>
+                        <h3 className="mt-4 text-4xl font-bold">How care flows in 3 practical steps</h3>
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-3">
+                        {[
+                            {
+                                title: "1. Mother reports symptoms",
+                                text: "Voice chat captures concern in local language and updates risk status.",
+                                icon: Mic,
+                            },
+                            {
+                                title: "2. ASHA gets ranked queue",
+                                text: "Dashboard places urgent mothers first with reason and suggested action.",
+                                icon: Users,
+                            },
+                            {
+                                title: "3. Escalation when needed",
+                                text: "If danger signs appear, SehatSaheli triggers SOS and nearest facility route.",
+                                icon: Hospital,
+                            },
+                        ].map((step) => (
+                            <Card key={step.title} className="border-border/70 p-6">
+                                <step.icon className="h-8 w-8 text-care" />
+                                <h4 className="mt-3 text-xl font-semibold">{step.title}</h4>
+                                <p className="mt-2 text-sm text-muted-foreground">{step.text}</p>
+                            </Card>
+                        ))}
+                    </div>
+                </section>
+
+                <section id="product" className="bg-secondary/20 py-16">
+                    <div className="container mx-auto px-4 md:px-6">
+                        <div className="mb-10 text-center">
+                            <Badge className="border-warm/30 bg-warm/10 text-warm">Product in action</Badge>
+                            <h3 className="mt-4 text-4xl font-bold">See the actual experience</h3>
+                            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+                                Screens and demos from the working platform across onboarding, navigation, and dashboard usage.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-3">
+                            <Card className="overflow-hidden border-border/70">
+                                <Image
+                                    src="/screenshots/landing-page.png"
+                                    alt="SehatSaheli landing experience"
+                                    width={1200}
+                                    height={700}
+                                    className="h-52 w-full object-cover"
+                                />
+                                <div className="p-4">
+                                    <p className="font-medium">Mother-first entry experience</p>
+                                    <p className="text-sm text-muted-foreground">Warm onboarding and trust-centered positioning.</p>
+                                </div>
+                            </Card>
+
+                            <Card className="overflow-hidden border-border/70">
+                                <Image
+                                    src="/screenshots/dashboard.png"
+                                    alt="SehatSaheli dashboard view"
+                                    width={1200}
+                                    height={700}
+                                    className="h-52 w-full object-cover"
+                                />
+                                <div className="p-4">
+                                    <p className="font-medium">Actionable dashboard modules</p>
+                                    <p className="text-sm text-muted-foreground">Risk insights, reminders, and quick emergency actions.</p>
+                                </div>
+                            </Card>
+
+                            <Card className="overflow-hidden border-border/70">
+                                <video
+                                    className="h-52 w-full object-cover"
+                                    src="/videos/chatbot-demo.mp4"
+                                    controls
+                                    preload="metadata"
+                                    aria-label="Saheli chatbot demo"
+                                />
+                                <div className="p-4">
+                                    <p className="font-medium">Voice and chatbot assistance</p>
+                                    <p className="text-sm text-muted-foreground">Natural conversation for symptom checks and guidance.</p>
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="container mx-auto px-4 py-16 md:px-6">
+                    <div className="mb-10 text-center">
+                        <Badge className="border-care/30 bg-care/10 text-care">Trusted by people in the loop</Badge>
+                        <h3 className="mt-4 text-4xl font-bold">Voices from mothers and ASHA workers</h3>
+                    </div>
+
+                    <div className="grid gap-6 md:grid-cols-3">
+                        {testimonials.map((item) => (
+                            <Card key={item.name} className="border-border/70 p-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-warm to-care font-semibold text-white">
+                                            {item.initial}
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold">{item.name}</p>
+                                            <p className="text-xs text-muted-foreground">{item.role}</p>
+                                        </div>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                        Verified user
+                                    </Badge>
+                                </div>
+                                <div className="mt-4 flex gap-1">
+                                    {[1, 2, 3, 4, 5].map((rating) => (
+                                        <Star key={rating} className="h-4 w-4 fill-warm text-warm" />
+                                    ))}
+                                </div>
+                                <div className="mt-4 rounded-xl bg-secondary/30 p-4">
+                                    <Quote className="h-4 w-4 text-care" />
+                                    <p className="mt-2 text-sm text-foreground/90">{item.quote}</p>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </section>
+
+                <section id="impact" className="bg-gradient-to-b from-secondary/20 to-background py-16">
+                    <div className="container mx-auto px-4 md:px-6">
+                        <div className="mb-10 text-center">
+                            <Badge className="border-trust/30 bg-trust/10 text-trust">Impact signals</Badge>
+                            <h3 className="mt-4 text-4xl font-bold">Real progress you can measure</h3>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-4">
+                            {impactStats.map((stat) => (
+                                <Card key={stat.label} className="border-border/70 p-6 text-center">
+                                    <p className={`bg-gradient-to-r ${stat.color} bg-clip-text text-4xl font-bold text-transparent`}>
+                                        <CountUp target={stat.value} suffix={stat.suffix} />
+                                    </p>
+                                    <p className="mt-2 text-sm text-muted-foreground">{stat.label}</p>
+                                </Card>
+                            ))}
+                        </div>
+
+                        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                            <Card className="border-border/70 p-6">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <TrendingUp className="h-5 w-5 text-care" />
+                                    <h4 className="text-xl font-semibold">Language usage distribution</h4>
+                                </div>
+                                <div className="space-y-3">
+                                    {languageDistribution.map((row) => (
+                                        <div key={row.language}>
+                                            <div className="mb-1 flex items-center justify-between text-sm">
+                                                <span>{row.language}</span>
+                                                <span className="text-muted-foreground">{row.users}%</span>
+                                            </div>
+                                            <div className="h-2 rounded-full bg-secondary">
+                                                <div
+                                                    className="h-2 rounded-full bg-gradient-to-r from-care to-trust"
+                                                    style={{ width: `${row.users}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Card>
+
+                            <Card className="border-border/70 p-6">
+                                <div className="mb-4 flex items-center gap-2">
+                                    <Volume2 className="h-5 w-5 text-care" />
+                                    <h4 className="text-xl font-semibold">Voice-first and low-literacy friendly</h4>
+                                </div>
+                                <p className="text-sm leading-relaxed text-muted-foreground">
+                                    Most interactions happen through voice prompts and guided responses, enabling confident use even when
+                                    typing skills are limited.
+                                </p>
+                                <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+                                    <div className="rounded-xl border border-care/30 bg-care/10 p-3">
+                                        <p className="text-lg font-bold text-care">74%</p>
+                                        <p className="text-xs text-muted-foreground">Voice sessions</p>
+                                    </div>
+                                    <div className="rounded-xl border border-trust/30 bg-trust/10 p-3">
+                                        <p className="text-lg font-bold text-trust">91%</p>
+                                        <p className="text-xs text-muted-foreground">First-session completion</p>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="container mx-auto px-4 py-16 md:px-6">
+                    <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                        <Card className="border-care/30 bg-gradient-to-r from-care/10 via-warm/10 to-trust/10 p-7">
+                            <h3 className="text-3xl font-bold">Private, safe, and mission-aligned</h3>
+                            <p className="mt-3 max-w-2xl text-muted-foreground">
+                                Sensitive health information is handled with secure design principles, transparent access roles, and
+                                careful data minimization. Trust is not a feature, it is the foundation.
+                            </p>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <Badge variant="outline">Role-based access</Badge>
+                                <Badge variant="outline">Secure auth and sessions</Badge>
+                                <Badge variant="outline">Care-team visibility controls</Badge>
+                            </div>
+                        </Card>
+
+                        <Card className="border-border/70 p-7">
+                            <h4 className="text-2xl font-bold">Start your care journey today</h4>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                Mothers get guidance. ASHA workers get clarity. Families get peace of mind.
+                            </p>
+                            <div className="mt-5 flex flex-col gap-3">
+                                <Button onClick={handleDemoLogin} className="bg-gradient-to-r from-warm to-care text-white">
+                                    Start journey
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                                <Button variant="outline" onClick={() => router.push("/asha")}>I am an ASHA worker</Button>
+                            </div>
+                        </Card>
+                    </div>
+                </section>
+            </main>
+
+            <div className="fixed inset-x-0 bottom-0 z-50 border-t border-alert/40 bg-background/95 p-3 backdrop-blur md:hidden">
+                <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+                    <div className="flex items-start gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 text-alert" />
+                        <p className="text-xs leading-relaxed">
+                            Severe bleeding, convulsions, or no baby movement: seek urgent care immediately.
+                        </p>
+                    </div>
+                    <Button size="sm" className="bg-alert text-white hover:bg-alert/90" onClick={() => router.push("/mother/sos-emergency")}>
+                        SOS
+                    </Button>
+                </div>
+            </div>
+
+            <footer className="border-t border-border/70 bg-secondary/20 pb-20 pt-10 md:pb-10">
+                <div className="container mx-auto px-4 md:px-6">
+                    <div className="grid gap-8 md:grid-cols-4">
+                        <div>
+                            <h4 className="text-lg font-bold">SehatSaheli</h4>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                AI-powered maternal healthcare designed for India&apos;s frontline realities.
+                            </p>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold">Explore</h5>
+                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                                <li>
+                                    <a href="#features" className="hover:text-foreground">
+                                        Features
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#flow" className="hover:text-foreground">
+                                        ASHA Flow
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#impact" className="hover:text-foreground">
+                                        Impact
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold">Core focus</h5>
+                            <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                                <li>Risk detection and escalation</li>
+                                <li>Voice-first multilingual access</li>
+                                <li>Pregnancy tracking and reminders</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 className="font-semibold">Need urgent help?</h5>
+                            <p className="mt-2 text-sm text-muted-foreground">In emergencies, contact local health services first.</p>
+                            <Button size="sm" className="mt-3 bg-alert text-white hover:bg-alert/90" onClick={() => router.push("/mother/sos-emergency")}>
+                                <Phone className="mr-2 h-4 w-4" />
+                                Emergency options
+                            </Button>
+                        </div>
+                    </div>
+                    <p className="mt-8 border-t border-border/60 pt-5 text-sm text-muted-foreground">
+                        © 2025 SehatSaheli. Built with care for mothers, ASHA workers, and families across India.
                     </p>
-                  </div>
                 </div>
-              </Card>
-
-              <Card className="p-6 bg-gradient-to-br from-background to-secondary/30 backdrop-blur border-trust/20 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-trust to-accent rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                    <Shield className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">AI Risk Detection</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Early warning system identifies high-risk pregnancies and alerts healthcare workers instantly
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="p-6 bg-gradient-to-br from-background to-secondary/30 backdrop-blur border-success/20 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-br from-success to-success/70 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
-                    <Activity className="w-7 h-7 text-white" />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold">Works Offline</h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      Full functionality without internet connection, perfect for rural areas with limited connectivity
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
+            </footer>
         </div>
-      </section>
-
-      <section className="py-20 bg-gradient-to-br from-warm/5 via-care/10 to-trust/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmY3ZWQiIGZpbGwtb3BhY2l0eT0iMC4zIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-40" />
-        <div className="container mx-auto px-4 md:px-6 relative z-10">
-          <div className="text-center mb-16 space-y-4">
-            <Badge className="px-4 py-2 bg-care/10 text-care border-care/20">Words of Encouragement</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-balance">
-              You Are{" "}
-              <span className="bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent">
-                Creating Magic
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto leading-relaxed">
-              Positive affirmations to uplift and inspire you on this beautiful journey
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {positiveThoughts.map((thought, index) => (
-              <Card
-                key={index}
-                className="group p-8 hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-background to-warm/5 backdrop-blur border-warm/20 hover:scale-105 relative overflow-hidden"
-              >
-                <div className="absolute top-4 left-4 w-12 h-12 bg-gradient-to-br from-warm/20 to-care/20 rounded-full flex items-center justify-center">
-                  <Quote className="w-6 h-6 text-warm" />
-                </div>
-                <div className="pt-16 space-y-4">
-                  <p className="text-lg leading-relaxed text-pretty italic text-foreground/90">{thought.quote}</p>
-                  <div className="flex items-center gap-2 pt-4 border-t border-border/50">
-                    <Heart className="w-4 h-4 text-care fill-care" />
-                    <p className="text-sm font-medium text-muted-foreground">{thought.author}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <Card className="inline-block px-8 py-6 bg-gradient-to-r from-care/10 to-warm/10 border-care/20">
-              <p className="text-xl font-semibold bg-gradient-to-r from-warm to-care bg-clip-text text-transparent">
-                Remember: You are not alone. We are here for you, every step of the way.
-              </p>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      <section id="tips" className="py-20 bg-gradient-to-br from-care/5 via-warm/5 to-care/5">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16 space-y-4">
-            <Badge className="px-4 py-2 bg-warm/10 text-warm border-warm/20">Essential Knowledge</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-balance">
-              Important Tips for{" "}
-              <span className="bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent">
-                Pregnant Women
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto leading-relaxed">
-              Simple, actionable advice to help you and your baby stay healthy throughout pregnancy
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pregnancyTips.map((tip, index) => (
-              <Card
-                key={index}
-                className="group p-8 hover:shadow-2xl transition-all duration-300 bg-card/80 backdrop-blur border-border/50 hover:scale-105 hover:border-warm/30"
-              >
-                <div
-                  className={`w-16 h-16 bg-gradient-to-br ${tip.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}
-                >
-                  <tip.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3 text-balance">{tip.title}</h3>
-                <p className="text-muted-foreground leading-relaxed text-pretty">{tip.description}</p>
-              </Card>
-            ))}
-          </div>
-
-          <div className="mt-12 text-center">
-            <Card className="inline-block p-6 bg-gradient-to-br from-alert/10 to-alert/5 border-alert/20">
-              <div className="flex items-start gap-4 text-left">
-                <Shield className="w-8 h-8 text-alert shrink-0 mt-1" />
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-alert">Emergency Warning Signs</h3>
-                  <p className="text-muted-foreground leading-relaxed max-w-2xl">
-                    If you experience severe bleeding, severe abdominal pain, high fever, severe headache with blurred
-                    vision, or reduced fetal movement —{" "}
-                    <strong className="text-foreground">seek medical care immediately</strong>. These could be signs of
-                    serious complications.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="py-20 bg-gradient-to-br from-secondary/30 via-care/5 to-secondary/30">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16 space-y-4">
-            <div className="inline-block px-4 py-2 bg-warm/10 rounded-full">
-              <p className="text-sm font-semibold text-warm">Powerful Features</p>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-balance">
-              Comprehensive Care for{" "}
-              <span className="bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent">
-                Every Mother
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto">
-              Tools designed specifically for India's maternal healthcare challenges with the latest features
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allFeatures.map((feature, index) => (
-              <div
-                key={index}
-                className="group p-8 hover:shadow-2xl transition-all duration-300 bg-card/80 backdrop-blur border border-border/50 hover:scale-105 hover:border-warm/30 rounded-2xl"
-              >
-                <div
-                  className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}
-                >
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-20 bg-gradient-to-br from-trust/5 via-care/5 to-accent/5">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16 space-y-4">
-            <Badge className="px-4 py-2 bg-trust/10 text-trust border-trust/20">Real Stories</Badge>
-            <h2 className="text-4xl md:text-5xl font-bold text-balance">
-              Mothers Who{" "}
-              <span className="bg-gradient-to-r from-warm via-care to-trust bg-clip-text text-transparent">
-                Trust Saheli
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto leading-relaxed">
-              Hear from women whose lives were transformed by SehatSaheli
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <Card
-                key={index}
-                className="group p-8 hover:shadow-2xl transition-all duration-300 bg-gradient-to-br from-background to-secondary/30 backdrop-blur border-border/50 hover:scale-105"
-              >
-                <div className="space-y-4">
-                  <div className="flex gap-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-warm fill-warm" />
-                    ))}
-                  </div>
-                  <p className="text-lg leading-relaxed text-pretty italic text-foreground/90">"{testimonial.text}"</p>
-                  <div className="pt-4 border-t border-border/50">
-                    <p className="font-semibold text-foreground">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.location}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Impact Section */}
-      <section id="impact" className="py-20">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold">Real Impact, Real Lives</h2>
-            <p className="text-xl text-muted-foreground text-balance max-w-2xl mx-auto">
-              Transforming maternal healthcare across rural India, one mother at a time
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { value: "85%", label: "Non-English Speakers Supported", gradient: "from-warm to-care" },
-              { value: "24/7", label: "AI Health Assistance", gradient: "from-care to-trust" },
-              { value: "8+", label: "Indian Languages Supported", gradient: "from-trust to-success" },
-              { value: "100%", label: "Offline Functionality", gradient: "from-success to-warm" },
-            ].map((stat, index) => (
-              <Card key={index} className="p-8 text-center hover:shadow-xl transition-all hover:scale-105">
-                <div
-                  className={`text-5xl md:text-6xl font-bold bg-gradient-to-r ${stat.gradient} bg-clip-text text-transparent mb-3`}
-                >
-                  {stat.value}
-                </div>
-                <p className="text-muted-foreground font-medium">{stat.label}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="relative py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-warm via-care to-trust" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0YzAtMi4yMS0xLjc5LTQtNC00cy00IDEuNzktNCA0IDEuNzkgNCA0IDQgNC0xLjc5IDQtNHptMC0xMGMwLTIuMjEtMS43OS00LTQtNHMtNCAxLjc5LTQgNCAxLjc5IDQgNCA0IDQtMS43OSA0LTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-
-        <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white text-balance leading-tight">
-              Ready to Transform Maternal Healthcare?
-            </h2>
-            <p className="text-xl md:text-2xl text-white/95 text-balance leading-relaxed">
-              Join thousands using SehatSaheli. Experience AI-driven care in your language, community support, pregnancy tracking, nutrition guidance, and emergency alerts designed for rural India.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4">
-              <Button
-                size="lg"
-                onClick={handleDemoLogin}
-                className="h-16 px-10 text-lg bg-white text-foreground hover:bg-white/90 shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
-              >
-                Get Started Now
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-secondary/20 py-12 border-t">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-warm to-care rounded-xl flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-white" fill="currentColor" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">SehatSaheli</h3>
-                  <p className="text-xs text-muted-foreground">सेहत सहेली</p>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Empowering rural women and ASHA workers with AI-powered maternal healthcare in their native language.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>
-                  <a href="#features" className="hover:text-foreground transition-colors">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#tips" className="hover:text-foreground transition-colors">
-                    Health Tips
-                  </a>
-                </li>
-                <li>
-                  <a href="#impact" className="hover:text-foreground transition-colors">
-                    Impact
-                  </a>
-                </li>
-                <li>
-                  <button onClick={handleDemoLogin} className="hover:text-foreground transition-colors">
-                    Get Started
-                  </button>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Languages</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>Hindi • हिंदी</li>
-                <li>Bengali • বাংলা</li>
-                <li>Tamil • தமிழ்</li>
-                <li>Telugu • తెలుగు</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Mission</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Making quality maternal healthcare accessible to every woman in rural India, regardless of language or
-                location.
-              </p>
-            </div>
-          </div>
-          <div className="border-t pt-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              © 2025 SehatSaheli. Built with <Heart className="inline w-4 h-4 text-care fill-care" /> for India's
-              mothers.
-            </p>
-          </div>
-        </div>
-      </footer>
-    </div>
-  )
+    )
 }

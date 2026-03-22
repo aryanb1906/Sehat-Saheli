@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test"
 
+const useExistingServer = process.env.PLAYWRIGHT_USE_EXISTING_SERVER === "1"
+const baseURL = useExistingServer ? "http://127.0.0.1:3100" : "http://127.0.0.1:4173"
+
 export default defineConfig({
     testDir: "./e2e",
     timeout: 30_000,
@@ -8,15 +11,19 @@ export default defineConfig({
     },
     fullyParallel: true,
     use: {
-        baseURL: "http://127.0.0.1:4173",
+        baseURL,
         trace: "on-first-retry",
     },
-    webServer: {
-        command: "npx next dev -p 4173",
-        url: "http://127.0.0.1:4173",
-        reuseExistingServer: true,
-        timeout: 120_000,
-    },
+    ...(useExistingServer
+        ? {}
+        : {
+            webServer: {
+                command: "npx next dev -p 4173",
+                url: "http://127.0.0.1:4173",
+                reuseExistingServer: true,
+                timeout: 120_000,
+            },
+        }),
     projects: [
         {
             name: "chromium",
