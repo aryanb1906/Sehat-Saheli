@@ -2,7 +2,9 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { LanguageProvider } from "@/lib/language-context"
+import { AppProviders } from "@/components/app-providers"
+import { PwaRegister } from "@/components/pwa-register"
+import { WebVitals } from "@/components/web-vitals"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -39,7 +41,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <LanguageProvider>{children}</LanguageProvider>
+        <AppProviders>{children}</AppProviders>
+        <PwaRegister />
+        <WebVitals />
         <Analytics />
       </body>
     </html>

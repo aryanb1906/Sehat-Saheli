@@ -4,12 +4,15 @@ import { useRouter } from "next/navigation"
 import { Heart, Stethoscope } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
+import { useAppStore } from "@/store/use-app-store"
 
 export default function RoleSelect() {
   const router = useRouter()
   const { content } = useLanguage()
+  const setUserRole = useAppStore((state) => state.setUserRole)
 
   const selectRole = (role: "mother" | "asha") => {
+    setUserRole(role)
     localStorage.setItem("userRole", role)
     localStorage.setItem("demoRole", role)
     router.push(`/${role}`)

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { z } from "zod";
 
 interface VideoConsultation {
     id: string;
@@ -39,10 +41,39 @@ export async function GET(req: NextRequest) {
             },
         ];
 
+        const { searchParams } = new URL(req.url);
+        const patientId = searchParams.get("patientId") || "demo-mother";
+
+        const dbConsultations = await prisma.videoConsultation.findMany({
+            where: { patientId },
+            orderBy: { createdAt: "desc" },
+        });
+
+        if (dbConsultations.length === 0) {
+            return NextResponse.json({
+                success: true,
+                consultations,
+                totalConsultations: consultations.length,
+            });
+        }
+
+        const mapped: VideoConsultation[] = dbConsultations.map((row) => ({
+            id: row.id,
+            doctorName: row.doctorName,
+            specialization: row.specialization,
+            date: row.date,
+            time: row.time,
+            duration: row.duration,
+            status: row.status.toLowerCase() as VideoConsultation["status"],
+            roomId: row.roomId ?? undefined,
+            notes: row.notes ?? undefined,
+            rating: row.rating ?? undefined,
+        }));
+
         return NextResponse.json({
             success: true,
-            consultations,
-            totalConsultations: consultations.length,
+            consultations: mapped,
+            totalConsultations: mapped.length,
         });
     } catch (error) {
         return NextResponse.json(
@@ -55,17 +86,70 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
-        const { doctorId, date, time, reason } = body;
+        const parsed = z
+            .object({
+                patientId: z.string().optional(),
+                doctorId: z.string().optional(),
+                doctorName: z.string().optional(),
+                specialty: z.string().optional(),
+                date: z.string(),
+                time: z.string(),
+                reason: z.string().optional(),
+                data: z
+                    .object({
+                        specialty: z.string(),
+                        date: z.string(),
+                        time: z.string(),
+                        reason: z.string().optional(),
+                    })
+                    .optional(),
+            })
+            .safeParse(body);
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+        }
+
+        const payload = parsed.data.data
+            ? {
+                  specialty: parsed.data.data.specialty,
+                  date: parsed.data.data.date,
+                  time: parsed.data.data.time,
+                  reason: parsed.data.data.reason,
+              }
+            : {
+                  specialty: parsed.data.specialty || "General Checkup",
+                  date: parsed.data.date,
+                  time: parsed.data.time,
+                  reason: parsed.data.reason,
+              };
+
+        const patientId = parsed.data.patientId || "demo-mother";
+        const doctorId = parsed.data.doctorId;
+        const doctorName = parsed.data.doctorName || "Dr. Available";
+
+        const created = await prisma.videoConsultation.create({
+            data: {
+                patientId,
+                doctorId,
+                doctorName,
+                specialization: payload.specialty,
+                date: payload.date,
+                time: payload.time,
+                reason: payload.reason,
+                roomId: `sehat-saheli-vc-${Date.now()}`,
+            },
+        });
 
         const newConsultation: VideoConsultation = {
-            id: `vc_${Date.now()}`,
-            doctorName: "Dr. Available",
-            specialization: "Obstetrics & Gynecology",
-            date,
-            time,
+            id: created.id,
+            doctorName: created.doctorName,
+            specialization: created.specialization,
+            date: created.date,
+            time: created.time,
             duration: 30,
             status: "scheduled",
-            roomId: `sehat-saheli-vc-${Date.now()}`,
+            roomId: created.roomId || undefined,
         };
 
         return NextResponse.json({
@@ -85,6 +169,15 @@ export async function PUT(req: NextRequest) {
     try {
         const body = await req.json();
         const { consultationId, rating, notes } = body;
+
+        await prisma.videoConsultation.update({
+            where: { id: consultationId },
+            data: {
+                rating: typeof rating === "number" ? rating : undefined,
+                notes,
+                status: "COMPLETED",
+            },
+        });
 
         return NextResponse.json({
             success: true,

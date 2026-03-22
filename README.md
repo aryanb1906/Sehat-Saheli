@@ -232,6 +232,61 @@ To run the project locally:
 
 ---
 
+## ✅ Top 5 Priorities Implemented (Current Sprint)
+
+The following high-priority foundation work has been implemented in this update:
+
+1. **Authentication System**
+    - NextAuth-based auth flow with credentials and optional Google OAuth.
+    - Role-ready user model (`MOTHER`, `ASHA`, `DOCTOR`).
+    - Signup API and signin/register pages.
+    - Protected route middleware for `/mother/*`, `/asha/*`, and `/doctor/*`.
+
+2. **Database Integration (Prisma + PostgreSQL)**
+    - Prisma schema added for `User`, `ChatRoom`, `ChatMessage`, and `VideoConsultation`.
+    - Shared Prisma client utility in `lib/prisma.ts`.
+    - Prisma scripts added: `prisma:generate`, `prisma:push`, `prisma:studio`.
+
+3. **Real-time Chat Infrastructure**
+    - New persistent messaging endpoints:
+      - `GET/POST /api/chat/messages`
+      - `GET /api/chat/stream` (SSE stream for near real-time updates)
+    - Database-backed conversation and message storage.
+
+4. **Video Consultation Persistence**
+    - `app/api/video-consultation/route.ts` migrated from mock-only to DB-backed CRUD.
+    - Existing UI compatibility preserved while enabling persisted appointments.
+
+5. **Performance & Offline Foundations**
+    - Next.js image optimization enabled with AVIF/WebP formats.
+    - Package import optimization for `lucide-react` and `recharts`.
+    - Web Vitals capture hook added.
+    - PWA basics added: manifest + service worker registration.
+
+### New Environment Variables
+
+Copy `.env.example` to `.env.local` and configure:
+
+```env
+DATABASE_URL="postgresql://..."
+AUTH_SECRET="..."
+AUTH_URL="http://localhost:3000"
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+GEMINI_API_KEY=""
+```
+
+### Setup Commands
+
+```bash
+npm install
+npm run prisma:generate
+npm run prisma:push
+npm run dev
+```
+
+---
+
 ## 🎯 Suggested Frontend Improvements (Next Phase)
 
 ### 🎨 Design & UX Enhancements
