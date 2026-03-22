@@ -1,22 +1,47 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from 'next/navigation'
 import { Users, AlertTriangle, CheckCircle, TrendingUp, Search, Menu, BarChart3, GraduationCap } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { demoPatients } from "@/lib/demo-database"
 import { useLanguage } from "@/lib/language-context"
 import { NotificationCenter } from "@/components/notification-center"
 import { AppSidebar } from "@/components/app-sidebar"
+
+interface Patient {
+  id: string
+  name: string
+  age: number
+  weeks: number
+  risk: "Low" | "Medium" | "High"
+  lastCheckup: string
+}
 
 export default function ASHADashboard() {
   const router = useRouter()
   const { content } = useLanguage()
   const [searchQuery, setSearchQuery] = useState("")
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const patients = demoPatients
+  const [patients, setPatients] = useState<Patient[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadPatients = async () => {
+      try {
+        const res = await fetch(`/api/asha-patients?ashaWorkerId=asha_001&q=${encodeURIComponent(searchQuery)}`)
+        const data = await res.json()
+        setPatients(data.patients || [])
+      } catch (error) {
+        console.error("Failed to load ASHA patients", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadPatients()
+  }, [searchQuery])
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
@@ -36,13 +61,13 @@ export default function ASHADashboard() {
     low: patients.filter((p) => p.risk === "Low").length,
   }
 
-  const filteredPatients = patients.filter((patient) => patient.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredPatients = patients
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-trust/10 to-background">
       {/* AppSidebar */}
       <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} role="asha" />
-      
+
       {/* Header */}
       <div className="bg-gradient-to-r from-trust to-accent p-6 text-white">
         <div className="flex items-center justify-between mb-4">
@@ -121,8 +146,8 @@ export default function ASHADashboard() {
         {/* Patient List */}
         <div className="space-y-3">
           <h2 className="text-xl font-bold">{content.myPatients || "My Patients"}</h2>
-          
-          <Card 
+
+          <Card
             className="p-4 cursor-pointer bg-gradient-to-r from-trust/10 to-accent/10 border-2 border-trust/30 hover:shadow-lg transition-all"
             onClick={() => router.push('/asha/training')}
           >
@@ -140,7 +165,11 @@ export default function ASHADashboard() {
             </div>
           </Card>
 
-          {filteredPatients.map((patient) => (
+          {loading ? (
+            <Card className="p-4">
+              <p className="text-sm text-muted-foreground">Loading patients...</p>
+            </Card>
+          ) : filteredPatients.map((patient) => (
             <Card
               key={patient.id}
               className="p-4 cursor-pointer hover:shadow-lg transition-shadow"

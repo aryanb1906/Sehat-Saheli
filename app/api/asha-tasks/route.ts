@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 interface Task {
     id: string;
@@ -16,49 +19,48 @@ interface Task {
 
 export async function GET(req: NextRequest) {
     try {
+        const rl = rateLimit(`asha-tasks-get:${clientIp(req)}`, 100, 60_000)
+        if (!rl.allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+
         const { searchParams } = new URL(req.url);
-        const ashId = searchParams.get("ashId");
+        const ashId = searchParams.get("ashId") || "asha_001";
         const status = searchParams.get("status");
 
-        // Mock data
-        const tasks: Task[] = [
-            {
-                id: "task_001",
-                ashId: "asha_001",
-                patientId: "patient_001",
-                taskType: "home-visit",
-                description: "Weekly ANC checkup - blood pressure & weight monitoring",
-                dueDate: "2024-03-23",
-                status: "pending",
-                priority: "high",
-                location: "Village: Sundarpur, House No. 42",
+        const dbTasks = await prisma.ashaTask.findMany({
+            where: {
+                ashId,
+                ...(status
+                    ? {
+                        status:
+                            status === "completed"
+                                ? "COMPLETED"
+                                : status === "in-progress"
+                                    ? "IN_PROGRESS"
+                                    : "PENDING",
+                    }
+                    : {}),
             },
-            {
-                id: "task_002",
-                ashId: "asha_001",
-                patientId: "patient_002",
-                taskType: "vaccination",
-                description: "Administer Tetanus toxoid dose 2",
-                dueDate: "2024-03-24",
-                status: "pending",
-                priority: "medium",
-            },
-            {
-                id: "task_003",
-                ashId: "asha_001",
-                patientId: "patient_003",
-                taskType: "follow-up",
-                description: "Check if patient took iron supplements regularly",
-                dueDate: "2024-03-25",
-                status: "in-progress",
-                priority: "medium",
-            },
-        ];
+            orderBy: { dueDate: "asc" },
+        })
 
-        let filteredTasks = tasks;
-        if (status) {
-            filteredTasks = filteredTasks.filter((t) => t.status === status);
-        }
+        const filteredTasks: Task[] = dbTasks.map((task) => ({
+            id: task.id,
+            ashId: task.ashId,
+            patientId: task.patientId,
+            taskType: task.taskType,
+            description: task.description,
+            dueDate: task.dueDate,
+            status:
+                task.status === "IN_PROGRESS"
+                    ? "in-progress"
+                    : task.status === "COMPLETED"
+                        ? "completed"
+                        : "pending",
+            priority: task.priority.toLowerCase() as Task["priority"],
+            location: task.location || undefined,
+            notes: task.notes || undefined,
+            completedAt: task.completedAt || undefined,
+        }))
 
         return NextResponse.json({
             success: true,
@@ -75,12 +77,42 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const rl = rateLimit(`asha-tasks-post:${clientIp(req)}`, 40, 60_000)
+        if (!rl.allowed) return NextResponse.json({ error: "Too many create requests" }, { status: 429 })
+
         const body = await req.json();
-        const { ashId, patientId, taskType, description, dueDate, priority } =
-            body;
+        const parsed = z
+            .object({
+                ashId: z.string().min(1),
+                patientId: z.string().min(1),
+                taskType: z.string().min(2),
+                description: z.string().min(5),
+                dueDate: z.string().min(8),
+                priority: z.enum(["low", "medium", "high"]),
+                location: z.string().optional(),
+            })
+            .safeParse(body)
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+        }
+
+        const { ashId, patientId, taskType, description, dueDate, priority, location } = parsed.data;
+
+        const created = await prisma.ashaTask.create({
+            data: {
+                ashId,
+                patientId,
+                taskType,
+                description,
+                dueDate,
+                priority: priority === "high" ? "HIGH" : priority === "low" ? "LOW" : "MEDIUM",
+                location,
+            },
+        })
 
         const newTask: Task = {
-            id: `task_${Date.now()}`,
+            id: created.id,
             ashId,
             patientId,
             taskType,
@@ -88,6 +120,7 @@ export async function POST(req: NextRequest) {
             dueDate,
             status: "pending",
             priority,
+            location: created.location || undefined,
         };
 
         return NextResponse.json({
@@ -105,8 +138,33 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
     try {
+        const rl = rateLimit(`asha-tasks-put:${clientIp(req)}`, 60, 60_000)
+        if (!rl.allowed) return NextResponse.json({ error: "Too many update requests" }, { status: 429 })
+
         const body = await req.json();
-        const { taskId, status, notes, completedAt } = body;
+        const parsed = z
+            .object({
+                taskId: z.string().min(1),
+                status: z.enum(["pending", "in-progress", "completed"]),
+                notes: z.string().optional(),
+                completedAt: z.string().optional(),
+            })
+            .safeParse(body)
+
+        if (!parsed.success) {
+            return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+        }
+
+        const { taskId, status, notes, completedAt } = parsed.data;
+
+        await prisma.ashaTask.update({
+            where: { id: taskId },
+            data: {
+                status: status === "completed" ? "COMPLETED" : status === "in-progress" ? "IN_PROGRESS" : "PENDING",
+                notes,
+                completedAt,
+            },
+        })
 
         return NextResponse.json({
             success: true,

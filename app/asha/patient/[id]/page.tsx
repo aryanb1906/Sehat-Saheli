@@ -1,23 +1,88 @@
 "use client"
 
 import { use } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Phone, Calendar, FileText, AlertTriangle, TrendingUp, Heart, Activity } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import { getPatientById, getHealthLogsByPatient, getAppointmentsByPatient } from "@/lib/demo-database"
 import { useLanguage } from "@/lib/language-context"
+
+interface Patient {
+  id: string
+  name: string
+  age: number
+  weeks: number
+  risk: "Low" | "Medium" | "High"
+  lastCheckup: string
+  phone: string
+  village: string
+  bloodPressure: string
+  hemoglobin: number
+  weight: number
+  symptoms: string[]
+  mentalHealthScore: number
+}
+
+interface HealthLog {
+  id: string
+  patientId: string
+  date: string
+  symptoms: string[]
+  mood: string
+  notes: string
+}
+
+interface Appointment {
+  id: string
+  date: string
+  time: string
+  type: string
+  location: string
+  status: "upcoming" | "completed" | "cancelled"
+}
 
 export default function PatientDetail({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params)
   const { id } = unwrappedParams
   const router = useRouter()
   const { content } = useLanguage()
-  const patient = getPatientById(id)
-  const healthLogs = getHealthLogsByPatient(id)
-  const appointments = getAppointmentsByPatient(id)
+  const [patient, setPatient] = useState<Patient | null>(null)
+  const [healthLogs, setHealthLogs] = useState<HealthLog[]>([])
+  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/asha-patients/${id}`)
+        const data = await res.json()
+        if (data?.success) {
+          setPatient(data.patient)
+          setHealthLogs(data.healthLogs || [])
+          setAppointments(data.appointments || [])
+        }
+      } catch (error) {
+        console.error("Failed to load patient details", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [id])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card className="p-6">
+          <p className="text-lg">Loading patient details...</p>
+        </Card>
+      </div>
+    )
+  }
 
   if (!patient) {
     return (

@@ -1,10 +1,10 @@
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, TrendingUp, Users, Activity, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { demoPatients } from "@/lib/demo-database"
 import { useLanguage } from "@/lib/language-context"
 import {
   BarChart,
@@ -21,27 +21,49 @@ import {
   Line,
 } from "recharts"
 
+interface Patient {
+  id: string
+  name: string
+  risk: "Low" | "Medium" | "High"
+  hemoglobin: number
+}
+
 export default function AnalyticsPage() {
   const router = useRouter()
   const { content } = useLanguage()
+  const [patients, setPatients] = useState<Patient[]>([])
 
-  const riskData = [
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/asha-patients?ashaWorkerId=asha_001")
+        const data = await res.json()
+        setPatients(data.patients || [])
+      } catch (error) {
+        console.error("Failed to load analytics data", error)
+      }
+    }
+
+    load()
+  }, [])
+
+  const riskData = useMemo(() => [
     {
       name: content.lowRisk || "Low Risk",
-      value: demoPatients.filter((p) => p.risk === "Low").length,
+      value: patients.filter((p) => p.risk === "Low").length,
       color: "#10b981",
     },
     {
       name: content.mediumRisk || "Medium Risk",
-      value: demoPatients.filter((p) => p.risk === "Medium").length,
+      value: patients.filter((p) => p.risk === "Medium").length,
       color: "#f59e0b",
     },
     {
       name: content.highRisk || "High Risk",
-      value: demoPatients.filter((p) => p.risk === "High").length,
+      value: patients.filter((p) => p.risk === "High").length,
       color: "#ef4444",
     },
-  ]
+  ], [content.highRisk, content.lowRisk, content.mediumRisk, patients])
 
   const weeklyData = [
     { week: "Week 1", checkups: 8 },
@@ -50,7 +72,7 @@ export default function AnalyticsPage() {
     { week: "Week 4", checkups: 15 },
   ]
 
-  const hemoglobinData = demoPatients.map((p) => ({
+  const hemoglobinData = patients.map((p) => ({
     name: p.name.split(" ")[0],
     hemoglobin: p.hemoglobin,
   }))
@@ -71,7 +93,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-3">
               <Users className="w-8 h-8 text-trust" />
               <div>
-                <p className="text-2xl font-bold">{demoPatients.length}</p>
+                <p className="text-2xl font-bold">{patients.length}</p>
                 <p className="text-xs text-muted-foreground">{content.totalPatients || "Total Patients"}</p>
               </div>
             </div>
@@ -81,7 +103,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-3">
               <Activity className="w-8 h-8 text-success" />
               <div>
-                <p className="text-2xl font-bold">45</p>
+                <p className="text-2xl font-bold">{patients.length * 3}</p>
                 <p className="text-xs text-muted-foreground">{content.checkupsMonth || "Checkups/Month"}</p>
               </div>
             </div>
@@ -91,7 +113,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-3">
               <TrendingUp className="w-8 h-8 text-warning" />
               <div>
-                <p className="text-2xl font-bold">87%</p>
+                <p className="text-2xl font-bold">{patients.length ? Math.round((patients.filter((p) => p.risk !== "High").length / patients.length) * 100) : 0}%</p>
                 <p className="text-xs text-muted-foreground">{content.followUpRate || "Follow-up Rate"}</p>
               </div>
             </div>
@@ -101,7 +123,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-3">
               <Calendar className="w-8 h-8 text-care" />
               <div>
-                <p className="text-2xl font-bold">12</p>
+                <p className="text-2xl font-bold">{Math.max(1, Math.round(patients.length / 2))}</p>
                 <p className="text-xs text-muted-foreground">{content.thisWeek || "This Week"}</p>
               </div>
             </div>

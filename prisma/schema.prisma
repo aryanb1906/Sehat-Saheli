@@ -19,6 +19,30 @@ enum ConsultationStatus {
   CANCELLED
 }
 
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum LabStatus {
+  NORMAL
+  ALERT
+  CRITICAL
+}
+
 model User {
   id            String              @id @default(cuid())
   name          String
@@ -71,6 +95,99 @@ model VideoConsultation {
   rating        Int?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
+
+  @@index([patientId, date])
+}
+
+model PatientProfile {
+  id                String               @id @default(cuid())
+  userId            String?
+  ashaWorkerId      String
+  name              String
+  age               Int
+  weeks             Int
+  risk              RiskLevel
+  lastCheckup       String
+  phone             String
+  village           String
+  bloodPressure     String
+  hemoglobin        Float
+  weight            Float
+  symptoms          Json
+  nextAppointment   String?
+  mentalHealthScore Int?
+  emergencyContact  String?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  healthLogs        PatientHealthLog[]
+  appointments      PatientAppointment[]
+  tasks             AshaTask[]
+  labReports        LabReport[]
+
+  @@index([ashaWorkerId, risk])
+}
+
+model PatientHealthLog {
+  id          String         @id @default(cuid())
+  patientId   String
+  date        String
+  symptoms    Json
+  mood        String
+  notes       String
+  bloodPressure String?
+  weight      Float?
+  createdAt   DateTime       @default(now())
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, date])
+}
+
+model PatientAppointment {
+  id         String         @id @default(cuid())
+  patientId  String
+  date       String
+  time       String
+  type       String
+  location   String
+  status     String
+  notes      String?
+  createdAt  DateTime       @default(now())
+  patient    PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId, date])
+}
+
+model AshaTask {
+  id          String         @id @default(cuid())
+  ashId       String
+  patientId   String
+  taskType    String
+  description String
+  dueDate     String
+  status      TaskStatus     @default(PENDING)
+  priority    TaskPriority   @default(MEDIUM)
+  location    String?
+  notes       String?
+  completedAt String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([ashId, status])
+}
+
+model LabReport {
+  id          String         @id @default(cuid())
+  patientId   String
+  date        String
+  testType    String
+  results     Json
+  status      LabStatus      @default(NORMAL)
+  imageUrl    String?
+  doctorNotes String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  patient     PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   @@index([patientId, date])
 }
