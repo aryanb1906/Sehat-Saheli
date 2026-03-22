@@ -34,7 +34,13 @@ export default function SignInPage() {
             return
         }
 
+        document.cookie = "sehat_guest=; path=/; max-age=0; SameSite=Lax"
         router.push(callbackUrl)
+    }
+
+    const continueAsGuest = () => {
+        document.cookie = "sehat_guest=1; path=/; max-age=2592000; SameSite=Lax"
+        router.push("/role-select")
     }
 
     return (
@@ -70,6 +76,15 @@ export default function SignInPage() {
                     onClick={() => signIn("google", { callbackUrl })}
                 >
                     Continue with Google
+                </Button>
+
+                <Button
+                    variant="ghost"
+                    className="w-full mt-2"
+                    onClick={continueAsGuest}
+                    type="button"
+                >
+                    Skip Sign In (Continue as Guest)
                 </Button>
 
                 <p className="text-sm mt-4 text-center">

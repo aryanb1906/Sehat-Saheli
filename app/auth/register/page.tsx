@@ -37,7 +37,22 @@ export default function RegisterPage() {
         }
 
         await signIn("credentials", { email, password, redirect: false })
+        document.cookie = "sehat_guest=; path=/; max-age=0; SameSite=Lax"
         setLoading(false)
+        router.push("/role-select")
+    }
+
+    const fillDemoDetails = () => {
+        const stamp = Math.floor(Math.random() * 100000)
+        setName("Demo User")
+        setEmail(`demo.user.${stamp}@sehat.local`)
+        setPassword("demo1234")
+        setRole("MOTHER")
+        setError("")
+    }
+
+    const continueAsGuest = () => {
+        document.cookie = "sehat_guest=1; path=/; max-age=2592000; SameSite=Lax"
         router.push("/role-select")
     }
 
@@ -73,6 +88,14 @@ export default function RegisterPage() {
                         {loading ? "Creating account..." : "Register"}
                     </Button>
                 </form>
+
+                <Button type="button" variant="outline" className="w-full mt-3" onClick={fillDemoDetails}>
+                    Use Demo Details
+                </Button>
+
+                <Button type="button" variant="ghost" className="w-full mt-2" onClick={continueAsGuest}>
+                    Skip Sign In (Continue as Guest)
+                </Button>
             </Card>
         </div>
     )
