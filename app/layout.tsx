@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AppProviders } from "@/components/app-providers"
+import { GuestModeBanner } from "@/components/guest-mode-banner"
 import { PwaRegister } from "@/components/pwa-register"
 import { WebVitals } from "@/components/web-vitals"
 import "./globals.css"
@@ -41,7 +42,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <GuestModeBanner />
+          {children}
+        </AppProviders>
         <PwaRegister />
         <WebVitals />
         <Analytics />
