@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from 'next/navigation'
-import { Users, AlertTriangle, CheckCircle, TrendingUp, Search, Menu, BarChart3, GraduationCap, ArrowRight, Clock3, ClipboardList } from 'lucide-react'
+import { Users, AlertTriangle, CheckCircle, TrendingUp, Search, Menu, BarChart3, GraduationCap, ArrowRight, Clock3, ClipboardList, Home, UserRound } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -62,6 +62,8 @@ export default function ASHADashboard() {
   }
 
   const filteredPatients = patients
+  const criticalCases = stats.high
+  const followUps = Math.max(0, stats.medium + stats.high)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-trust/10 via-background to-background">
@@ -146,7 +148,7 @@ export default function ASHADashboard() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <button
-              className="group flex min-h-[126px] flex-col justify-between rounded-xl bg-trust p-5 text-left text-white shadow-sm"
+              className="group flex min-h-[126px] flex-col justify-between rounded-xl bg-trust p-5 text-left text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               onClick={() => router.push('/asha/training')}
             >
               <div className="flex items-start justify-between">
@@ -160,7 +162,7 @@ export default function ASHADashboard() {
             </button>
 
             <button
-              className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-white p-5 text-left text-foreground shadow-sm"
+              className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-white p-5 text-left text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               onClick={() => router.push('/asha/appointment-reminders')}
             >
               <div className="flex items-start justify-between">
@@ -174,7 +176,7 @@ export default function ASHADashboard() {
             </button>
 
             <button
-              className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-white p-5 text-left text-foreground shadow-sm"
+              className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-white p-5 text-left text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               onClick={() => router.push('/asha/home-visits')}
             >
               <div className="flex items-start justify-between">
@@ -189,7 +191,27 @@ export default function ASHADashboard() {
           </div>
         </section>
 
-        <section className="mt-7 space-y-3 pb-8">
+        <section className="mt-7 space-y-3">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Daily Insights</h2>
+          <Card className="border-border/70 bg-white p-5 shadow-sm">
+            <div className="space-y-4">
+              <div className="rounded-xl border border-warning/25 bg-warning/10 p-3">
+                <p className="text-sm font-semibold text-foreground">🟡 Today's Priority</p>
+                <p className="mt-1 text-sm text-foreground/80">{followUps} patients need follow-up today.</p>
+              </div>
+              <div className="rounded-xl border border-alert/25 bg-alert/10 p-3">
+                <p className="text-sm font-semibold text-foreground">🟠 Risk Alert</p>
+                <p className="mt-1 text-sm text-foreground/80">{criticalCases} high-risk cases should be reviewed first.</p>
+              </div>
+              <div className="rounded-xl border border-success/25 bg-success/10 p-3">
+                <p className="text-sm font-semibold text-foreground">🟢 Field Suggestion</p>
+                <p className="mt-1 text-sm text-foreground/80">Plan home visits in nearby clusters to save travel time.</p>
+              </div>
+            </div>
+          </Card>
+        </section>
+
+        <section className="mt-7 space-y-3 pb-24 md:pb-8">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold tracking-tight text-foreground">Patient Directory</h2>
             <p className="text-sm font-medium text-muted-foreground">Search and open profile</p>
@@ -240,6 +262,27 @@ export default function ASHADashboard() {
             </Card>
           )}
         </section>
+      </div>
+
+      <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-white/95 p-2 shadow-lg backdrop-blur md:hidden">
+        <div className="grid grid-cols-4 gap-1">
+          <button onClick={() => router.push('/asha')} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-trust">
+            <Home className="h-4 w-4" />
+            Home
+          </button>
+          <button onClick={() => router.push('/asha/home-visits')} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-muted-foreground hover:bg-muted">
+            <ClipboardList className="h-4 w-4" />
+            Visits
+          </button>
+          <button onClick={() => router.push('/asha')} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-muted-foreground hover:bg-muted">
+            <UserRound className="h-4 w-4" />
+            Patients
+          </button>
+          <button onClick={() => router.push('/asha/analytics')} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-muted-foreground hover:bg-muted">
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </button>
+        </div>
       </div>
     </div>
   )
