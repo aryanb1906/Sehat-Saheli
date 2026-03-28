@@ -21,6 +21,33 @@ interface Task {
     notes?: string
 }
 
+interface AutomationPlanItem {
+    id: string
+    patientId: string
+    patientName: string
+    village: string
+    taskType: string
+    description: string
+    dueDate: string
+    priority: "low" | "medium" | "high"
+    patientRisk: "low" | "medium" | "high"
+    score: number
+    reasons: string[]
+}
+
+interface AutomationPlanResponse {
+    success: boolean
+    stats: {
+        totalPending: number
+        highRiskInTodayPlan: number
+        remindersGenerated: number
+        escalationsGenerated: number
+    }
+    todayPlan: AutomationPlanItem[]
+    reminders: Array<{ message: string }>
+    escalations: Array<{ reason: string; action: string }>
+}
+
 export default function ASHATaskManagement() {
     const router = useRouter()
     const { content } = useLanguage()
@@ -28,6 +55,8 @@ export default function ASHATaskManagement() {
     const [tasks, setTasks] = useState<Task[]>([])
     const [filter, setFilter] = useState("all")
     const [loading, setLoading] = useState(true)
+    const [automationLoading, setAutomationLoading] = useState(false)
+    const [automationPlan, setAutomationPlan] = useState<AutomationPlanResponse | null>(null)
 
     useEffect(() => {
         fetchTasks()
@@ -70,6 +99,29 @@ export default function ASHATaskManagement() {
                 description: "Failed to update task. Please try again.",
                 variant: "destructive",
             })
+        }
+    }
+
+    const generateAutomationPlan = async () => {
+        setAutomationLoading(true)
+        try {
+            const response = await fetch("/api/asha-tasks/automation-plan?ashId=asha_001")
+            const data = await response.json()
+            setAutomationPlan(data)
+
+            toast({
+                title: "✅ Daily Plan Generated",
+                description: `Prioritized ${data?.todayPlan?.length || 0} tasks with ${data?.stats?.remindersGenerated || 0} reminders`,
+            })
+        } catch (error) {
+            console.error("Failed to generate automation plan:", error)
+            toast({
+                title: "Error",
+                description: "Unable to generate automation plan right now.",
+                variant: "destructive",
+            })
+        } finally {
+            setAutomationLoading(false)
         }
     }
 
@@ -170,10 +222,67 @@ export default function ASHATaskManagement() {
                 </div>
 
                 {/* Add Task Button */}
-                <Button className="mb-6 bg-trust text-white h-11">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add New Task
-                </Button>
+                <div className="mb-6 flex flex-wrap items-center gap-3">
+                    <Button className="bg-trust text-white h-11">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add New Task
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="h-11"
+                        disabled={automationLoading}
+                        onClick={generateAutomationPlan}
+                    >
+                        {automationLoading ? "Generating plan..." : "Generate Today Plan"}
+                    </Button>
+                </div>
+
+                {automationPlan?.success && (
+                    <Card className="p-4 mb-6 border-trust/25 bg-trust/5">
+                        <h3 className="font-semibold text-base mb-3">Automation Engine Output</h3>
+                        <div className="grid md:grid-cols-4 gap-3 mb-4">
+                            <div>
+                                <p className="text-2xl font-bold text-trust">{automationPlan.stats.totalPending}</p>
+                                <p className="text-xs text-foreground/70">Pending Tasks</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-alert">{automationPlan.stats.highRiskInTodayPlan}</p>
+                                <p className="text-xs text-foreground/70">High-Risk in Plan</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-blue-600">{automationPlan.stats.remindersGenerated}</p>
+                                <p className="text-xs text-foreground/70">Smart Reminders</p>
+                            </div>
+                            <div>
+                                <p className="text-2xl font-bold text-warning">{automationPlan.stats.escalationsGenerated}</p>
+                                <p className="text-xs text-foreground/70">Escalations</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                            <p className="text-sm font-semibold">Top Visits for Today</p>
+                            {automationPlan.todayPlan.slice(0, 4).map((item) => (
+                                <div key={item.id} className="rounded-lg border bg-background px-3 py-2">
+                                    <p className="text-sm font-medium">{item.patientName} - {item.description}</p>
+                                    <p className="text-xs text-foreground/70">
+                                        {item.village} | Due {new Date(item.dueDate).toLocaleDateString()} | Score {item.score}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+
+                        {automationPlan.escalations.length > 0 && (
+                            <div className="space-y-2">
+                                <p className="text-sm font-semibold text-warning">Escalation Alerts</p>
+                                {automationPlan.escalations.slice(0, 2).map((item, index) => (
+                                    <p key={index} className="text-xs text-foreground/75">
+                                        • {item.reason} - {item.action}
+                                    </p>
+                                ))}
+                            </div>
+                        )}
+                    </Card>
+                )}
 
                 {/* Tasks List */}
                 {loading ? (

@@ -1,13 +1,13 @@
 "use client"
 
-import { FormEvent, useState } from "react"
+import { FormEvent, Suspense, useState } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
-export default function SignInPage() {
+function SignInForm() {
     const router = useRouter()
     const params = useSearchParams()
     const callbackUrl = params.get("callbackUrl") || "/role-select"
@@ -92,5 +92,13 @@ export default function SignInPage() {
                 </p>
             </Card>
         </div>
+    )
+}
+
+export default function SignInPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-gradient-to-br from-trust/10 to-background" />}>
+            <SignInForm />
+        </Suspense>
     )
 }

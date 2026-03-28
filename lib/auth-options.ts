@@ -33,8 +33,14 @@ const providers: NextAuthOptions["providers"] = [
             if (hasDb) {
                 try {
                     const dbUser = await prisma.user.findUnique({ where: { email: normalizedEmail } })
-                    if (dbUser) {
-                        user = dbUser
+                    if (dbUser?.passwordHash) {
+                        user = {
+                            id: dbUser.id,
+                            name: dbUser.name,
+                            email: dbUser.email,
+                            role: dbUser.role,
+                            passwordHash: dbUser.passwordHash,
+                        }
                     }
                 } catch {
                     if (!useDevFallback) {

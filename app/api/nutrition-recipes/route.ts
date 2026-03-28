@@ -70,6 +70,9 @@ export async function GET(req: NextRequest) {
         const season = searchParams.get("season");
         const dietaryRestriction = searchParams.get("restriction");
         const calorieTarget = searchParams.get("calories");
+        const trimester = searchParams.get("trimester");
+        const condition = (searchParams.get("condition") || "").toLowerCase();
+        const region = searchParams.get("region") || "general";
 
         let filteredRecipes = recipesDatabase;
 
@@ -86,10 +89,40 @@ export async function GET(req: NextRequest) {
             );
         }
 
+        if (condition === "anemia") {
+            filteredRecipes = filteredRecipes.filter((r) =>
+                (r as any).iron === "High" || r.benefits.some((b) => b.toLowerCase().includes("iron")),
+            );
+        }
+
+        if (condition === "diabetes") {
+            filteredRecipes = filteredRecipes.filter((r) => r.calories <= 230);
+        }
+
+        const trimesterTips: Record<string, string[]> = {
+            first: ["Focus on folate-rich meals", "Prefer small frequent meals to reduce nausea"],
+            second: ["Increase protein and calcium", "Add iron-rich foods with vitamin C"],
+            third: ["Prioritize hydration and fiber", "Split meals to avoid acidity and bloating"],
+        };
+
+        const localSubstitutions: Record<string, string[]> = {
+            odisha: ["Palak -> Poi saag", "Chickpea -> Black gram", "Almond -> Groundnut"],
+            bihar: ["Ragi -> Sattu", "Dates -> Jaggery peanut chikki", "Oats -> Dalia"],
+            up: ["Broccoli -> Cauliflower greens", "Quinoa -> Bajra", "Almond -> Roasted chana"],
+            general: ["Almond -> Roasted chana", "Quinoa -> Millets", "Avocado -> Groundnut + curd"],
+        };
+
         return NextResponse.json({
             success: true,
             recipes: filteredRecipes,
             totalRecipes: filteredRecipes.length,
+            personalization: {
+                trimester: trimester || "not-specified",
+                condition: condition || "none",
+                region,
+                tips: trimester ? trimesterTips[trimester] || [] : [],
+                substitutions: localSubstitutions[region.toLowerCase()] || localSubstitutions.general,
+            },
         });
     } catch (error) {
         return NextResponse.json(

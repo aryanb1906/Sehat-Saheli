@@ -29,6 +29,20 @@ export default function AnalyticsDashboard() {
     const [selectedMetric, setSelectedMetric] = useState("engagement")
     const [loading, setLoading] = useState(true)
 
+    const funnel = {
+        registered: 245,
+        ancCompleted: 202,
+        institutionalDelivery: 181,
+        pncCompleted: 149,
+    }
+
+    const villageHeatmap = [
+        { village: "Rampur", highRisk: 11, trend: "+2 this week" },
+        { village: "Sundarpur", highRisk: 8, trend: "stable" },
+        { village: "Nandgaon", highRisk: 6, trend: "-1 this week" },
+        { village: "Bhagatpur", highRisk: 5, trend: "+1 this week" },
+    ]
+
     useEffect(() => {
         fetchAnalytics()
     }, [])
@@ -210,6 +224,66 @@ export default function AnalyticsDashboard() {
                                 ))}
                             </div>
                         )}
+
+                        {/* Cohort Funnel */}
+                        <Card className="p-6 mt-8 border-trust/25 bg-trust/5">
+                            <h2 className="text-lg font-bold mb-4">Maternal Care Funnel</h2>
+                            <div className="grid md:grid-cols-4 gap-3">
+                                <div className="rounded-lg bg-background p-3 border">
+                                    <p className="text-xs text-muted-foreground">Registered</p>
+                                    <p className="text-2xl font-bold">{funnel.registered}</p>
+                                </div>
+                                <div className="rounded-lg bg-background p-3 border">
+                                    <p className="text-xs text-muted-foreground">ANC Completed</p>
+                                    <p className="text-2xl font-bold">{funnel.ancCompleted}</p>
+                                </div>
+                                <div className="rounded-lg bg-background p-3 border">
+                                    <p className="text-xs text-muted-foreground">Institutional Delivery</p>
+                                    <p className="text-2xl font-bold">{funnel.institutionalDelivery}</p>
+                                </div>
+                                <div className="rounded-lg bg-background p-3 border">
+                                    <p className="text-xs text-muted-foreground">PNC Completed</p>
+                                    <p className="text-2xl font-bold">{funnel.pncCompleted}</p>
+                                </div>
+                            </div>
+                        </Card>
+
+                        {/* High-Risk Village Heatmap */}
+                        <Card className="p-6 mt-6 border-warning/25 bg-warning/5">
+                            <h2 className="text-lg font-bold mb-4">High-Risk Village Heatmap</h2>
+                            <div className="space-y-2">
+                                {villageHeatmap.map((row) => (
+                                    <div key={row.village} className="flex items-center justify-between rounded-lg border bg-background p-3">
+                                        <div>
+                                            <p className="font-medium text-sm">{row.village}</p>
+                                            <p className="text-xs text-muted-foreground">{row.trend}</p>
+                                        </div>
+                                        <span className="rounded-full bg-alert/10 px-3 py-1 text-xs font-semibold text-alert">
+                                            {row.highRisk} high-risk
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+
+                        {/* Intervention Effectiveness */}
+                        <Card className="p-6 mt-6 border-success/25 bg-success/5">
+                            <h2 className="text-lg font-bold mb-4">Intervention Effectiveness</h2>
+                            <div className="grid md:grid-cols-3 gap-3">
+                                <div className="rounded-lg border bg-background p-3">
+                                    <p className="text-xs text-muted-foreground">Follow-up Closure Rate</p>
+                                    <p className="text-2xl font-bold text-success">88%</p>
+                                </div>
+                                <div className="rounded-lg border bg-background p-3">
+                                    <p className="text-xs text-muted-foreground">Danger Sign Escalation in &lt; 2h</p>
+                                    <p className="text-2xl font-bold text-trust">79%</p>
+                                </div>
+                                <div className="rounded-lg border bg-background p-3">
+                                    <p className="text-xs text-muted-foreground">Missed ANC Recovery</p>
+                                    <p className="text-2xl font-bold text-warning">64%</p>
+                                </div>
+                            </div>
+                        </Card>
                     </>
                 )}
             </div>

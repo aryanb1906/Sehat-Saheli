@@ -1,4 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { clientIp, rateLimit } from "@/lib/rate-limit"
+import { getRequestId, logError, withTiming } from "@/lib/observability"
 
 export const runtime = "edge"
 
@@ -38,19 +40,28 @@ function cleanMarkdownFormatting(text: string): string {
   // Remove bold markdown (**text** or __text__)
   let cleaned = text.replace(/\*\*(.+?)\*\*/g, '$1')
   cleaned = cleaned.replace(/__(.+?)__/g, '$1')
-  
+
   // Remove italic markdown (*text* or _text_)
   cleaned = cleaned.replace(/\*(.+?)\*/g, '$1')
   cleaned = cleaned.replace(/_(.+?)_/g, '$1')
-  
+
   // Remove any remaining asterisks
   cleaned = cleaned.replace(/\*/g, '')
-  
+
   return cleaned
 }
 
 export async function POST(req: Request) {
+  const requestId = getRequestId(req)
   try {
+    const rl = await rateLimit(`chat:${clientIp(req)}`, 30, 60_000)
+    if (!rl.allowed) {
+      return new Response(JSON.stringify({ error: "Too many chat requests. Please retry shortly." }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": "60" },
+      })
+    }
+
     const { messages, language } = await req.json()
 
     const systemPrompt = `You are Saheli, a caring and knowledgeable AI health companion for pregnant women in rural India. 
@@ -95,10 +106,12 @@ If you detect medium-risk symptoms, start with [MEDIUM RISK]`
 
     const lastMessage = messages[messages.length - 1]
 
-    const result = await retryWithBackoff(
-      () => chat.sendMessageStream(lastMessage.content),
-      3, // Max 3 retries
-      1000, // Start with 1 second delay
+    const result = await withTiming("chat.stream", () =>
+      retryWithBackoff(
+        () => chat.sendMessageStream(lastMessage.content),
+        3,
+        1000,
+      ),
     )
 
     const encoder = new TextEncoder()
@@ -122,10 +135,12 @@ If you detect medium-risk symptoms, start with [MEDIUM RISK]`
         "Content-Type": "text/plain; charset=utf-8",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
+        "x-request-id": requestId,
       },
     })
   } catch (error: any) {
     console.error("[v0] Chat API error:", error)
+    logError("chat.api.failed", { requestId, message: error?.message || "unknown" })
 
     let errorMessage = "Failed to process request"
     let statusCode = 500
@@ -144,11 +159,10 @@ If you detect medium-risk symptoms, start with [MEDIUM RISK]`
     return new Response(
       JSON.stringify({
         error: errorMessage,
-        details: error.message,
       }),
       {
         status: statusCode,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-request-id": requestId },
       },
     )
   }

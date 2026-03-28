@@ -4,7 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { AppProviders } from "@/components/app-providers"
 import { GuestModeBanner } from "@/components/guest-mode-banner"
+import { OfflineSyncStatusWidget } from "@/components/offline-sync-status"
 import { PwaRegister } from "@/components/pwa-register"
+import { VoiceAssistWidget } from "@/components/voice-assist-widget"
 import { WebVitals } from "@/components/web-vitals"
 import "./globals.css"
 
@@ -45,6 +47,8 @@ export default function RootLayout({
         <AppProviders>
           <GuestModeBanner />
           {children}
+          <OfflineSyncStatusWidget />
+          <VoiceAssistWidget />
         </AppProviders>
         <PwaRegister />
         <WebVitals />

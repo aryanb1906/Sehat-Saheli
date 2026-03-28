@@ -151,7 +151,7 @@ export interface LanguageContent {
   bodiesChanges: string
   whatToExpect: string
   doctorTips: string
-  
+
   nutritionPlanner: string
   weeklyMealPlan: string
   breakfast: string
@@ -166,7 +166,7 @@ export interface LanguageContent {
   includeCalsium: string
   eatVegetables: string
   limitSpicy: string
-  
+
   dangerSigns: string
   knowWhenToSeekHelp: string
   emergencyAlert: string
@@ -179,7 +179,7 @@ export interface LanguageContent {
   shortnessOfBreath: string
   swellingPressure: string
   callNowEmergency: string
-  
+
   vaccinationTracker: string
   ttVaccineSchedule: string
   dailySupplements: string
@@ -190,16 +190,12 @@ export interface LanguageContent {
   bloodPressureCheck: string
   fetalMonitoring: string
   finalCheckup: string
-  
+
   homeVisits: string
   scheduleVisit: string
   visitStats: string
-  completed: string
-  scheduled: string
-  pending: string
   markComplete: string
-  vitals: string
-  
+
   appointmentReminders: string
   sendReminders: string
   upcomingAppointments: string
@@ -214,6 +210,27 @@ export interface LanguageContent {
   // Community Support
   communitySupport: string
   supportGroups: string
+
+  // Optional dashboard/shell labels
+  motherPregnancyTracker?: string
+  motherMedications?: string
+  motherKickCounter?: string
+  motherNutritionTracker?: string
+  motherPregnancyExercises?: string
+  motherMedicalRecords?: string
+  motherVitalSigns?: string
+  motherDoctorConsultation?: string
+  motherFamilySharing?: string
+  motherLaborSigns?: string
+  motherBirthPlan?: string
+  motherSOSEmergency?: string
+  motherPregnancyJournal?: string
+  motherHospitalFinder?: string
+  ashaTrainingModules?: string
+  ashaProductivityPanel?: string
+  primaryActionsTitle?: string
+  quickActionsTitle?: string
+  patientDirectoryTitle?: string
 }
 
 export const multilingualContent: Record<string, LanguageContent> = {
@@ -349,7 +366,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'Body Changes This Week',
     whatToExpect: "What to Expect This Week",
     doctorTips: "Doctor's Tips",
-    
+
     nutritionPlanner: 'Nutrition Planner',
     weeklyMealPlan: 'Weekly Meal Plan',
     breakfast: 'Breakfast',
@@ -364,7 +381,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'Include calcium-rich foods',
     eatVegetables: 'Eat fresh vegetables',
     limitSpicy: 'Limit spicy foods',
-    
+
     dangerSigns: 'Danger Signs',
     knowWhenToSeekHelp: 'Know when to seek immediate help',
     emergencyAlert: 'Emergency Alert!',
@@ -377,7 +394,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'Shortness of Breath',
     swellingPressure: 'Swelling & Pressure',
     callNowEmergency: 'CALL 108 EMERGENCY',
-    
+
     vaccinationTracker: 'Vaccination Tracker',
     ttVaccineSchedule: 'TT Vaccine Schedule',
     dailySupplements: 'Daily Supplements',
@@ -388,16 +405,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'Blood Pressure Check',
     fetalMonitoring: 'Fetal Monitoring',
     finalCheckup: 'Final Checkup',
-    
+
     homeVisits: 'Home Visits',
     scheduleVisit: 'Schedule Visit',
     visitStats: 'Visit Statistics',
-    completed: 'Completed',
-    scheduled: 'Scheduled',
-    pending: 'Pending',
     markComplete: 'Mark Complete',
-    vitals: 'Vitals',
-    
+
     appointmentReminders: 'Appointment Reminders',
     sendReminders: 'Send reminders to pregnant women before their checkups',
     upcomingAppointments: 'Upcoming Appointments',
@@ -411,8 +424,27 @@ export const multilingualContent: Record<string, LanguageContent> = {
 
     communitySupport: "Community Support Groups",
     supportGroups: "Connect with other pregnant women, mothers, and local experts",
+    motherPregnancyTracker: "Pregnancy Tracker",
+    motherMedications: "Medications",
+    motherKickCounter: "Kick Counter",
+    motherNutritionTracker: "Nutrition Tracker",
+    motherPregnancyExercises: "Pregnancy Exercises",
+    motherMedicalRecords: "Medical Records",
+    motherVitalSigns: "Vital Signs",
+    motherDoctorConsultation: "Doctor Consultation",
+    motherFamilySharing: "Family Sharing",
+    motherLaborSigns: "Labor Signs",
+    motherBirthPlan: "Birth Plan",
+    motherSOSEmergency: "SOS Emergency",
+    motherPregnancyJournal: "Pregnancy Journal",
+    motherHospitalFinder: "Hospital Finder",
+    ashaTrainingModules: "Training Modules",
+    ashaProductivityPanel: "ASHA Productivity Panel",
+    primaryActionsTitle: "Primary Actions",
+    quickActionsTitle: "Quick Actions",
+    patientDirectoryTitle: "Patient Directory",
   },
-  
+
   hi: {
     backButton: "वापस",
     logout: "लॉग आउट",
@@ -545,7 +577,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'इस हफ्ते शरीर में परिवर्तन',
     whatToExpect: 'इस हफ्ते क्या उम्मीद करें',
     doctorTips: 'डॉक्टर की सलाह',
-    
+
     nutritionPlanner: 'पोषण योजना',
     weeklyMealPlan: 'साप्ताहिक भोजन योजना',
     breakfast: 'नाश्ता',
@@ -560,7 +592,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'कैल्शियम युक्त खाद्य पदार्थ शामिल करें',
     eatVegetables: 'ताजी सब्जियां खाएं',
     limitSpicy: 'मसालेदार खाना सीमित करें',
-    
+
     dangerSigns: 'खतरे की निशानियां',
     knowWhenToSeekHelp: 'जानें कब तुरंत मदद लेनी है',
     emergencyAlert: 'आपातकालीन चेतावनी!',
@@ -573,7 +605,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'साँस लेने में कठिनाई',
     swellingPressure: 'सूजन और दबाव',
     callNowEmergency: '108 पर कॉल करें',
-    
+
     vaccinationTracker: 'टीकाकरण ट्रैकर',
     ttVaccineSchedule: 'टीटी वैक्सीन शेड्यूल',
     dailySupplements: 'दैनिक सप्लीमेंट्स',
@@ -584,16 +616,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'रक्तचाप जांच',
     fetalMonitoring: 'भ्रूण निगरानी',
     finalCheckup: 'अंतिम जांच',
-    
+
     homeVisits: 'घर का दौरा',
     scheduleVisit: 'दौरा निर्धारित करें',
     visitStats: 'दौरा आंकड़े',
-    completed: 'पूर्ण',
-    scheduled: 'निर्धारित',
-    pending: 'प्रतीक्षित',
     markComplete: 'पूर्ण चिह्नित करें',
-    vitals: 'वाइटल्स',
-    
+
     appointmentReminders: 'नियुक्ति अनुस्मारक',
     sendReminders: 'गर्भवती महिलाओं को उनकी जांच से पहले अनुस्मारक भेजें',
     upcomingAppointments: 'आगामी नियुक्तियां',
@@ -607,8 +635,27 @@ export const multilingualContent: Record<string, LanguageContent> = {
 
     communitySupport: "सामुदायिक समर्थन समूह",
     supportGroups: "अन्य गर्भवती महिलाओं, माताओं और स्थानीय विशेषज्ञों से जुड़ें",
+    motherPregnancyTracker: "गर्भावस्था ट्रैकर",
+    motherMedications: "दवाइयाँ",
+    motherKickCounter: "किक काउंटर",
+    motherNutritionTracker: "पोषण ट्रैकर",
+    motherPregnancyExercises: "गर्भावस्था व्यायाम",
+    motherMedicalRecords: "मेडिकल रिकॉर्ड",
+    motherVitalSigns: "वाइटल साइन",
+    motherDoctorConsultation: "डॉक्टर परामर्श",
+    motherFamilySharing: "परिवार साझा",
+    motherLaborSigns: "प्रसव संकेत",
+    motherBirthPlan: "जन्म योजना",
+    motherSOSEmergency: "SOS आपातकाल",
+    motherPregnancyJournal: "गर्भावस्था जर्नल",
+    motherHospitalFinder: "अस्पताल खोजें",
+    ashaTrainingModules: "प्रशिक्षण मॉड्यूल",
+    ashaProductivityPanel: "आशा उत्पादकता पैनल",
+    primaryActionsTitle: "मुख्य कार्य",
+    quickActionsTitle: "त्वरित कार्य",
+    patientDirectoryTitle: "मरीज निर्देशिका",
   },
-  
+
   or: {
     backButton: "ପଛକୁ",
     logout: "ଲଗଆଉଟ",
@@ -741,7 +788,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'ଏହି ସପ୍ତାହରେ ଶରୀରର ପରିବର୍ତ୍ତନ',
     whatToExpect: 'ଏହି ସପ୍ତାହରେ କ\'ଣ ଆଶା କରିବେ',
     doctorTips: 'ଡାକ୍ତରଙ୍କ ପରାମର୍ଶ',
-    
+
     nutritionPlanner: 'ପୁଷ୍ଟି ଯୋଜନାକାର',
     weeklyMealPlan: 'ସାପ୍ତାହିକ ଭୋଜନ ପ୍ରସ୍ତାବନା',
     breakfast: 'ନାଶତା',
@@ -756,7 +803,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'କ୍ୟାଲସିୟମ ସମୃଦ୍ଧ ଖାଦ୍ୟ ଯୋଗ କରନ୍ତୁ',
     eatVegetables: 'ତାଜା ସବ୍ଜି ଖାଆନ୍ତୁ',
     limitSpicy: 'ମସଲାଦାର ଖାଦ୍ୟ ସୀମିତ କରନ୍ତୁ',
-    
+
     dangerSigns: 'ବିପଦ ସଙ୍କେତ',
     knowWhenToSeekHelp: 'ଜାଣନ୍ତୁ କେବେ ତାତକାଳିକ ସାହାଯ୍ୟ ଚାହିବେ',
     emergencyAlert: 'ଜରୁରୀ ସତର୍କତା!',
@@ -769,7 +816,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'ଶ୍ୱାସକ୍ରିୟା ଲାଘୁତା',
     swellingPressure: 'ଫୁଲା ଓ ଚାପ',
     callNowEmergency: '108 ରେ କଲ କରନ୍ତୁ',
-    
+
     vaccinationTracker: 'ଟିକାକରଣ ট୍ରାକର',
     ttVaccineSchedule: 'ଟିଟି ଭ୍ୟାକସିନ ସମୟସୂଚୀ',
     dailySupplements: 'ଦୈନିକ ସପ୍ଲିମେଣ୍ଟ୍‌ସ',
@@ -780,16 +827,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'ରକ୍ତଚାପ ଯାଞ୍ଚ',
     fetalMonitoring: 'ଭ୍ରୁଣ ଅନୁରକ୍ଷା',
     finalCheckup: 'ଅନ୍ତିମ ଯାଞ୍ଚ',
-    
+
     homeVisits: 'ଘର ପରିଦର୍ଶନ',
     scheduleVisit: 'ଦର୍ଶନ ସଂରକ୍ଷିତ କରନ୍ତୁ',
     visitStats: 'ଦର୍ଶନ ପରିସଂଖ୍ୟାନ',
-    completed: 'ସମ୍ପନ୍ନ',
-    scheduled: 'ସଂରକ୍ଷିତ',
-    pending: 'ବିଚାରାଧୀନ',
     markComplete: 'ସମ୍ପନ୍ନ ଚିହ୍ନିତ କରନ୍ତୁ',
-    vitals: 'ଭାଇଟାଲ୍‌ସ',
-    
+
     appointmentReminders: 'ନିଯୁକ୍ତି ସ୍ମାରକ',
     sendReminders: 'ଗର୍ଭବତୀ ମହିଳାଙ୍କୁ ତାଙ୍କ ଯାଞ୍ଚ ପୂର୍ବରୁ ସ୍ମାରକ ପଠାନ୍ତୁ',
     upcomingAppointments: 'ଆସନ୍ନ ନିଯୁକ୍ତିଗୁଡିକ',
@@ -804,7 +847,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     communitySupport: "ସମ୍ପ୍ରଦାୟ ସହାୟତା ଗୋଷ୍ଠୀ",
     supportGroups: "ଅନ୍ୟ ଗର୍ଭବତୀ ମହିଳା, ମାତା ଏବଂ ସ୍ଥାନୀୟ ବିଶେଷଜ୍ଞମାନଙ୍କ ସହ ସଂଯୋଗ କରନ୍ତୁ",
   },
-  
+
   bn: {
     backButton: "ফিরে যান",
     logout: "লগ আউট",
@@ -937,7 +980,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'এই সপ্তাহে শরীরের পরিবর্তন',
     whatToExpect: 'এই সপ্তাহে কী আশা করবেন',
     doctorTips: 'ডাক্তারের পরামর্শ',
-    
+
     nutritionPlanner: 'পুষ্টি পরিকল্পনাকারী',
     weeklyMealPlan: 'সাপ্তাহিক খাবারের পরিকল্পনা',
     breakfast: 'সকালের নাস্তা',
@@ -952,7 +995,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'ক্যালসিয়াম সমৃদ্ধ খাবার অন্তর্ভুক্ত করুন',
     eatVegetables: 'তাজা সবজি খান',
     limitSpicy: 'মশলাদার খাবার সীমিত করুন',
-    
+
     dangerSigns: 'বিপদ সংকেত',
     knowWhenToSeekHelp: 'জানুন কখন তাৎক্ষণিক সাহায্য নিতে হবে',
     emergencyAlert: 'জরুরী সতর্কতা!',
@@ -965,7 +1008,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'শ্বাসকষ্ট',
     swellingPressure: 'ফোলাপনা এবং চাপ',
     callNowEmergency: '108 এ কল করুন',
-    
+
     vaccinationTracker: 'টিকাকরণ ট্র্যাকার',
     ttVaccineSchedule: 'টিটি ভ্যাকসিন সময়সূচী',
     dailySupplements: 'দৈনিক সম্পূরক',
@@ -976,16 +1019,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'রক্তচাপ পরীক্ষা',
     fetalMonitoring: 'ভ্রূণ পর্যবেক্ষণ',
     finalCheckup: 'চূড়ান্ত পরীক্ষা',
-    
+
     homeVisits: 'বাড়িতে পরিদর্শন',
     scheduleVisit: 'পরিদর্শন নির্ধারণ করুন',
     visitStats: 'পরিদর্শনের পরিসংখ্যান',
-    completed: 'সম্পন্ন',
-    scheduled: 'নির্ধারিত',
-    pending: 'অপেক্ষমান',
     markComplete: 'সম্পন্ন চিহ্নিত করুন',
-    vitals: 'ভাইটালস',
-    
+
     appointmentReminders: 'অ্যাপয়েন্টমেন্ট অনুস্মারক',
     sendReminders: 'গর্ভবতী মহিলাদের তাদের চেকআপের আগে অনুস্মারক পাঠান',
     upcomingAppointments: 'আসন্ন অ্যাপয়েন্টমেন্ট',
@@ -1000,399 +1039,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     communitySupport: "সম্প্রদায় সহায়তা গোষ্ঠী",
     supportGroups: "অন্যান্য গর্ভবতী নারী, মায়েদের এবং স্থানীয় বিশেষজ্ঞদের সাথে সংযোগ করুন",
   },
-  
-  or: {
-    backButton: "ପଛକୁ",
-    logout: "ଲଗଆଉଟ",
-    settings: "ସେଟିଂସ",
-    home: "ହୋମ",
-    greeting: "ନମସ୍କାର",
-    greetingQuestion: "ଆଜି ଆପଣ କେମିତି ଅନୁଭବ କରୁଛନ୍ତି?",
-    healthStatus: "ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ସ୍ଥିତି",
-    lowRisk: "କମ ବିପଦ",
-    mediumRisk: "ମଧ୍ୟମ ବିପଦ",
-    highRisk: "ଉଚ୍ଚ ବିପଦ",
-    talkToSaheli: "ସହେଲୀ ସହିତ କଥା ହୁଅନ୍ତୁ",
-    talkToSaheliSubtitle: "ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ସାଥୀ",
-    myHealthLog: "ମୋର ସ୍ୱାସ୍ଥ୍ୟ ଲଗ",
-    myHealthLogSubtitle: "ଆପଣଙ୍କର ସ୍ୱାସ୍ଥ୍ୟ ଯାତ୍ରା ଟ୍ରାକ କରନ୍ତୁ",
-    mentalHealth: "ମାନସିକ ସ୍ୱାସ୍ଥ୍ୟ",
-    mentalHealthSubtitle: "ଆପଣଙ୍କର ଭାବନାତ୍ମକ ସୁସ୍ଥତା ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ",
-    emergencyCall: "ଜରୁରୀକାଳୀନ କଲ",
-    emergencyCallSubtitle: "ସାହାଯ୍ୟ ପାଇଁ ତୁରନ୍ତ ପହଞ୍ଚନ୍ତୁ",
-    myAppointments: "ମୋର ନିଯୁକ୍ତିଗୁଡିକ",
-    healthTips: "ସ୍ୱାସ୍ଥ୍ୟ ସୂଚନା",
-    healthLogTitle: "ମୋର ସ୍ୱାସ୍ଥ୍ୟ ଲଗ",
-    addEntry: "ନୂଆ ଏଣ୍ଟ୍ରି ଯୋଡନ୍ତୁ",
-    date: "ତାରିଖ",
-    symptoms: "ଲକ୍ଷଣ",
-    vitals: "ଭାଇଟାଲସ",
-    notes: "ନୋଟ",
-    deleteEntry: "ଏଣ୍ଟ୍ରି ଡିଲିଟ କରନ୍ତୁ",
-    noEntries: "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସ୍ୱାସ୍ଥ୍ୟ ଏଣ୍ଟ୍ରି ନାହିଁ",
-    appointmentsTitle: "ମୋର ନିଯୁକ୍ତିଗୁଡିକ",
-    upcoming: "ଆଗାମୀ",
-    completed: "ସମ୍ପୂର୍ଣ୍ଣ",
-    cancelled: "ବାତିଲ",
-    doctor: "ଡାକ୍ତର",
-    time: "ସମୟ",
-    location: "ସ୍ଥାନ",
-    setReminder: "ରିମାଇଣ୍ଡର ସେଟ କରନ୍ତୁ",
-    reschedule: "ପୁନର୍ନିର୍ଧାରଣ",
-    cancelAppointment: "ବାତିଲ",
-    addAppointment: "ନୂଆ ନିଯୁକ୍ତି ସୂଚୀ କରନ୍ତୁ",
-    chatTitle: "ସହେଲୀ ସହିତ କଥା ହୁଅନ୍ତୁ",
-    chatSubtitle: "ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ସାଥୀ",
-    startVoiceInput: "ଭଏସ ଇନପୁଟ ଆରମ୍ଭ କରନ୍ତୁ",
-    stopVoiceInput: "ଭଏସ ଇନପୁଟ ବନ୍ଦ କରନ୍ତୁ",
-    sendMessage: "ପଠାନ୍ତୁ",
-    typePlaceholder: "ଆପଣଙ୍କର ମେସେଜ ଟାଇପ କରନ୍ତୁ କିମ୍ବା ଭଏସ ବ୍ୟବହାର କରନ୍ତୁ...",
-    listening: "ଶୁଣୁଛି...",
-    mentalHealthTitle: "ମାନସିକ ସ୍ୱାସ୍ଥ୍ୟ ଯାଞ୍ଚ",
-    howFeeling: "ଆଜି ଆପଣ କେମିତି ଅନୁଭବ କରୁଛନ୍ତି?",
-    happy: "ଖୁସି",
-    neutral: "ସାଧାରଣ",
-    sad: "ଦୁଃଖୀ",
-    anxious: "ଚିନ୍ତିତ",
-    emergencyTitle: "ଜରୁରୀକାଳୀନ ସମ୍ପର୍କ",
-    callNow: "ବର୍ତ୍ତମାନ କଲ କରନ୍ତୁ",
-    nationalEmergency: "ଜାତୀୟ ଜରୁରୀକାଳୀନ: 112",
-    ambulance: "ଆମ୍ବୁଲାନ୍ସ: 108 / 102",
-    primaryHealthCenter: "ପ୍ରାଥମିକ ସ୍ୱାସ୍ଥ୍ୟ କେନ୍ଦ୍ର",
-    ashaWorker: "ଆଶା କର୍ମଚାରୀ",
-    healthTipsTitle: "ଗର୍ଭାବସ୍ଥା ପାଇଁ ସ୍ୱାସ୍ଥ୍ୟ ସୂଚନା",
-    tips: [
-      "ନିୟମିତ ଗର୍ଭାବସ୍ଥା ପରୀକ୍ଷା (ANC) କରାନ୍ତୁ",
-      "ପ୍ରତିଦିନ ଆୟରନ୍ ଏବଂ ଫୋଲିକ୍ ଆସିଡ୍ ଗୋଳି ନିଅନ୍ତୁ",
-      "ସନ୍ତୁଳିତ ଖାଦ୍ୟ ଖାଆନ୍ତୁ",
-      "ଭଲ ଆରାମ କରନ୍ତୁ",
-      "ଜରୁରୀକାଳୀନ ପରିସ୍ଥିତିରେ ତୁରନ୍ତ ଚିକିତ୍ସା ନିଅନ୍ତୁ",
-    ],
-    save: "ସେଭ କରନ୍ତୁ",
-    cancel: "ବାତିଲ",
-    submit: "ସବମିଟ",
-    delete: "ଡିଲିଟ",
-    edit: "ଏଡିଟ",
-    confirm: "ନିଶ୍ଚିତ",
-    savedSuccessfully: "ସଫଳତାର ସହ ସେଭ କରାଯାଇଛି!",
-    deletedSuccessfully: "ସଫଳତାର ସହ ଡିଲିଟ କରାଯାଇଛି!",
-    errorOccurred: "ଏକ ତ୍ରୁଟି ଘଟିଛି",
-    reminderSet: "ରିମାଇଣ୍ଡର ସଫଳତାର ସହ ସେଟ କରାଯାଇଛି!",
-    languageName: "ଓଡ଼ିଆ",
-    welcomeTo: "ସେହତସହେଲୀରେ ସ୍ୱାଗତ",
-    whoAreYou: "ଆପଣ କିଏ?",
-    iAmMother: "ମୁଁ ଜଣେ ମା",
-    iAmASHA: "ମୁଁ ଜଣେ ଆଶା କର୍ମଚାରୀ",
-    motherDescription: "ସ୍ୱାସ୍ଥ୍ୟ ଟ୍ରାକିଂ, AI ସହାୟତା ଏବଂ ଜରୁରୀକାଳୀନ ସାହାଯ୍ୟ ପାଆନ୍ତୁ",
-    ashaDescription: "ରୋଗୀମାନଙ୍କୁ ନୀରିକ୍ଷଣ କରନ୍ତୁ, ବିପଦମାନଙ୍କୁ ମୂଲ్యాంకନ କରନ୍ତୁ ଏବଂ ଯତ୍ନ ମାର୍ଗଦର୍ଶନ ପ୍ରଦାନ କରନ୍ତୁ",
-    ashaDashboard: "ଆଶା ଡାସବୋର୍ଡ",
-    welcomeBack: "ପୁନର୍ବାର ସ୍ୱାଗତ",
-    totalPatients: "ମୋଟ ରୋଗୀ",
-    searchPatients: "ରୋଗୀ ଖୋଜନ୍ତୁ...",
-    myPatients: "ମୋର ରୋଗୀମାନେ",
-    age: "ବୟସ",
-    years: "ବର୍ଷ",
-    weeksPregnant: "ସପ୍ତାହ ଗର୍ଭବତୀ",
-    lastCheckup: "ଶେଷ ଯାଞ୍ଚ",
-    risk: "ବିପଦ",
-    riskPatient: "ବିପଦ ରୋଗୀ",
-    patientNotFound: "ରୋଗୀ ମିଳିଲା ନାହିଁ",
-    goBack: "ଫେରନ୍ତୁ",
-    smsSentSuccess: "ଜରୁରୀକାଳୀନ SMS ସଫଳତାର ସହ ପଠାଗଲା!",
-    smsFailure: "SMS ପଠାଇବାରେ ବିଫଳ",
-    hemoglobin: "ହିମୋଗ୍ଲୋବିନ",
-    highRiskAlert: "ଉଚ୍ଚ ବିପଦ ଆଲର୍ଟ",
-    requiresAttention: "ଏହି ରୋଗୀଙ୍କୁ ତୁରନ୍ତ ଧ୍ୟାନ ଆବଶ୍ୟକ",
-    sendEmergencySMS: "ଜରୁରୀକାଳୀନ SMS ପଠାନ୍ତୁ",
-    history: "ଇତିହାସ",
-    appointments: "ନିଯୁକ୍ତି",
-    currentVitals: "ବର୍ତ୍ତମାନର ଭାଇଟାଲସ",
-    bloodPressure: "ରକ୍ତଚାପ",
-    weight: "ଓଜନ",
-    currentSymptoms: "ବର୍ତ୍ତମାନର ଲକ୍ଷଣ",
-    updateVitals: "ଭାଇଟାଲସ ଅପଡେଟ କରନ୍ତୁ",
-    noHealthLogs: "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ସ୍ୱାସ୍ଥ୍ୟ ଲଗ ନାହିଁ",
-    noAppointments: "କୌଣସି ଆଗାମୀ ନିଯୁକ୍ତି ନାହିଁ",
-    scheduleAppointment: "ନିଯୁକ୍ତି ସୂଚୀ କରନ୍ତୁ",
-    analyticsDashboard: "ବିଶ୍ଳେଷଣ ଡାସବୋର୍ଡ",
-    healthInsights: "ସ୍ୱାସ୍ଥ୍ୟ ଅନ୍ତର୍ଦୃଷ୍ଟି ଏବଂ ଧାରା",
-    checkupsMonth: "ଯାଞ୍ଚ/ମାସ",
-    followUpRate: "ଅନୁସରଣ ହାର",
-    thisWeek: "ଏହି ସପ୍ତାହ",
-    riskDistribution: "ବିପଦ ବଣ୍ଟନ",
-    weeklyCheckups: "ସାପ୍ତାହିକ ଯାଞ୍ଚ",
-    hemoglobinLevels: "ହିମୋଗ୍ଲୋବିନ ସ୍ତର",
-    normalRange: "ସାଧାରଣ ସୀମା",
-    duringPregnancy: "ଗର୍ଭାବସ୍ଥାରେ",
 
-    pregnancyWeek: 'ଗର୍ଭାବସ୍ଥାର ସପ୍ତାହ',
-    babyGrowth: 'ଶିଶୁ ବୃଦ୍ଧି',
-    babySize: 'ଶିଶୁର ଆକାର',
-    babyWeight: 'ଭାର',
-    babyLength: 'ଦୈର୍ଘ୍ୟ',
-    bodiesChanges: 'ଏହି ସପ୍ତାହରେ ଶରୀରର ପରିବର୍ତ୍ତନ',
-    whatToExpect: 'ଏହି ସପ୍ତାହରେ କ\'ଣ ଆଶା କରିବେ',
-    doctorTips: 'ଡାକ୍ତରଙ୍କ ପରାମର୍ଶ',
-    
-    nutritionPlanner: 'ପୁଷ୍ଟି ଯୋଜନାକାର',
-    weeklyMealPlan: 'ସାପ୍ତାହିକ ଭୋଜନ ପ୍ରସ୍ତାବନା',
-    breakfast: 'ନାଶତା',
-    lunch: 'ମଧ୍ୟାହ୍ନ ଖାଦ୍ୟ',
-    snack: 'ଖଦ୍ୟ',
-    dinner: 'ରାତିର ଖାଦ୍ୟ',
-    ironRichFoods: 'ଲୌହ ସମୃଦ୍ଧ ଖାଦ୍ୟ',
-    dailyChecklist: 'ଦୈନିକ ଚେକଲିଷ୍ଟ',
-    drinkWater: '2-3 ଲିଟର ପାଣି ପିଅନ୍ତୁ',
-    takeIronTablets: 'ଲୌହ ଟାବଲେଟ ନିଅନ୍ତୁ',
-    eatProtein: 'ପ୍ରତ୍ୟେକ ଖାଦ୍ୟରେ ପ୍ରୋଟିନ ଖାଆନ୍ତୁ',
-    includeCalsium: 'କ୍ୟାଲସିୟମ ସମୃଦ୍ଧ ଖାଦ୍ୟ ଯୋଗ କରନ୍ତୁ',
-    eatVegetables: 'ତାଜା ସବ୍ଜି ଖାଆନ୍ତୁ',
-    limitSpicy: 'ମସଲାଦାର ଖାଦ୍ୟ ସୀମିତ କରନ୍ତୁ',
-    
-    dangerSigns: 'ବିପଦ ସଙ୍କେତ',
-    knowWhenToSeekHelp: 'ଜାଣନ୍ତୁ କେବେ ତାତକାଳିକ ସାହାଯ୍ୟ ଚାହିବେ',
-    emergencyAlert: 'ଜରୁରୀ ସତର୍କତା!',
-    heavyBleeding: 'ଭାରୀ ରକ୍ତସ୍ରାବ',
-    severeAbdominalPain: 'ଗୁରୁତର ପେଟ ଯନ୍ତ୍ରଣା',
-    highFever: 'ଉଚ୍ଚ ଜ୍ବର',
-    noFetalMovement: 'ଶିଶୁର ଗତିବିଧି ନାହିଁ',
-    severeHeadache: 'ଗୁରୁତର ମୁଣ୍ଡ ଯନ୍ତ୍ରଣା',
-    visionChanges: 'ଦୃଷ୍ଟି ପରିବର୍ତ୍ତନ',
-    shortnessOfBreath: 'ଶ୍ୱାସକ୍ରିୟା ଲାଘୁତା',
-    swellingPressure: 'ଫୁଲା ଓ ଚାପ',
-    callNowEmergency: '108 ରେ କଲ କରନ୍ତୁ',
-    
-    vaccinationTracker: 'ଟିକାକରଣ ট୍ରାକର',
-    ttVaccineSchedule: 'ଟିଟି ଭ୍ୟାକସିନ ସମୟସୂଚୀ',
-    dailySupplements: 'ଦୈନିକ ସପ୍ଲିମେଣ୍ଟ୍‌ସ',
-    trimesters: 'ଟ୍ରାଇମେସ୍ଟର ଚେକଲିଷ୍ଟ',
-    trimesterChecklist: 'ଟ୍ରାଇମେସ୍ଟର',
-    glucoseTest: 'ଗ୍ଲୁକୋଜ ପରୀକ୍ଷା',
-    bloodTest: 'ରକ୍ତ ପରୀକ୍ଷା',
-    bloodPressureCheck: 'ରକ୍ତଚାପ ଯାଞ୍ଚ',
-    fetalMonitoring: 'ଭ୍ରୁଣ ଅନୁରକ୍ଷା',
-    finalCheckup: 'ଅନ୍ତିମ ଯଞ୍ଚ',
-    
-    homeVisits: 'ଘର ପରିଦର୍ଶନ',
-    scheduleVisit: 'ଦର୍ଶନ ସଂରକ୍ଷିତ କରନ୍ତୁ',
-    visitStats: 'ଦର୍ଶନ ପରିସଂଖ୍ୟାନ',
-    completed: 'ସମ୍ପନ୍ନ',
-    scheduled: 'ସଂରକ୍ଷିତ',
-    pending: 'ବିଚାରାଧୀନ',
-    markComplete: 'ସମ୍ପନ୍ନ ଚିହ୍ନିତ କରନ୍ତୁ',
-    vitals: 'ଭାଇଟାଲ୍‌ସ',
-    
-    appointmentReminders: 'ନିଯୁକ୍ତି ସ୍ମାରକ',
-    sendReminders: 'ଗର୍ଭବତୀ ମହିଳାଙ୍କୁ ତାଙ୍କ ଯାଞ୍ଚ ପୂର୍ବରୁ ସ୍ମାରକ ପଠାନ୍ତୁ',
-    upcomingAppointments: 'ଆସନ୍ନ ନିଯୁକ୍ତିଗୁଡିକ',
-    preVisitInstructions: 'ଦର୍ଶନ ପୂର୍ବ ନିର୍ଦେଶନା',
-    keepFastEmpty: 'ରାତ 12 ଘଣ୍ଟାରୁ ପେଟ ଖାଲି ରଖନ୍ତୁ',
-    bringReports: 'ପୂର୍ବ ଯାଞ୍ଚ ରିପୋର୍ଟ ନିଆନ୍ତୁ',
-    noteSymptoms: 'ଆପଣ ଅନୁଭବ କରୁଥିବା ଲକ୍ଷଣଗୁଡିକ ନୋଟ କରନ୍ତୁ',
-    arriveEarly: '10 ମିନିଟ ପୂର୍ବରୁ ପହଞ୍ଚନ୍ତୁ',
-    reminderSent: 'ସ୍ମାରକ ପଠାଯାଇଛି',
-    sendReminderSMS: 'SMS ମାଧ୍ୟମରେ ସ୍ମାରକ ପଠାନ୍ତୁ',
-
-    communitySupport: "ସମ୍ପ୍ରଦାୟ ସହାୟତା ଗୋଷ୍ଠୀ",
-    supportGroups: "ଅନ୍ୟ ଗର୍ଭବତୀ ମହିଳା, ମାତା ଏବଂ ସ୍ଥାନୀୟ ବିଶେଷଜ୍ଞମାନଙ୍କ ସହ ସଂଯୋଗ କରନ୍ତୁ",
-  },
-  
-  bn: {
-    backButton: "ফিরে যান",
-    logout: "লগ আউট",
-    settings: "সেটিংস",
-    home: "হোম",
-    greeting: "নমস্কার",
-    greetingQuestion: "আজ আপনি কেমন অনুভব করছেন?",
-    healthStatus: "আপনার স্বাস্থ্য অবস্থা",
-    lowRisk: "কম ঝুঁকি",
-    mediumRisk: "মাঝারি ঝুঁকি",
-    highRisk: "উচ্চ ঝুঁকি",
-    talkToSaheli: "সাহেলির সাথে কথা বলুন",
-    talkToSaheliSubtitle: "আপনার AI স্বাস্থ্য সাথী",
-    myHealthLog: "আমার স্বাস্থ্য লগ",
-    myHealthLogSubtitle: "আপনার স্বাস্থ্য যাত্রা ট্র্যাক করুন",
-    mentalHealth: "মানসিক স্বাস্থ্য",
-    mentalHealthSubtitle: "আপনার মানসিক সুস্থতা গুরুত্বপূর্ণ",
-    emergencyCall: "জরুরি কল",
-    emergencyCallSubtitle: "দ্রুত সাহায্য",
-    myAppointments: "আমার অ্যাপয়েন্টমেন্ট",
-    healthTips: "স্বাস্থ্য পরামর্শ",
-    healthLogTitle: "আমার স্বাস্থ্য লগ",
-    addEntry: "নতুন এন্ট্রি যোগ করুন",
-    date: "তারিখ",
-    symptoms: "লক্ষণ",
-    vitals: "ভাইটালস",
-    notes: "নোট",
-    deleteEntry: "এন্ট্রি মুছুন",
-    noEntries: "কোনো এন্ট্রি নেই",
-    appointmentsTitle: "আমার অ্যাপয়েন্টমেন্ট",
-    upcoming: "আসন্ন",
-    completed: "সম্পন্ন",
-    cancelled: "বাতিল",
-    doctor: "ডাক্তার",
-    time: "সময়",
-    location: "স্থান",
-    setReminder: "রিমাইন্ডার সেট করুন",
-    reschedule: "পুনঃনির্ধারণ",
-    cancelAppointment: "বাতিল",
-    addAppointment: "নতুন অ্যাপয়েন্টমেন্ট",
-    chatTitle: "সাহেলির সাথে কথা বলুন",
-    chatSubtitle: "আপনার AI স্বাস্থ্য সাথী",
-    startVoiceInput: "ভয়েস শুরু করুন",
-    stopVoiceInput: "ভয়েস বন্ধ করুন",
-    sendMessage: "পাঠান",
-    typePlaceholder: "আপনার বার্তা টাইপ করুন...",
-    listening: "শুনছি...",
-    mentalHealthTitle: "মানসিক স্বাস্থ্য পরীক্ষা",
-    howFeeling: "আজ আপনি কেমন অনুভব করছেন?",
-    happy: "খুশি",
-    neutral: "স্বাভাবিক",
-    sad: "দুঃখিত",
-    anxious: "উদ্বিগ্ন",
-    emergencyTitle: "জরুরি যোগাযোগ",
-    callNow: "এখন কল করুন",
-    nationalEmergency: "জাতীয় জরুরি: 112",
-    ambulance: "অ্যাম্বুলেন্স: 108 / 102",
-    primaryHealthCenter: "প্রাথমিক স্বাস্থ্য কেন্দ্র",
-    ashaWorker: "আশা কর্মী",
-    healthTipsTitle: "গর্ভাবস্থার স্বাস্থ্য পরামর্শ",
-    tips: [
-      "নিয়মিত গর্ভকালীন পরীক্ষা করুন",
-      "প্রতিদিন আয়রন এবং ফলিক এসিড সাপ্লিমেন্ট নিন",
-      "সুষম খাদ্য খান",
-      "পর্যাপ্ত বিশ্রাম নিন",
-      "জরুরি অবস্থায় অবিলম্বে চিকিৎসা নিন",
-    ],
-    save: "সংরক্ষণ করুন",
-    cancel: "বাতিল",
-    submit: "জমা দিন",
-    delete: "মুছুন",
-    edit: "সম্পাদনা",
-    confirm: "নিশ্চিত করুন",
-    savedSuccessfully: "সফলভাবে সংরক্ষিত!",
-    deletedSuccessfully: "সফলভাবে মুছে ফেলা হয়েছে!",
-    errorOccurred: "একটি ত্রুটি ঘটেছে",
-    reminderSet: "রিমাইন্ডার সেট করা হয়েছে!",
-    languageName: "বাংলা",
-    welcomeTo: "সেহাত সাহেলিতে স্বাগতম",
-    whoAreYou: "আপনি কে?",
-    iAmMother: "আমি একজন মা",
-    iAmASHA: "আমি একজন আশা কর্মী",
-    motherDescription: "স্বাস্থ্য ট্র্যাকিং, AI সহায়তা এবং জরুরি সাহায্য",
-    ashaDescription: "রোগীদের পর্যবেক্ষণ এবং যত্ন নির্দেশিকা",
-    ashaDashboard: "আশা ড্যাশবোর্ড",
-    welcomeBack: "স্বাগতম",
-    totalPatients: "মোট রোগী",
-    searchPatients: "রোগী খুঁজুন...",
-    myPatients: "আমার রোগীরা",
-    age: "বয়স",
-    years: "বছর",
-    weeksPregnant: "সপ্তাহ গর্ভবতী",
-    lastCheckup: "শেষ পরীক্ষা",
-    risk: "ঝুঁকি",
-    riskPatient: "ঝুঁকির রোগী",
-    patientNotFound: "রোগী পাওয়া যায়নি",
-    goBack: "ফিরে যান",
-    smsSentSuccess: "জরুরী SMS সফলভাবে পাঠানো হয়েছে!",
-    smsFailure: "SMS পাঠাতে ব্যর্থ",
-    hemoglobin: "হিমোগ्लोবিন",
-    highRiskAlert: "উচ্চ ঝুঁকি সতর্কতা",
-    requiresAttention: "এই রোগীর অবিলম্বে মনোযোগ প্রয়োজন",
-    sendEmergencySMS: "জরুরী SMS পাঠান",
-    history: "ইতিহাস",
-    appointments: "অ্যাপয়েন্টমেন্ট",
-    currentVitals: "বর্তমান ভাইটালস",
-    bloodPressure: "রক্তচাপ",
-    weight: "ওজন",
-    currentSymptoms: "বর্তমান লক্ষণ",
-    updateVitals: "ভাইটালস আপডেট করুন",
-    noHealthLogs: "কোন স্বাস্থ্য লগ নেই",
-    noAppointments: "কোন আসন্ন অ্যাপয়েন্টমেন্ট নেই",
-    scheduleAppointment: "অ্যাপয়েন্টমেন্ট নির্ধারণ করুন",
-    analyticsDashboard: "বিশ্লেষণ ড্যাশবোর্ড",
-    healthInsights: "স্বাস্থ্য অন্তর্দৃষ্টি",
-    checkupsMonth: "চেকআপ/মাস",
-    followUpRate: "ফলো-আপ হার",
-    thisWeek: "এই সপ্তাহে",
-    riskDistribution: "ঝুঁকি বন্টন",
-    weeklyCheckups: "সাপ্তাহিক চেকআপ",
-    hemoglobinLevels: "হিমোগ्लोবিন স্তর",
-    normalRange: "সাধারণ পরিসীমা",
-    duringPregnancy: "গর্ভাবস্থায়",
-
-    pregnancyWeek: 'গর্ভাবস্থার সপ্তাহ',
-    babyGrowth: 'শিশুর বৃদ্ধি',
-    babySize: 'শিশুর আকার',
-    babyWeight: 'ওজন',
-    babyLength: 'দৈর্ঘ্য',
-    bodiesChanges: 'এই সপ্তাহে শরীরের পরিবর্তন',
-    whatToExpect: 'এই সপ্তাহে কী আশা করবেন',
-    doctorTips: 'ডাক্তারের পরামর্শ',
-    
-    nutritionPlanner: 'পুষ্টি পরিকল্পনাকারী',
-    weeklyMealPlan: 'সাপ্তাহিক খাবারের পরিকল্পনা',
-    breakfast: 'সকালের নাস্তা',
-    lunch: 'দুপুরের খাবার',
-    snack: 'জলখাবার',
-    dinner: 'রাতের খাবার',
-    ironRichFoods: 'লোহা সমৃদ্ধ খাবার',
-    dailyChecklist: 'দৈনিক চেকলিস্ট',
-    drinkWater: '2-3 লিটার পানি পান',
-    takeIronTablets: 'লোহার ট্যাবলেট নিন',
-    eatProtein: 'প্রতিটি খাবারে প্রোটিন খান',
-    includeCalsium: 'ক্যালসিয়াম সমৃদ্ধ খাবার অন্তর্ভুক্ত করুন',
-    eatVegetables: 'তাজা সবজি খান',
-    limitSpicy: 'মশলাদার খাবার সীমিত করুন',
-    
-    dangerSigns: 'বিপদ সংকেত',
-    knowWhenToSeekHelp: 'জানুন কখন তাৎক্ষণিক সাহায্য নিতে হবে',
-    emergencyAlert: 'জরুরী সতর্কতা!',
-    heavyBleeding: 'ভারী রক্তপাত',
-    severeAbdominalPain: 'তীব্র পেটে ব্যথা',
-    highFever: 'উচ্চ জ্বর',
-    noFetalMovement: 'ভ্রূণের নড়াচড়া নেই',
-    severeHeadache: 'তীব্র মাথাব্যথা',
-    visionChanges: 'দৃষ্টিতে পরিবর্তন',
-    shortnessOfBreath: 'শ্বাসকষ্ট',
-    swellingPressure: 'ফোলাপনা এবং চাপ',
-    callNowEmergency: '108 এ কল করুন',
-    
-    vaccinationTracker: 'টিকাকরণ ট্র্যাকার',
-    ttVaccineSchedule: 'টিটি ভ্যাকসিন সময়সূচী',
-    dailySupplements: 'দৈনিক সম্পূরক',
-    trimesters: 'ত্রৈমাসিক চেকলিস্ট',
-    trimesterChecklist: 'ত্রৈমাসিক',
-    glucoseTest: 'গ্লুকোজ পরীক্ষা',
-    bloodTest: 'রক্ত পরীক্ষা',
-    bloodPressureCheck: 'রক্তচাপ পরীক্ষা',
-    fetalMonitoring: 'ভ্রূণ পর্যবেক্ষণ',
-    finalCheckup: 'চূড়ান্ত পরীক্ষা',
-    
-    homeVisits: 'বাড়িতে পরিদর্শন',
-    scheduleVisit: 'পরিদর্শন নির্ধারণ করুন',
-    visitStats: 'পরিদর্শনের পরিসংখ্যান',
-    completed: 'সম্পন্ন',
-    scheduled: 'নির্ধারিত',
-    pending: 'অপেক্ষমান',
-    markComplete: 'সম্পন্ন চিহ্নিত করুন',
-    vitals: 'ভাইটালস',
-    
-    appointmentReminders: 'অ্যাপয়েন্টমেন্ট অনুস্মারক',
-    sendReminders: 'গর্ভবতী মহিলাদের তাদের চেকআপের আগে অনুস্মারক পাঠান',
-    upcomingAppointments: 'আসন্ন অ্যাপয়েন্টমেন্ট',
-    preVisitInstructions: 'পরিদর্শনের আগের নির্দেশনা',
-    keepFastEmpty: 'রাত 12 টা থেকে পেট খালি রাখুন',
-    bringReports: 'পূর্ববর্তী চেকআপ রিপোর্ট নিয়ে আসুন',
-    noteSymptoms: 'আপনি লক্ষ্য করা যে কোনো লক্ষণ নোট করুন',
-    arriveEarly: '10 মিনিট আগে আসুন',
-    reminderSent: 'অনুস্মারক পাঠানো হয়েছে',
-    sendReminderSMS: 'SMS এর মাধ্যমে অনুস্মারক পাঠান',
-
-    communitySupport: "সম্প্রদায় সহায়তা গোষ্ঠী",
-    supportGroups: "অন্যান্য গর্ভবতী নারী, মায়েদের এবং স্থানীয় বিশেষজ্ঞদের সাথে সংযোগ করুন",
-  },
-  
   te: {
     backButton: "వెనుకకు",
     logout: "లాగౌట్",
@@ -1525,7 +1172,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'ఈ వారం శరీర మార్పులు',
     whatToExpect: 'ఈ వారం ఏమి ఆశించాలి',
     doctorTips: 'వైద్య సలహాలు',
-    
+
     nutritionPlanner: 'పోషణ ప్రణేత',
     weeklyMealPlan: 'సాప్తాహిక ఆహార ప్రణాళిక',
     breakfast: 'ఉదయపు భోజనం',
@@ -1540,7 +1187,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'క్యాల్సియం సమృద్ధ ఆహారాలను చేర్చండి',
     eatVegetables: 'తాజా కూరలు తీసుకోండి',
     limitSpicy: 'మసాలా ఆహారాన్ని పరిమితం చేయండి',
-    
+
     dangerSigns: 'ప్రమాద సంకేతాలు',
     knowWhenToSeekHelp: 'వెంటనే సహాయం కోసం ఎప్పుడు అడగాలో తెలుసుకోండి',
     emergencyAlert: 'అత్యవసర చేతవేతనం!',
@@ -1553,7 +1200,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'శ్వాస తీవ్రత',
     swellingPressure: 'ఉబ్బరం మరియు ఒత్తిడి',
     callNowEmergency: '108కి కాల్ చేయండి',
-    
+
     vaccinationTracker: 'టీకాకరణ ట్రాకర్',
     ttVaccineSchedule: 'టిటి టీకా షెడ్యూల్',
     dailySupplements: 'దోపిడీ సపలిమెంట్‌లు',
@@ -1564,16 +1211,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'రక్తపీడన పరీక్ష',
     fetalMonitoring: 'పిండ్ల పర్యవేక్షణ',
     finalCheckup: 'చివరి పరీక్ష',
-    
+
     homeVisits: 'గృహ సందర్శనలు',
     scheduleVisit: 'దర్ଶନ షెడ్యూల్ చేయండి',
     visitStats: 'దర్ଶନ గణాంకాలు',
-    completed: 'పూర్తైంది',
-    scheduled: 'షెడ్యూల్ చేయబడింది',
-    pending: 'పెండింగ్',
     markComplete: 'పూర్తిగా గుర్తించండి',
-    vitals: 'వాటల్‌లు',
-    
+
     appointmentReminders: 'నియమితాల రిమైండర్‌లు',
     sendReminders: 'గర్భిణీ మహిళలకు వారి చెకআప్ ముందు రిమైండర్‌లను పంపండి',
     upcomingAppointments: 'రాబోయే నియామితాలు',
@@ -1588,7 +1231,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     communitySupport: "కమ్యూనిటీ సపోర్ట్ గ్రూప్‌లు",
     supportGroups: "ఇతర గర్భిణీ మహిళలు, తల్లులు మరియు స్థానిక నిపుణులతో సంଯోగం చేయండి",
   },
-  
+
   ta: {
     backButton: "பின்னால்",
     logout: "வெளியேறு",
@@ -1721,7 +1364,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'இந்த வாரத்தில் உடல் மாற்றங்கள்',
     whatToExpect: 'இந்த வாரத்தில் என்ன எதிர்பார்க்க வேண்டும்',
     doctorTips: 'டாக்டரின் ஆலோசனை',
-    
+
     nutritionPlanner: 'ஊட்டச்சத்து திட்டம்',
     weeklyMealPlan: 'வார உணவு திட்டம்',
     breakfast: 'காலை உணவு',
@@ -1736,7 +1379,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'கால்சியம் நிறைந்த உணவுகளை சேர்க்கவும்',
     eatVegetables: 'புதிய காய்கறிகள் சாப்பிடவும்',
     limitSpicy: 'காரமான உணவுகளை குறைக்கவும்',
-    
+
     dangerSigns: 'ஆபத்து சமிக்ஞைகள்',
     knowWhenToSeekHelp: 'உடனடி உதவி எப்போது கேட்க வேண்டும் என்பதை அறிக',
     emergencyAlert: 'அவசர எச்சரிக்கை!',
@@ -1749,7 +1392,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'சுவாசக் குறைபாடு',
     swellingPressure: 'வீக்கம் மற்றும் அழுத்தம்',
     callNowEmergency: '108 ஆக அழைக்கவும்',
-    
+
     vaccinationTracker: 'தடுப்பூசி பட்டியல்',
     ttVaccineSchedule: 'டிடி தடுப்பூசி அட்டவணை',
     dailySupplements: 'தினசரி சப்ளிமென்ட்',
@@ -1760,16 +1403,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'இரத்த அழுத்த பரிசோதனை',
     fetalMonitoring: 'கரு கண்காணிப்பு',
     finalCheckup: 'இறுதி பரிசோதனை',
-    
+
     homeVisits: 'வீட்டு பயணங்கள்',
     scheduleVisit: 'பயணத்தை திட்டமிடவும்',
     visitStats: 'பயண புள்ளிவிவரங்கள்',
-    completed: 'நிறைவுற்றது',
-    scheduled: 'திட்டமிடப்பட்டது',
-    pending: 'நிலுவையில் உள்ளது',
     markComplete: 'நிறைவுற்றது என குறிக்கவும்',
-    vitals: 'ஜீவன் அறிகுறிகள்',
-    
+
     appointmentReminders: 'சந்திப்பு நினைவூட்டல்கள்',
     sendReminders: 'கர்ப்பிணி பெண்களுக்கு அவர்களின் சரிபார்ப்பிற்கு முன் நினைவூட்டல்களை அனுப்பவும்',
     upcomingAppointments: 'வரவிருக்கும் சந்திப்புகள்',
@@ -1917,7 +1556,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'या आठवड्यात शरीर बदल',
     whatToExpect: 'या आठवड्यात काय अपेक्षा करावी',
     doctorTips: 'डाक्तरांच्या सुचना',
-    
+
     nutritionPlanner: 'पोषण नियोजक',
     weeklyMealPlan: 'साप्ताहिक जेवणाची योजना',
     breakfast: 'नाश्ता',
@@ -1932,7 +1571,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'कॅल्शियम युक्त खाद्यपदार्थ समाविष्ट करा',
     eatVegetables: 'ताजी भाजी खा',
     limitSpicy: 'तीखा खाना मर्यादित करा',
-    
+
     dangerSigns: 'धोकादायक चिन्हे',
     knowWhenToSeekHelp: 'तातकाळ मदत केव्हा मिळवायची हे जाणा',
     emergencyAlert: 'आपत्कालीन सतर्कता!',
@@ -1945,7 +1584,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'श्वासाळू',
     swellingPressure: 'सूज आणि दबाव',
     callNowEmergency: '108 ला कॉल करा',
-    
+
     vaccinationTracker: 'लसीकरण ट्रॅकर',
     ttVaccineSchedule: 'टीटी लस वेळापत्रक',
     dailySupplements: 'दैनिक पूरक',
@@ -1956,16 +1595,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'रक्तदाब तपासणी',
     fetalMonitoring: 'भ्रूण निरीक्षण',
     finalCheckup: 'अंतिम तपासणी',
-    
+
     homeVisits: 'घर भेट',
     scheduleVisit: 'भेट शेड्यूल करा',
     visitStats: 'भेट आकडेवारी',
-    completed: 'पूर्ण',
-    scheduled: 'शेड्यूल केले',
-    pending: 'प्रलंबित',
     markComplete: 'पूर्ण चिन्हांकित करा',
-    vitals: 'महत्वाचे संकेत',
-    
+
     appointmentReminders: 'नियुक्ती सूचना',
     sendReminders: 'गर्भवती महिलांना त्यांच्या तपासणीपूर्वी अनुस्मारक पाठवा',
     upcomingAppointments: 'येणाऱ्या नियुक्त्या',
@@ -1980,7 +1615,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     communitySupport: "सामुदायिक समर्थन गट",
     supportGroups: "अन्य गर्भवती महिला, आई आणि स्थानिक तज्ञांशी जोडा",
   },
-  
+
   gu: {
     backButton: "પાછળ",
     logout: "લૉગઆઉટ",
@@ -2113,7 +1748,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bodiesChanges: 'આ સપ્તાહ શરીર ફેરફાર',
     whatToExpect: 'આ સપ્તાહ શું અપેક્ષા કરવી',
     doctorTips: 'ડૉક્ટર સૂચનો',
-    
+
     nutritionPlanner: 'પોષણ આયોજક',
     weeklyMealPlan: 'સાપ્તાહિક ખાવાનો યોજના',
     breakfast: 'સવારનું નાસ્તું',
@@ -2128,7 +1763,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     includeCalsium: 'કેલ્શિયમ સમૃદ્ધ ખાદ્યપદાર્થો સમાવેશ કરો',
     eatVegetables: 'તાજી સબ્જીઓ ખાઓ',
     limitSpicy: 'મસાલેદાર ખાવું મર્યાદિત કરો',
-    
+
     dangerSigns: 'ખતરાના સંકેતો',
     knowWhenToSeekHelp: 'જાણો કે તાત્કાલિક મદદ ક્યારે લેવી છે',
     emergencyAlert: 'કટોકટી સતર્કતા!',
@@ -2141,7 +1776,7 @@ export const multilingualContent: Record<string, LanguageContent> = {
     shortnessOfBreath: 'શ્વાસ લેવામાં અસુવિધા',
     swellingPressure: 'ફોલાશ અને દબાણ',
     callNowEmergency: '108 પર કૉલ કરો',
-    
+
     vaccinationTracker: 'રસીકરણ ટ્રૅકર',
     ttVaccineSchedule: 'ટીટી રસી સમયપત્રક',
     dailySupplements: 'દૈનિક પૂરક',
@@ -2152,16 +1787,12 @@ export const multilingualContent: Record<string, LanguageContent> = {
     bloodPressureCheck: 'રક્ત દબાણ તપાસ',
     fetalMonitoring: 'ફીટલ મોનિટરિંગ',
     finalCheckup: 'અંતિમ તપાસ',
-    
+
     homeVisits: 'ઘર મુલાકાત',
     scheduleVisit: 'મુલાકાત શેડ્યુલ કરો',
     visitStats: 'મુલાકાત આંકડા',
-    completed: 'પૂર્ણ',
-    scheduled: 'શેડ્યુલ કર્યો',
-    pending: 'બાકી',
     markComplete: 'પૂર્ણ ચિહ્નિત કરો',
-    vitals: 'જીવંત સંકેતો',
-    
+
     appointmentReminders: 'મુલાકાત યાદીપત્રો',
     sendReminders: 'ગર્ભવતી મહિલાઓને તેમની તપાસ પહેલાં યાદીપત્રો મોકલો',
     upcomingAppointments: 'આવતી મુલાકાતો',
@@ -2195,3 +1826,4 @@ export function getLanguageDisplayName(code: string): string {
   }
   return names[code] || "English"
 }
+

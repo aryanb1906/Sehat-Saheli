@@ -43,6 +43,7 @@ import { NotificationCenter } from "@/components/notification-center"
 import { AppSidebar } from "@/components/app-sidebar"
 import { useLanguage } from "@/lib/language-context"
 import { DashboardSection } from "@/components/dashboard-section"
+import { VoiceActionEventDetail, VOICE_ACTION_EVENT } from "@/lib/voice-assistant/types"
 
 type RiskStatus = "Low" | "Medium" | "High"
 type ToolCategory = "tracking" | "medical" | "support"
@@ -107,7 +108,9 @@ const SYNC_UI: Record<SyncState, { label: string; icon: LucideIcon; className: s
 
 export default function MotherDashboard() {
     const router = useRouter()
-    const { content } = useLanguage()
+    const { content, language } = useLanguage()
+    const isHindi = language === "hi"
+    const tr = (en: string, hi: string) => (isHindi ? hi : en)
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [userName, setUserName] = useState("Priya")
@@ -157,63 +160,87 @@ export default function MotherDashboard() {
         return () => clearInterval(timer)
     }, [])
 
+    useEffect(() => {
+        const onVoiceAction = (event: Event) => {
+            const detail = (event as CustomEvent<VoiceActionEventDetail>).detail
+            if (!detail) return
+
+            if (detail.intent === "MARK_TASK_COMPLETE") {
+                setChecklist((prev) => {
+                    const targetIndex = prev.findIndex((item) => !item.done)
+                    if (targetIndex === -1) return prev
+                    return prev.map((item, index) => (index === targetIndex ? { ...item, done: true } : item))
+                })
+                return
+            }
+
+            if (detail.intent === "SHOW_CHECKLIST") {
+                const checklistEl = document.getElementById("mother-checklist-section")
+                checklistEl?.scrollIntoView({ behavior: "smooth", block: "center" })
+            }
+        }
+
+        window.addEventListener(VOICE_ACTION_EVENT, onVoiceAction)
+        return () => window.removeEventListener(VOICE_ACTION_EVENT, onVoiceAction)
+    }, [])
+
     const primaryActions = useMemo<PrimaryAction[]>(
         () => [
             {
                 title: content.talkToSaheli || "Talk to Saheli",
-                subtitle: "Chat with AI care guide",
+                subtitle: tr("Chat with AI care guide", "AI देखभाल मार्गदर्शक से बात करें"),
                 route: "/mother/talk",
                 icon: Mic,
                 tone: "primary",
             },
             {
-                title: "Emergency Drill Mode",
-                subtitle: "Practice critical first-10-minute actions",
+                title: tr("Emergency Drill Mode", "आपातकालीन ड्रिल मोड"),
+                subtitle: tr("Practice critical first-10-minute actions", "पहले 10 मिनट के जरूरी कदम अभ्यास करें"),
                 route: "/mother/emergency",
                 icon: ShieldAlert,
                 tone: "danger",
             },
             {
-                title: "Family View Dashboard",
-                subtitle: "Share progress with family caregivers",
+                title: tr("Family View Dashboard", "परिवार डैशबोर्ड"),
+                subtitle: tr("Share progress with family caregivers", "परिवार के साथ प्रगति साझा करें"),
                 route: "/mother/family-sharing",
                 icon: Users,
                 tone: "soft",
             },
             {
                 title: content.myHealthLog || "My Health Log",
-                subtitle: "Track daily symptoms and vitals",
+                subtitle: tr("Track daily symptoms and vitals", "दैनिक लक्षण और वाइटल्स ट्रैक करें"),
                 route: "/mother/health-log",
                 icon: BookOpen,
                 tone: "soft",
             },
         ],
-        [content],
+        [content, isHindi],
     )
 
     const toolsByCategory: Record<ToolCategory, ToolItem[]> = {
         tracking: [
-            { label: "Pregnancy Tracker", route: "/mother/pregnancy-tracker", icon: Baby },
-            { label: "Vital Signs Tracker", route: "/mother/vital-signs", icon: TrendingUp },
-            { label: "Baby Kick Counter", route: "/mother/kick-counter", icon: Activity },
-            { label: "Nutrition Tracker", route: "/mother/nutrition", icon: Utensils },
-            { label: "Pregnancy Exercises", route: "/mother/exercises", icon: Dumbbell },
-            { label: "Labor Signs Tracker", route: "/mother/labor-signs", icon: Zap },
+            { label: content.motherPregnancyTracker || "Pregnancy Tracker", route: "/mother/pregnancy-tracker", icon: Baby },
+            { label: content.motherVitalSigns || "Vital Signs", route: "/mother/vital-signs", icon: TrendingUp },
+            { label: content.motherKickCounter || "Kick Counter", route: "/mother/kick-counter", icon: Activity },
+            { label: content.motherNutritionTracker || "Nutrition Tracker", route: "/mother/nutrition", icon: Utensils },
+            { label: content.motherPregnancyExercises || "Pregnancy Exercises", route: "/mother/exercises", icon: Dumbbell },
+            { label: content.motherLaborSigns || "Labor Signs", route: "/mother/labor-signs", icon: Zap },
         ],
         medical: [
             { label: content.myAppointments || "My Appointments", route: "/mother/appointments", icon: Calendar },
-            { label: "Doctor Consultation", route: "/mother/doctor-consultation", icon: Video },
-            { label: "Medications & Reminders", route: "/mother/medications", icon: Pill },
-            { label: "Medical Records", route: "/mother/medical-records", icon: FileText },
-            { label: "Birth Plan", route: "/mother/birth-plan", icon: Heart },
-            { label: "Hospital Finder", route: "/mother/hospital-finder", icon: MapPin },
+            { label: content.motherDoctorConsultation || "Doctor Consultation", route: "/mother/doctor-consultation", icon: Video },
+            { label: content.motherMedications || "Medications", route: "/mother/medications", icon: Pill },
+            { label: content.motherMedicalRecords || "Medical Records", route: "/mother/medical-records", icon: FileText },
+            { label: content.motherBirthPlan || "Birth Plan", route: "/mother/birth-plan", icon: Heart },
+            { label: content.motherHospitalFinder || "Hospital Finder", route: "/mother/hospital-finder", icon: MapPin },
         ],
         support: [
             { label: content.healthTips || "Health Tips", route: "/mother/tips", icon: MessageCircle },
-            { label: "Community Support", route: "/mother/community", icon: Users },
-            { label: "Family Sharing", route: "/mother/family-sharing", icon: Share2 },
-            { label: "Pregnancy Journal", route: "/mother/pregnancy-journal", icon: BookOpen },
-            { label: "SOS Emergency", route: "/mother/sos-emergency", icon: AlertTriangle },
+            { label: content.communitySupport, route: "/mother/community", icon: Users },
+            { label: content.motherFamilySharing || "Family Sharing", route: "/mother/family-sharing", icon: Share2 },
+            { label: content.motherPregnancyJournal || "Pregnancy Journal", route: "/mother/pregnancy-journal", icon: BookOpen },
+            { label: content.motherSOSEmergency || "SOS Emergency", route: "/mother/sos-emergency", icon: AlertTriangle },
         ],
     }
 
@@ -284,10 +311,13 @@ export default function MotherDashboard() {
                                 {hydrated ? (
                                     <>
                                         <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white md:text-4xl">
-                                            Namaste, {userName}
+                                            {content.greeting || "Namaste"}, {userName}
                                         </h1>
                                         <p className="mt-2 text-sm font-medium text-foreground/80 dark:text-white/85 md:text-base">
-                                            You are doing great today. Let us keep mother and baby safe.
+                                            {tr(
+                                                "You are doing great today. Let us keep mother and baby safe.",
+                                                "आज आप बहुत अच्छा कर रही हैं। माँ और शिशु को सुरक्षित रखें।",
+                                            )}
                                         </p>
                                     </>
                                 ) : (
@@ -299,9 +329,9 @@ export default function MotherDashboard() {
                             </div>
 
                             <div className="rounded-xl border border-white/60 bg-white/65 px-4 py-3 backdrop-blur-sm dark:border-white/20 dark:bg-white/10">
-                                <p className="text-xs font-semibold uppercase tracking-wide text-foreground/70">Pregnancy Week</p>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-foreground/70">{content.pregnancyWeek || "Pregnancy Week"}</p>
                                 {hydrated ? (
-                                    <p className="mt-1 text-xl font-bold text-foreground dark:text-white">Week {pregnancyWeek}</p>
+                                    <p className="mt-1 text-xl font-bold text-foreground dark:text-white">{tr("Week", "हफ्ता")} {pregnancyWeek}</p>
                                 ) : (
                                     <Skeleton className="mt-2 h-6 w-24 bg-white/55 dark:bg-white/20" />
                                 )}
@@ -313,7 +343,7 @@ export default function MotherDashboard() {
                         <Card className="border border-[#DFF5E1] bg-[#F4FFF5] p-5 shadow-none dark:border-[#2C4A37] dark:bg-[#1A2A22]">
                             <div className="flex items-center justify-between gap-3">
                                 <div>
-                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Risk Indicator</p>
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr("Risk Indicator", "जोखिम संकेतक")}</p>
                                     <h2 className="mt-2 flex items-center gap-2 text-xl font-bold text-foreground">
                                         <span className={`rounded-full px-2 py-1 text-xs font-semibold ${riskMeta.chip}`}>{riskStatus} Risk</span>
                                     </h2>
@@ -332,7 +362,7 @@ export default function MotherDashboard() {
                         </Card>
 
                         <Card className="border border-[#E3F2FD] bg-[#F5FAFF] p-5 shadow-none dark:border-[#2A3E52] dark:bg-[#1A2533]">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Smart Daily Checklist</p>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{content.dailyChecklist || tr("Smart Daily Checklist", "स्मार्ट दैनिक चेकलिस्ट")}</p>
                             <h3 className="mt-2 text-lg font-semibold text-foreground">{checklistDone}/{checklist.length} tasks complete</h3>
                             <div className="mt-3 h-2.5 rounded-full bg-trust/10">
                                 <div className="h-2.5 rounded-full bg-gradient-to-r from-trust to-care transition-all" style={{ width: `${checklistProgress}%` }} />
@@ -342,7 +372,7 @@ export default function MotherDashboard() {
                     </div>
                 </Card>
 
-                <DashboardSection title="Primary Actions" subtitle="Most-used features" className="mt-6 animate-fade-up animate-fade-up-delay-1">
+                <DashboardSection title={content.primaryActionsTitle || tr("Primary Actions", "मुख्य कार्य")} subtitle={tr("Most-used features", "सबसे अधिक उपयोग की जाने वाली सुविधाएँ")} className="mt-6 animate-fade-up animate-fade-up-delay-1">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         {primaryActions.map((action) => {
                             const Icon = action.icon
@@ -376,7 +406,7 @@ export default function MotherDashboard() {
                 </DashboardSection>
 
                 <DashboardSection title="Daily Care + Mood" className="mt-6 animate-fade-up animate-fade-up-delay-2">
-                    <div className="grid gap-4 lg:grid-cols-2">
+                    <div id="mother-checklist-section" className="grid gap-4 lg:grid-cols-2">
                         <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
                             <div className="space-y-3">
                                 {checklist.map((item) => (

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Shield, Lock, Eye, Database, UserCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -7,6 +8,108 @@ import { Card } from "@/components/ui/card"
 
 export default function PrivacyPage() {
   const router = useRouter()
+  const [consentDataShare, setConsentDataShare] = useState(true)
+  const [consentAiTraining, setConsentAiTraining] = useState(false)
+  const [retentionDays, setRetentionDays] = useState(365)
+  const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [history, setHistory] = useState<Array<{ id: string; version: number; action: string; createdAt: string }>>([])
+  const userId = "demo-mother"
+
+  useEffect(() => {
+    const loadConsent = async () => {
+      setLoading(true)
+      setError("")
+      try {
+        const response = await fetch(`/api/privacy-consent?userId=${userId}&includeHistory=1`)
+        const data = await response.json()
+        if (data?.success && data?.consent) {
+          setConsentDataShare(Boolean(data.consent.consentDataShare))
+          setConsentAiTraining(Boolean(data.consent.consentAiTraining))
+          setRetentionDays(Number(data.consent.retentionDays) || 365)
+          if (Array.isArray(data.history)) {
+            setHistory(data.history)
+          }
+          return
+        }
+      } catch {
+        setError("Unable to load consent data")
+      }
+
+      const saved = localStorage.getItem("privacy-consent-settings")
+      if (!saved) return
+      try {
+        const parsed = JSON.parse(saved)
+        setConsentDataShare(Boolean(parsed.consentDataShare))
+        setConsentAiTraining(Boolean(parsed.consentAiTraining))
+        setRetentionDays(Number(parsed.retentionDays) || 365)
+      } catch {
+        // Ignore corrupt local data.
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadConsent()
+  }, [])
+
+  const saveConsentSettings = async () => {
+    setSaving(true)
+    localStorage.setItem(
+      "privacy-consent-settings",
+      JSON.stringify({ consentDataShare, consentAiTraining, retentionDays }),
+    )
+
+    try {
+      const response = await fetch("/api/privacy-consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          consentDataShare,
+          consentAiTraining,
+          retentionDays,
+        }),
+      })
+      if (!response.ok) setError("Failed to save consent settings")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const revokeAllConsent = async () => {
+    setSaving(true)
+    try {
+      const response = await fetch("/api/privacy-consent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "revoke", userId }),
+      })
+
+      if (!response.ok) {
+        setError("Failed to revoke consent")
+        return
+      }
+
+      setConsentDataShare(false)
+      setConsentAiTraining(false)
+      const data = await response.json()
+      if (data?.consent) {
+        setHistory((prev) => [
+          {
+            id: `${Date.now()}`,
+            version: data.consent.version || prev.length + 1,
+            action: "REVOKED",
+            createdAt: new Date().toISOString(),
+          },
+          ...prev,
+        ])
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-trust/5 to-background">
@@ -36,6 +139,70 @@ export default function PrivacyPage() {
             protecting your privacy and ensuring your data is secure. This policy explains how we collect, use, and
             safeguard your information.
           </p>
+        </Card>
+
+        <Card className="p-6 border-trust/30 bg-trust/5">
+          <h3 className="text-xl font-bold mb-3">Consent & Retention Controls</h3>
+          <div className="space-y-3 text-sm">
+            <label className="flex items-center justify-between rounded-lg border bg-background px-3 py-2">
+              <span>Allow ASHA/doctor data sharing (care operations)</span>
+              <input
+                type="checkbox"
+                aria-label="Allow data sharing with ASHA and doctor"
+                checked={consentDataShare}
+                onChange={(e) => setConsentDataShare(e.target.checked)}
+              />
+            </label>
+            <label className="flex items-center justify-between rounded-lg border bg-background px-3 py-2">
+              <span>Allow anonymized AI improvement usage</span>
+              <input
+                type="checkbox"
+                aria-label="Allow anonymized AI training"
+                checked={consentAiTraining}
+                onChange={(e) => setConsentAiTraining(e.target.checked)}
+              />
+            </label>
+            <label className="block rounded-lg border bg-background px-3 py-2">
+              <span className="block mb-1">Data retention period (days)</span>
+              <input
+                type="number"
+                min={30}
+                max={3650}
+                aria-label="Data retention days"
+                value={retentionDays}
+                onChange={(e) => setRetentionDays(Number(e.target.value))}
+                className="w-full rounded border px-3 py-2"
+              />
+            </label>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button onClick={() => void saveConsentSettings()} disabled={saving}>
+                {saving ? "Saving..." : "Save Preferences"}
+              </Button>
+              <Button variant="outline" onClick={() => void revokeAllConsent()} disabled={saving}>
+                Revoke All Consent
+              </Button>
+              <Button variant="outline">Export My Data</Button>
+              <Button variant="outline">Request Data Deletion</Button>
+            </div>
+            {loading && <p className="text-xs text-muted-foreground">Loading consent data...</p>}
+            {error && <p className="text-xs text-alert">{error}</p>}
+          </div>
+        </Card>
+
+        <Card className="p-6 border-warning/30 bg-warning/5">
+          <h3 className="text-xl font-bold mb-3">Consent History</h3>
+          {history.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No consent history records yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {history.slice(0, 8).map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between rounded-md border bg-background px-3 py-2 text-sm">
+                  <span>v{entry.version} - {entry.action}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(entry.createdAt).toLocaleString()}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         <div className="space-y-6">

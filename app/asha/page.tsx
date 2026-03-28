@@ -44,7 +44,9 @@ type SyncState = "synced" | "syncing" | "queued"
 
 export default function ASHADashboard() {
     const router = useRouter()
-    const { content } = useLanguage()
+    const { content, language } = useLanguage()
+    const isHindi = language === "hi"
+    const tr = (en: string, hi: string) => (isHindi ? hi : en)
     const [searchQuery, setSearchQuery] = useState("")
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [patients, setPatients] = useState<Patient[]>([])
@@ -106,21 +108,21 @@ export default function ASHADashboard() {
 
     const productivity = [
         {
-            title: "Priority home visits",
+            title: tr("Priority home visits", "प्राथमिक गृह दौरे"),
             value: Math.max(3, stats.high),
-            note: "Start with red-risk mothers before noon",
+            note: tr("Start with red-risk mothers before noon", "दोपहर से पहले उच्च-जोखिम माताओं से शुरू करें"),
             tone: "border-alert/30 bg-alert/10",
         },
         {
-            title: "Overdue follow-ups",
+            title: tr("Overdue follow-ups", "लंबित फॉलो-अप"),
             value: Math.max(4, followUps),
-            note: "Call and reschedule missed ANC checkups",
+            note: tr("Call and reschedule missed ANC checkups", "छूटी ANC जांच के लिए कॉल कर पुनर्निर्धारित करें"),
             tone: "border-warning/30 bg-warning/10",
         },
         {
-            title: "Escalations pending",
+            title: tr("Escalations pending", "लंबित एस्केलेशन"),
             value: Math.max(1, Math.floor(stats.high / 2)),
-            note: "Escalate severe symptoms to PHC/doctor",
+            note: tr("Escalate severe symptoms to PHC/doctor", "गंभीर लक्षणों को PHC/डॉक्टर तक बढ़ाएँ"),
             tone: "border-trust/30 bg-trust/10",
         },
     ]
@@ -156,8 +158,8 @@ export default function ASHADashboard() {
                                 <p className="mt-2 text-base font-medium text-white/90">{content.welcomeBack || "Welcome back"}, Meera Devi</p>
                             </div>
                             <div className="rounded-xl bg-white/20 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-xs font-semibold uppercase tracking-wide text-white/85">Today</p>
-                                <p className="mt-1 text-lg font-semibold">{stats.total} patients assigned</p>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-white/85">{tr("Today", "आज")}</p>
+                                <p className="mt-1 text-lg font-semibold">{stats.total} {tr("patients assigned", "मरीज असाइन")}</p>
                             </div>
                         </div>
                     </div>
@@ -205,7 +207,7 @@ export default function ASHADashboard() {
                     </div>
                 </Card>
 
-                <DashboardSection title="ASHA Productivity Panel" subtitle="Field priorities first" className="mt-7 animate-fade-up animate-fade-up-delay-1">
+                <DashboardSection title={content.ashaProductivityPanel || tr("ASHA Productivity Panel", "आशा उत्पादकता पैनल")} subtitle={tr("Field priorities first", "फील्ड प्राथमिकताएँ पहले")} className="mt-7 animate-fade-up animate-fade-up-delay-1">
                     <div className="grid gap-4 md:grid-cols-3">
                         {productivity.map((item) => (
                             <Card key={item.title} className={`p-4 shadow-none ${item.tone}`}>
@@ -217,7 +219,7 @@ export default function ASHADashboard() {
                     </div>
                 </DashboardSection>
 
-                <DashboardSection title="Quick Actions" subtitle="Daily workflow" className="mt-7 animate-fade-up animate-fade-up-delay-2">
+                <DashboardSection title={content.quickActionsTitle || tr("Quick Actions", "त्वरित कार्य")} subtitle={tr("Daily workflow", "दैनिक कार्यप्रवाह")} className="mt-7 animate-fade-up animate-fade-up-delay-2">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <button
                             className="group flex min-h-[126px] flex-col justify-between rounded-xl bg-trust p-5 text-left text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
@@ -228,8 +230,8 @@ export default function ASHADashboard() {
                                 <ArrowRight className="h-5 w-5 opacity-80 transition group-hover:translate-x-0.5" />
                             </div>
                             <div>
-                                <p className="text-base font-semibold">Continue Training</p>
-                                <p className="mt-1 text-sm text-white/90">3 modules in progress</p>
+                                <p className="text-base font-semibold">{content.ashaTrainingModules || tr("Continue Training", "प्रशिक्षण जारी रखें")}</p>
+                                <p className="mt-1 text-sm text-white/90">{tr("3 modules in progress", "3 मॉड्यूल जारी हैं")}</p>
                             </div>
                         </button>
 
@@ -242,8 +244,8 @@ export default function ASHADashboard() {
                                 <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5" />
                             </div>
                             <div>
-                                <p className="text-base font-semibold">Appointment Reminders</p>
-                                <p className="mt-1 text-sm text-muted-foreground">Manage visit schedules quickly</p>
+                                <p className="text-base font-semibold">{content.appointmentReminders || "Appointment Reminders"}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{tr("Manage visit schedules quickly", "विजिट शेड्यूल जल्दी प्रबंधित करें")}</p>
                             </div>
                         </button>
 
@@ -256,14 +258,14 @@ export default function ASHADashboard() {
                                 <ArrowRight className="h-5 w-5 text-muted-foreground transition group-hover:translate-x-0.5" />
                             </div>
                             <div>
-                                <p className="text-base font-semibold">Home Visits</p>
-                                <p className="mt-1 text-sm text-muted-foreground">Track and update field visits</p>
+                                <p className="text-base font-semibold">{content.homeVisits || "Home Visits"}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{tr("Track and update field visits", "फील्ड विजिट ट्रैक और अपडेट करें")}</p>
                             </div>
                         </button>
                     </div>
                 </DashboardSection>
 
-                <DashboardSection title="Patient Directory" subtitle="Search and open profile" className="mt-7 animate-fade-up animate-fade-up-delay-3 pb-24 md:pb-8">
+                <DashboardSection title={content.patientDirectoryTitle || tr("Patient Directory", "मरीज निर्देशिका")} subtitle={tr("Search and open profile", "खोजें और प्रोफाइल खोलें")} className="mt-7 animate-fade-up animate-fade-up-delay-3 pb-24 md:pb-8">
                     <Card className="border-border/70 bg-white p-3 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27] md:p-4">
                         <div className="flex items-center gap-3">
                             <Search className="h-5 w-5 text-muted-foreground" />
@@ -315,7 +317,7 @@ export default function ASHADashboard() {
 
                     {!loading && filteredPatients.length === 0 && (
                         <Card className="border-border/70 bg-white p-6 text-center shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
-                            <p className="text-sm text-muted-foreground">No patients found for this search.</p>
+                            <p className="text-sm text-muted-foreground">{tr("No patients found for this search.", "इस खोज के लिए कोई मरीज नहीं मिला।")}</p>
                         </Card>
                     )}
                 </DashboardSection>
@@ -326,26 +328,26 @@ export default function ASHADashboard() {
                 className="fixed bottom-6 right-5 z-40 inline-flex items-center gap-2 rounded-full bg-trust px-5 py-3 text-sm font-bold text-white shadow-lg transition-all hover:scale-[1.03] hover:shadow-xl active:scale-[0.98]"
             >
                 <Volume2 className="h-4 w-4" />
-                Voice Assist
+                {tr("Voice Assist", "वॉइस सहायता")}
             </button>
 
             <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-white/95 p-2 shadow-lg backdrop-blur md:hidden">
                 <div className="grid grid-cols-4 gap-1">
                     <button onClick={() => router.push("/asha")} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-trust">
                         <Home className="h-4 w-4" />
-                        Home
+                        {content.home}
                     </button>
                     <button onClick={() => router.push("/asha/home-visits")} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-muted-foreground hover:bg-muted">
                         <ClipboardList className="h-4 w-4" />
-                        Visits
+                        {content.homeVisits || tr("Visits", "दौरे")}
                     </button>
                     <button onClick={() => router.push("/asha")} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-muted-foreground hover:bg-muted">
                         <UserRound className="h-4 w-4" />
-                        Patients
+                        {content.myPatients || tr("Patients", "मरीज")}
                     </button>
                     <button onClick={() => router.push("/asha/analytics")} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-muted-foreground hover:bg-muted">
                         <BarChart3 className="h-4 w-4" />
-                        Analytics
+                        {content.analyticsDashboard || tr("Analytics", "विश्लेषण")}
                     </button>
                 </div>
             </div>

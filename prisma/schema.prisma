@@ -43,6 +43,19 @@ enum LabStatus {
   CRITICAL
 }
 
+enum ReferralStatus {
+  GENERATED
+  SHARED
+  IN_TREATMENT
+  COMPLETED
+  BREACHED
+}
+
+enum ConsentAction {
+  UPDATED
+  REVOKED
+}
+
 model User {
   id            String              @id @default(cuid())
   name          String
@@ -225,4 +238,80 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Referral {
+  id              String         @id @default(cuid())
+  patientId       String
+  consultationId  String
+  note            String
+  status          ReferralStatus @default(GENERATED)
+  slaDeadline     DateTime?
+  breachedAt      DateTime?
+  matchedFacility String?
+  capacityScore   Int?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@index([patientId, createdAt])
+  @@index([status, slaDeadline])
+}
+
+model PrivacyConsent {
+  userId             String          @id
+  consentDataShare   Boolean
+  consentAiTraining  Boolean
+  retentionDays      Int
+  version            Int             @default(1)
+  revokedAt          DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  history            ConsentHistory[]
+}
+
+model ConsentHistory {
+  id                String        @id @default(cuid())
+  userId            String
+  version           Int
+  consentDataShare  Boolean
+  consentAiTraining Boolean
+  retentionDays     Int
+  action            ConsentAction @default(UPDATED)
+  actorId           String?
+  createdAt         DateTime      @default(now())
+  consent           PrivacyConsent @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  timestamp  DateTime @default(now())
+  actorRole  String
+  actorId    String?
+  action     String
+  resource   String
+  endpoint   String?
+  requestId  String?
+  latencyMs  Int?
+  statusCode Int?
+  metadata   Json?
+
+  @@index([timestamp])
+  @@index([actorRole, timestamp])
+  @@index([action, timestamp])
+}
+
+model IdempotencyRecord {
+  key        String   @id
+  userId     String
+  endpoint   String
+  method     String
+  statusCode Int
+  response   Json
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([userId, endpoint])
+  @@index([expiresAt])
 }

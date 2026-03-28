@@ -11,6 +11,10 @@ vi.mock("@/lib/rate-limit", () => ({
     clientIp: () => "127.0.0.1",
     rateLimit: async () => ({ allowed: true, remaining: 99, resetAt: Date.now() + 60_000 }),
 }))
+vi.mock("@/lib/api-auth", () => ({
+    requireSessionUser: async () => ({ id: "asha_001", role: "ASHA", email: "asha@example.com" }),
+    hasRole: (role: string, allowed: string[]) => allowed.includes(role),
+}))
 
 describe("GET /api/asha-tasks", () => {
     beforeEach(() => {

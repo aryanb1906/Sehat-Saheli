@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { hasRole, requireSessionUser } from "@/lib/api-auth";
+import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized } from "@/lib/api-response";
 
 interface LabReport {
     id: string;
@@ -15,17 +17,29 @@ interface LabReport {
 
 export async function GET(req: NextRequest) {
     try {
-        const rl = await rateLimit(`lab-reports-get:${clientIp(req)}`, 100, 60_000)
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized()
+
+        const rl = await rateLimit(`lab-reports-get:${user.id}:${clientIp(req)}`, 100, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+            return failTooManyRequests("Too many requests")
         }
 
         const { searchParams } = new URL(req.url);
-        const userId = searchParams.get("userId") || searchParams.get("patientId");
+        const requestedPatientId = searchParams.get("userId") || searchParams.get("patientId");
         const reportType = searchParams.get("type"); // 'blood', 'ultrasound', 'urine'
 
+        if (user.role === "MOTHER" && requestedPatientId && requestedPatientId !== user.id) {
+            return failForbidden("Cannot access another patient's reports")
+        }
+
+        const patientId = user.role === "MOTHER" ? user.id : requestedPatientId
+        if (!patientId && !hasRole(user.role, ["ASHA", "DOCTOR"])) {
+            return failForbidden()
+        }
+
         const where = {
-            ...(userId ? { patientId: userId } : {}),
+            ...(patientId ? { patientId } : {}),
             ...(reportType ? { testType: reportType } : {}),
         }
 
@@ -52,18 +66,19 @@ export async function GET(req: NextRequest) {
             totalReports: reports.length,
         });
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to fetch lab reports" },
-            { status: 500 }
-        );
+        return failInternal("Failed to fetch lab reports")
     }
 }
 
 export async function POST(req: NextRequest) {
     try {
-        const rl = await rateLimit(`lab-reports-post:${clientIp(req)}`, 40, 60_000)
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized()
+        if (!hasRole(user.role, ["MOTHER", "ASHA", "DOCTOR"])) return failForbidden()
+
+        const rl = await rateLimit(`lab-reports-post:${user.id}:${clientIp(req)}`, 40, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many uploads" }, { status: 429 })
+            return failTooManyRequests("Too many uploads")
         }
 
         const body = await req.json();
@@ -79,10 +94,14 @@ export async function POST(req: NextRequest) {
             .safeParse(body);
 
         if (!parsed.success) {
-            return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+            return failBadRequest("Invalid payload")
         }
 
         const { patientId, testType, results, date, imageUrl, doctorNotes } = parsed.data;
+
+        if (user.role === "MOTHER" && patientId !== user.id) {
+            return failForbidden("Cannot upload report for another patient")
+        }
 
         const status = analyzeResults(results, testType)
 
@@ -114,10 +133,7 @@ export async function POST(req: NextRequest) {
             report: newReport,
         });
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to upload lab report" },
-            { status: 500 }
-        );
+        return failInternal("Failed to upload lab report")
     }
 }
 

@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { addAuditEvent } from "@/lib/audit-log";
+import { requireSessionUser } from "@/lib/api-auth";
+import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized } from "@/lib/api-response";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { readIdempotent, writeIdempotent } from "@/lib/idempotency";
 
 interface EmergencyContact {
     id: string;
@@ -21,6 +27,12 @@ interface SOS {
 
 export async function GET(req: NextRequest) {
     try {
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized()
+
+        const rl = await rateLimit(`emergency-get:${user.id}:${clientIp(req)}`, 120, 60_000)
+        if (!rl.allowed) return failTooManyRequests("Too many requests")
+
         const { searchParams } = new URL(req.url);
         const type = searchParams.get("type"); // "contacts", "history", "danger-signs"
 
@@ -32,40 +44,60 @@ export async function GET(req: NextRequest) {
             return getDangerSigns();
         }
 
-        return NextResponse.json(
-            { error: "Invalid query type" },
-            { status: 400 }
-        );
+        return failBadRequest("Invalid query type")
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to fetch emergency data" },
-            { status: 500 }
-        );
+        return failInternal("Failed to fetch emergency data")
     }
 }
 
 export async function POST(req: NextRequest) {
     try {
-        const body = await req.json();
-        const { action, data } = body;
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized()
 
-        if (action === "trigger-sos") {
-            return triggerSOS(data);
-        } else if (action === "add-contact") {
-            return addEmergencyContact(data);
-        } else if (action === "call-108") {
-            return initiateAmbulanCall(data);
+        const rl = await rateLimit(`emergency-post:${user.id}:${clientIp(req)}`, 40, 60_000)
+        if (!rl.allowed) return failTooManyRequests("Too many emergency requests")
+
+        const idempotencyKey = req.headers.get("idempotency-key")
+        if (idempotencyKey) {
+            const cached = readIdempotent(`emergency:${user.id}:${idempotencyKey}`)
+            if (cached) {
+                return NextResponse.json(cached.body, { status: cached.status })
+            }
         }
 
-        return NextResponse.json(
-            { error: "Invalid action" },
-            { status: 400 }
-        );
+        const body = await req.json();
+        const parsed = z
+            .object({
+                action: z.enum(["trigger-sos", "add-contact", "call-108"]),
+                data: z.record(z.unknown()).default({}),
+            })
+            .safeParse(body)
+
+        if (!parsed.success) return failBadRequest("Invalid payload")
+
+        const { action, data } = parsed.data;
+        let response: Response
+
+        if (action === "trigger-sos") {
+            response = await triggerSOS(user.id, user.role, data);
+        } else if (action === "add-contact") {
+            response = addEmergencyContact(data);
+        } else if (action === "call-108") {
+            response = initiateAmbulanceCall(data);
+        } else {
+            return failBadRequest("Invalid action")
+        }
+
+        if (idempotencyKey) {
+            const responseClone = response.clone()
+            const bodyData = await responseClone.json()
+            writeIdempotent(`emergency:${user.id}:${idempotencyKey}`, response.status, bodyData)
+        }
+
+        return response
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to process emergency action" },
-            { status: 500 }
-        );
+        return failInternal("Failed to process emergency action")
     }
 }
 
@@ -174,8 +206,21 @@ function getDangerSigns(): Response {
     });
 }
 
-function triggerSOS(data: any): Response {
-    const { userId, location, reason } = data;
+async function triggerSOS(userId: string, actorRole: "MOTHER" | "ASHA" | "DOCTOR", data: Record<string, unknown>): Promise<Response> {
+    const parsed = z
+        .object({
+            userId: z.string().optional(),
+            location: z.object({ lat: z.number(), lng: z.number() }),
+            reason: z.string().min(2).optional(),
+        })
+        .safeParse(data)
+
+    if (!parsed.success) return failBadRequest("Invalid SOS payload")
+    if (parsed.data.userId && parsed.data.userId !== userId) {
+        return failForbidden("Cannot trigger SOS for another user")
+    }
+
+    const { location, reason } = parsed.data
 
     const sosAlert: SOS = {
         id: `sos_${Date.now()}`,
@@ -190,6 +235,14 @@ function triggerSOS(data: any): Response {
     // In production: Send SMS/notifications to emergency contacts, ambulance service
     console.log("SOS TRIGGERED:", sosAlert);
 
+    await addAuditEvent({
+        actorRole,
+        actorId: userId,
+        action: "SOS_TRIGGERED",
+        resource: "emergency",
+        metadata: { reason, location },
+    })
+
     return NextResponse.json({
         success: true,
         message: "Emergency alert sent to contacts and 108",
@@ -197,8 +250,19 @@ function triggerSOS(data: any): Response {
     });
 }
 
-function addEmergencyContact(data: any): Response {
-    const { name, relationship, phone, priority } = data;
+function addEmergencyContact(data: Record<string, unknown>): Response {
+    const parsed = z
+        .object({
+            name: z.string().min(2),
+            relationship: z.string().min(2),
+            phone: z.string().min(8),
+            priority: z.number().int().min(1).max(5),
+        })
+        .safeParse(data)
+
+    if (!parsed.success) return failBadRequest("Invalid emergency contact payload")
+
+    const { name, relationship, phone, priority } = parsed.data
 
     const newContact: EmergencyContact = {
         id: `contact_${Date.now()}`,
@@ -216,8 +280,17 @@ function addEmergencyContact(data: any): Response {
     });
 }
 
-function initiateAmbulanCall(data: any): Response {
-    const { location, reason } = data;
+function initiateAmbulanceCall(data: Record<string, unknown>): Response {
+    const parsed = z
+        .object({
+            location: z.object({ lat: z.number(), lng: z.number() }).optional(),
+            reason: z.string().optional(),
+        })
+        .safeParse(data)
+
+    if (!parsed.success) return failBadRequest("Invalid ambulance payload")
+
+    const { location, reason } = parsed.data
 
     // In production: Integrate with ambulance service API
     return NextResponse.json({

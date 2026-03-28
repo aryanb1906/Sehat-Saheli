@@ -143,6 +143,10 @@ export async function POST(req: NextRequest) {
                 reason: parsed.data.reason,
             };
 
+        if (!payload.date || !payload.time) {
+            return NextResponse.json({ error: "date/time required" }, { status: 400 })
+        }
+
         const patientId = parsed.data.patientId || "demo-mother";
         const doctorId = parsed.data.doctorId;
         const doctorName = parsed.data.doctorName || "Dr. Available";

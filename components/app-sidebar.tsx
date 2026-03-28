@@ -30,28 +30,28 @@ export function AppSidebar({ isOpen, onClose, role }: AppSidebarProps) {
     { icon: Phone, label: content.emergencyCall, path: "/mother/emergency" },
     { icon: Calendar, label: content.myAppointments, path: "/mother/appointments" },
     { icon: MessageCircle, label: content.healthTips, path: "/mother/tips" },
-    { icon: Users, label: "Community Support", path: "/mother/community" },
-    { icon: Baby, label: "Pregnancy Tracker", path: "/mother/pregnancy-tracker" },
-    { icon: Pill, label: "Medications", path: "/mother/medications" },
-    { icon: TrendingUp, label: "Kick Counter", path: "/mother/kick-counter" },
-    { icon: Utensils, label: "Nutrition Tracker", path: "/mother/nutrition" },
-    { icon: Dumbbell, label: "Pregnancy Exercises", path: "/mother/exercises" },
-    { icon: FileText, label: "Medical Records", path: "/mother/medical-records" },
-    { icon: TrendingUp, label: "Vital Signs", path: "/mother/vital-signs" },
-    { icon: Video, label: "Doctor Consultation", path: "/mother/doctor-consultation" },
-    { icon: Share2, label: "Family Sharing", path: "/mother/family-sharing" },
-    { icon: Zap, label: "Labor Signs", path: "/mother/labor-signs" },
-    { icon: Heart, label: "Birth Plan", path: "/mother/birth-plan" },
-    { icon: AlertTriangle, label: "SOS Emergency", path: "/mother/sos-emergency" },
-    { icon: BookOpen, label: "Pregnancy Journal", path: "/mother/pregnancy-journal" },
-    { icon: MapPin, label: "Hospital Finder", path: "/mother/hospital-finder" },
+    { icon: Users, label: content.communitySupport, path: "/mother/community" },
+    { icon: Baby, label: content.motherPregnancyTracker || "Pregnancy Tracker", path: "/mother/pregnancy-tracker" },
+    { icon: Pill, label: content.motherMedications || "Medications", path: "/mother/medications" },
+    { icon: TrendingUp, label: content.motherKickCounter || "Kick Counter", path: "/mother/kick-counter" },
+    { icon: Utensils, label: content.motherNutritionTracker || "Nutrition Tracker", path: "/mother/nutrition" },
+    { icon: Dumbbell, label: content.motherPregnancyExercises || "Pregnancy Exercises", path: "/mother/exercises" },
+    { icon: FileText, label: content.motherMedicalRecords || "Medical Records", path: "/mother/medical-records" },
+    { icon: TrendingUp, label: content.motherVitalSigns || "Vital Signs", path: "/mother/vital-signs" },
+    { icon: Video, label: content.motherDoctorConsultation || "Doctor Consultation", path: "/mother/doctor-consultation" },
+    { icon: Share2, label: content.motherFamilySharing || "Family Sharing", path: "/mother/family-sharing" },
+    { icon: Zap, label: content.motherLaborSigns || "Labor Signs", path: "/mother/labor-signs" },
+    { icon: Heart, label: content.motherBirthPlan || "Birth Plan", path: "/mother/birth-plan" },
+    { icon: AlertTriangle, label: content.motherSOSEmergency || "SOS Emergency", path: "/mother/sos-emergency" },
+    { icon: BookOpen, label: content.motherPregnancyJournal || "Pregnancy Journal", path: "/mother/pregnancy-journal" },
+    { icon: MapPin, label: content.motherHospitalFinder || "Hospital Finder", path: "/mother/hospital-finder" },
   ]
 
   const ashaMenuItems = [
     { icon: Home, label: content.ashaDashboard, path: "/asha" },
     { icon: Users, label: content.myPatients, path: "/asha" },
     { icon: BarChart3, label: content.analyticsDashboard, path: "/asha/analytics" },
-    { icon: GraduationCap, label: "Training Modules", path: "/asha/training" },
+    { icon: GraduationCap, label: content.ashaTrainingModules || "Training Modules", path: "/asha/training" },
   ]
 
   const menuItems = role === "mother" ? motherMenuItems : ashaMenuItems
@@ -73,9 +73,8 @@ export function AppSidebar({ isOpen, onClose, role }: AppSidebarProps) {
               <Button
                 key={item.path}
                 variant={isActive ? "default" : "ghost"}
-                className={`w-full justify-start gap-3 h-12 text-base ${
-                  isActive ? "bg-gradient-to-r from-trust to-accent text-white" : ""
-                }`}
+                className={`w-full justify-start gap-3 h-12 text-base ${isActive ? "bg-gradient-to-r from-trust to-accent text-white" : ""
+                  }`}
                 onClick={() => handleNavigation(item.path)}
               >
                 <Icon className="w-5 h-5" />

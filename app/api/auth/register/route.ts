@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
 import { createDevUser, findDevUserByEmail } from "@/lib/dev-auth-store"
 import { canUseDevAuthFallback, hasDatabaseUrl } from "@/lib/env"
+import { addAuditEvent } from "@/lib/audit-log"
 
 const registerSchema = z.object({
     name: z.string().min(2),
@@ -89,6 +90,14 @@ export async function POST(req: NextRequest) {
             })
         }
 
+        await addAuditEvent({
+            actorRole: parsed.data.role,
+            actorId: user.id,
+            action: "USER_REGISTERED",
+            resource: "user",
+            metadata: { email },
+        })
+
         return NextResponse.json({
             success: true,
             user: { id: user.id, name: user.name, email: user.email, role: user.role },
@@ -116,11 +125,9 @@ export async function POST(req: NextRequest) {
             )
         }
 
-        const message = error instanceof Error ? error.message : "Unknown error"
         return NextResponse.json(
             {
                 error: "Registration failed. Please verify backend setup.",
-                details: process.env.NODE_ENV === "production" ? undefined : message,
             },
             { status: 500 },
         )

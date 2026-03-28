@@ -13,7 +13,9 @@
 ## 📖 Table of Contents
 - [The Problem](#-the-problem)
 - [Our Solution](#-our-solution)
+- [Latest Platform Update (March 2026)](#-latest-platform-update-march-2026)
 - [Key Features](#-key-features)
+- [End-to-End Product Workflow](#-end-to-end-product-workflow)
 - [Technology Stack](#-technology-stack)
 - [System Architecture](#-system-architecture)
 - [Getting Started](#-getting-started)
@@ -30,6 +32,60 @@ In rural India, maternal mortality remains a critical challenge due to:
 
 ## 💡 Our Solution
 **Sehat Saheli** is an AI-powered digital companion that empowers both expectant mothers and ASHA workers. It acts as a bridge, providing 24/7 medical guidance in native languages while streamlining patient management for healthcare workers.
+
+---
+
+## 🚀 Latest Platform Update (March 2026)
+
+This release includes both the previously completed platform foundations and the latest production updates delivered today.
+
+### ✅ Highlights Added Today
+
+1. **Voice Assistant 2.0**
+    - Dedicated settings panel: language override, auto-listen toggle, speaking speed.
+    - Voice intent analytics logging with success/failure trends.
+    - Expanded intents for mother + ASHA workflows:
+      - Appointments, medications, lab reports, community navigation.
+      - ASHA dashboard, patients, tasks, analytics navigation.
+    - New voice APIs:
+      - `POST /api/voice-assistant/parse`
+      - `POST/GET /api/voice-assistant/analytics`
+
+2. **Care Governance and Safety Layer**
+    - Privacy consent controls API with version history and revoke flows.
+    - Referral workflow API with SLA breach detection and escalation readiness.
+    - Audit logging APIs for admin-grade activity monitoring.
+    - Idempotency safeguards for mutation endpoints.
+    - Structured observability helpers with timing/error instrumentation.
+
+3. **Clinical Decision Support APIs**
+    - Maternal risk assessment endpoint (`/api/maternal-risk`) with trend-aware scoring and action plans.
+    - Medication safety endpoint (`/api/medication-safety`) with pregnancy-safe guidance labels.
+
+4. **Offline Reliability Enhancements**
+    - Offline write queue client with automatic replay on reconnect.
+    - Conflict detection + lightweight resolver UI for failed sync operations.
+
+5. **Role and Security Hardening**
+    - Stronger role guards in middleware for mother/ASHA/doctor/admin route boundaries.
+    - API auth utilities and standardized API error responses.
+
+6. **Localization + UX Continuity**
+    - Mother dashboard and sidebar labels aligned to multilingual content keys.
+    - Hindi/English display consistency in primary dashboard actions and test selectors.
+
+### ✅ Existing Foundations Preserved
+
+- NextAuth authentication and role-aware access model.
+- Prisma + PostgreSQL data model integration.
+- Real-time and persistent chat infrastructure.
+- Video consultation persistence layer.
+- PWA + performance baseline (manifest, service worker, web vitals).
+
+### 🧪 Validation Snapshot
+
+- Unit and route tests passing in latest run: **13/13 tests passed**.
+- New and updated test coverage includes referrals, privacy consent, emergency and lab route auth/validation, and smoke route protections.
 
 ---
 
@@ -96,6 +152,46 @@ All 8 pages now feature professional UI/UX patterns:
 6. **🔍 Symptom Checker** - AI analysis with severity-based actions
 7. **📋 ASHA Task Management** - Priority-based task tracking with real-time updates
 8. **📊 Analytics Dashboard** - ASHA performance metrics with progress bars
+
+---
+
+## 🔄 End-to-End Product Workflow
+
+### 1. Mother Journey
+1. Mother signs in (or enters allowed guest flow where configured).
+2. Uses dashboard tools for symptoms, medications, appointments, emergency readiness, and family sharing.
+3. Uses voice assistant in Hindi/English to execute actions hands-free.
+4. Receives guidance from risk + safety APIs (maternal risk scoring, medication safety signals).
+5. Data is persisted and, if offline, queued for safe sync when connectivity returns.
+
+### 2. ASHA Journey
+1. ASHA accesses patient/task dashboards using role-secured routes.
+2. Uses task and analytics views for daily workload management.
+3. Can navigate quickly via expanded voice intents.
+4. Automation planning endpoint supports prioritized work and routing bundles.
+
+### 3. Referral and Consent Governance
+1. Referral is generated with tracked status and SLA timeline.
+2. Breach conditions are surfaced as alerts for follow-up.
+3. Privacy consent is saved with versioned history.
+4. Revoke flow is supported and audit-ready.
+
+### 4. Audit and Observability Flow
+1. Sensitive API actions can emit structured audit events.
+2. Latency/error instrumentation is captured via observability helpers.
+3. Admin audit viewer page provides role-filtered operational traceability.
+
+### 5. Development Workflow
+1. Install and configure:
+    - `pnpm install`
+    - `pnpm prisma:generate`
+    - `pnpm prisma:push` (with active DB)
+2. Run app:
+    - `pnpm dev`
+3. Run tests:
+    - `pnpm test`
+4. Optional smoke checks:
+    - `pnpm exec playwright test`
 
 ---
 

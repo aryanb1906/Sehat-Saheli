@@ -60,7 +60,7 @@ export default function NutritionPlannerPage() {
   }
 
   const ironRichFoods = [
-    '🥬 Spinach', '🍅 Tomatoes', '🥛 Milk', '🥚 Eggs', 
+    '🥬 Spinach', '🍅 Tomatoes', '🥛 Milk', '🥚 Eggs',
     '🌾 Whole grains', '🫘 Lentils', '🥬 Leafy greens'
   ]
 
@@ -123,7 +123,7 @@ export default function NutritionPlannerPage() {
             <h2 className="text-2xl font-bold">Weekly Meal Plan</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {Object.entries(plan).map(([meal, item]) => (
+            {(Object.entries(plan) as Array<[string, string]>).map(([meal, item]) => (
               <div key={meal} className="bg-white p-4 rounded-lg">
                 <p className="font-semibold text-foreground capitalize mb-2">{meal}</p>
                 <p className="text-foreground/80">{item}</p>
@@ -155,13 +155,13 @@ export default function NutritionPlannerPage() {
             <h2 className="text-2xl font-bold">Daily Checklist</h2>
           </div>
           <div className="space-y-3">
-            {['✓ Drink 2-3 liters water', '✓ Take iron tablets', '✓ Eat protein at every meal', 
-              '✓ Include calcium-rich foods', '✓ Eat fresh vegetables', '✓ Limit spicy foods'].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg">
-                <input type="checkbox" className="w-5 h-5" />
-                <span className="text-foreground">{item}</span>
-              </div>
-            ))}
+            {['✓ Drink 2-3 liters water', '✓ Take iron tablets', '✓ Eat protein at every meal',
+              '✓ Include calcium-rich foods', '✓ Eat fresh vegetables', '✓ Limit spicy foods'].map((item: string, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                  <input type="checkbox" className="w-5 h-5" />
+                  <span className="text-foreground">{item}</span>
+                </div>
+              ))}
           </div>
         </Card>
       </div>

@@ -12,6 +12,9 @@ vi.mock("@/lib/rate-limit", () => ({
     clientIp: () => "127.0.0.1",
     rateLimit: async () => ({ allowed: true, remaining: 9, resetAt: Date.now() + 60_000 }),
 }))
+vi.mock("@/lib/audit-log", () => ({
+    addAuditEvent: async () => ({}),
+}))
 
 describe("POST /api/auth/register", () => {
     beforeEach(() => {

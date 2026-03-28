@@ -18,16 +18,18 @@ test.describe("Dashboard smoke tests", () => {
     test("mother dashboard renders key sections", async ({ page }) => {
         await page.goto("/mother")
 
-        await expect(page.getByRole("heading", { name: /primary actions/i })).toBeVisible()
-        await expect(page.getByRole("heading", { name: /daily insights/i })).toBeVisible()
+        await expect(page.getByText(/primary actions|मुख्य कार्य/i)).toBeVisible()
+        await expect(page.getByText(/risk indicator|जोखिम संकेतक/i)).toBeVisible()
         await expect(page.getByRole("button", { name: /sos/i })).toBeVisible()
     })
 
-    test("asha dashboard renders key sections", async ({ page }) => {
+    test("asha route requires authenticated role", async ({ page }) => {
         await page.goto("/asha")
+        await expect(page).toHaveURL(/\/auth\/signin/)
+    })
 
-        await expect(page.getByRole("heading", { name: /quick actions/i })).toBeVisible()
-        await expect(page.getByRole("heading", { name: /patient directory/i })).toBeVisible()
-        await expect(page.getByText(/continue training/i)).toBeVisible()
+    test("admin route requires doctor role", async ({ page }) => {
+        await page.goto("/admin/audit")
+        await expect(page).toHaveURL(/\/auth\/signin/)
     })
 })

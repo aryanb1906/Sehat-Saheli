@@ -14,6 +14,8 @@ interface Medication {
   dosage: string
   time: string
   taken: boolean
+  safety?: "safe" | "caution" | "avoid"
+  safetyNote?: string
 }
 
 export default function Medications() {
@@ -53,18 +55,49 @@ export default function Medications() {
       return
     }
 
-    const medication: Medication = {
-      id: Date.now().toString(),
-      ...newMed,
-      taken: false,
+    const createMedication = async () => {
+      let safety: Medication["safety"] = "caution"
+      let safetyNote = "Not found in local guide. Please confirm with doctor/ASHA."
+
+      try {
+        const response = await fetch("/api/medication-safety", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ medicationName: newMed.name }),
+        })
+        const data = await response.json()
+        if (data?.success) {
+          safety = data.safety
+          safetyNote = data.note
+        }
+      } catch {
+        // Keep default caution if safety service fails.
+      }
+
+      const medication: Medication = {
+        id: Date.now().toString(),
+        ...newMed,
+        taken: false,
+        safety,
+        safetyNote,
+      }
+      saveMedications([...medications, medication])
+      setNewMed({ name: "", dosage: "", time: "" })
+      setShowAdd(false)
+      const safetyLabel = (safety || "caution").toUpperCase()
+      toast({
+        title: "Added!",
+        description: `Medication reminder added (${safetyLabel})`,
+      })
     }
-    saveMedications([...medications, medication])
-    setNewMed({ name: "", dosage: "", time: "" })
-    setShowAdd(false)
-    toast({
-      title: "Added!",
-      description: "Medication reminder added",
-    })
+
+    void createMedication()
+  }
+
+  const getSafetyStyles = (safety?: Medication["safety"]) => {
+    if (safety === "safe") return "bg-success/10 text-success"
+    if (safety === "avoid") return "bg-alert/10 text-alert"
+    return "bg-warning/10 text-warning"
   }
 
   const toggleTaken = (id: string) => {
@@ -166,6 +199,12 @@ export default function Medications() {
                     <p className="text-sm text-muted-foreground">
                       {med.dosage} • {med.time}
                     </p>
+                    <div className="mt-2">
+                      <span className={`rounded px-2 py-1 text-xs font-semibold ${getSafetyStyles(med.safety)}`}>
+                        {(med.safety || "caution").toUpperCase()}
+                      </span>
+                      {med.safetyNote && <p className="text-xs text-muted-foreground mt-1">{med.safetyNote}</p>}
+                    </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => deleteMedication(med.id)}>
                     <Trash2 className="w-5 h-5 text-alert" />
