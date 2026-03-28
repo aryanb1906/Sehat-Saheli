@@ -4,3 +4,11 @@ out/
 dist/
 test-results/
 playwright-report/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Local diagnostics and smoke run artifacts
+logs/
+smoke-results/
+smoke-results-*/
