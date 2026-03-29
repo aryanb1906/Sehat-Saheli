@@ -9,12 +9,19 @@ import { useLanguage } from '@/lib/language-context'
 
 export default function HomeVisitsPage() {
   const router = useRouter()
-  const { content } = useLanguage()
+  const { content, language } = useLanguage()
+  const t = (copy: Record<string, string>) => copy[language] || copy.en
   const [visits, setVisits] = useState([
-    { id: 1, patientName: 'Priya Singh', visitDate: '2024-11-20', status: 'completed', vitals: 'BP: 120/80' },
+    { id: 1, patientName: 'Priya Singh', visitDate: '2024-11-20', status: 'completed', vitals: '120/80' },
     { id: 2, patientName: 'Rajni Devi', visitDate: '2024-11-21', status: 'scheduled', vitals: null },
     { id: 3, patientName: 'Meera Joshi', visitDate: '2024-11-22', status: 'pending', vitals: null }
   ])
+
+  const statusLabel: Record<string, string> = {
+    completed: t({ en: 'Completed', hi: 'पूर्ण', or: 'ସମ୍ପୂର୍ଣ୍ଣ', bn: 'সম্পন্ন', te: 'పూర్తి', ta: 'முடிந்தது', mr: 'पूर्ण', gu: 'પૂર્ણ' }),
+    scheduled: t({ en: 'Scheduled', hi: 'निर्धारित', or: 'ନିର୍ଦ୍ଧାରିତ', bn: 'নির্ধারিত', te: 'షెడ్యూల్ చేసిన', ta: 'திட்டமிட்டது', mr: 'नियोजित', gu: 'નિર્ધારિત' }),
+    pending: t({ en: 'Pending', hi: 'लंबित', or: 'ବକେୟା', bn: 'অপেক্ষমাণ', te: 'పెండింగ్', ta: 'நிலுவை', mr: 'प्रलंबित', gu: 'બાકી' }),
+  }
 
   const markCompleted = (id: number) => {
     setVisits(prev =>
@@ -30,11 +37,11 @@ export default function HomeVisitsPage() {
             <Button variant="ghost" size="icon" className="text-white" onClick={() => router.back()}>
               <ArrowLeft className="w-6 h-6" />
             </Button>
-            <h1 className="text-3xl font-bold">Home Visits</h1>
+            <h1 className="text-3xl font-bold">{content.homeVisits || t({ en: 'Home Visits', hi: 'होम विजिट', or: 'ଘର ଭିଜିଟ୍', bn: 'হোম ভিজিট', te: 'హోమ్ విజిట్స్', ta: 'வீட்டு வருகைகள்', mr: 'घरभेटी', gu: 'ઘર મુલાકાતો' })}</h1>
           </div>
           <Button className="bg-white text-trust hover:bg-white/90 gap-2">
             <Plus className="w-5 h-5" />
-            Schedule Visit
+            {content.scheduleVisit || t({ en: 'Schedule Visit', hi: 'विजिट निर्धारित करें', or: 'ଭିଜିଟ୍ ନିର୍ଧାରଣ କରନ୍ତୁ', bn: 'ভিজিট নির্ধারণ করুন', te: 'విజిట్ షెడ్యూల్ చేయండి', ta: 'வருகையை திட்டமிடுங்கள்', mr: 'भेट नियोजित करा', gu: 'મુલાકાત શેડ્યૂલ કરો' })}
           </Button>
         </div>
       </div>
@@ -43,19 +50,19 @@ export default function HomeVisitsPage() {
         {/* Visit Stats */}
         <div className="grid grid-cols-3 gap-4">
           <Card className="p-4 bg-success/10 border-success/20">
-            <p className="text-sm text-muted-foreground">Completed</p>
+            <p className="text-sm text-muted-foreground">{statusLabel.completed}</p>
             <p className="text-3xl font-bold text-success">
               {visits.filter(v => v.status === 'completed').length}
             </p>
           </Card>
           <Card className="p-4 bg-warning/10 border-warning/20">
-            <p className="text-sm text-muted-foreground">Scheduled</p>
+            <p className="text-sm text-muted-foreground">{statusLabel.scheduled}</p>
             <p className="text-3xl font-bold text-warning">
               {visits.filter(v => v.status === 'scheduled').length}
             </p>
           </Card>
           <Card className="p-4 bg-alert/10 border-alert/20">
-            <p className="text-sm text-muted-foreground">Pending</p>
+            <p className="text-sm text-muted-foreground">{statusLabel.pending}</p>
             <p className="text-3xl font-bold text-alert">
               {visits.filter(v => v.status === 'pending').length}
             </p>
@@ -74,17 +81,16 @@ export default function HomeVisitsPage() {
                     {new Date(visit.visitDate).toLocaleDateString('en-IN')}
                   </p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  visit.status === 'completed' ? 'bg-success/20 text-success' :
-                  visit.status === 'scheduled' ? 'bg-warning/20 text-warning' :
-                  'bg-alert/20 text-alert'
-                }`}>
-                  {visit.status.toUpperCase()}
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${visit.status === 'completed' ? 'bg-success/20 text-success' :
+                    visit.status === 'scheduled' ? 'bg-warning/20 text-warning' :
+                      'bg-alert/20 text-alert'
+                  }`}>
+                  {statusLabel[visit.status]}
                 </span>
               </div>
-              
+
               {visit.vitals && (
-                <p className="text-sm text-foreground/70 mb-3">Vitals: {visit.vitals}</p>
+                <p className="text-sm text-foreground/70 mb-3">{t({ en: 'Vitals', hi: 'वाइटल्स', or: 'ଭାଇଟାଲ୍', bn: 'ভাইটাল', te: 'వైటల్స్', ta: 'உடல் அளவீடுகள்', mr: 'व्हायटल्स', gu: 'વાઇટલ્સ' })}: BP {visit.vitals}</p>
               )}
 
               <div className="flex gap-2">
@@ -95,7 +101,7 @@ export default function HomeVisitsPage() {
                       className="flex-1 bg-success hover:bg-success/90 text-white gap-2"
                     >
                       <CheckCircle className="w-4 h-4" />
-                      Mark Complete
+                      {content.markComplete || t({ en: 'Mark Complete', hi: 'पूर्ण चिह्नित करें', or: 'ସମ୍ପୂର୍ଣ୍ଣ ଚିହ୍ନିତ କରନ୍ତୁ', bn: 'সম্পন্ন চিহ্নিত করুন', te: 'పూర్తిగా గుర్తించండి', ta: 'முடிந்ததாக குறிக்கவும்', mr: 'पूर्ण म्हणून चिन्हांकित करा', gu: 'પૂર્ણ તરીકે ચિહ્નિત કરો' })}
                     </Button>
                     <Button
                       onClick={() => window.location.href = `tel:${visit.patientName}`}
@@ -103,14 +109,14 @@ export default function HomeVisitsPage() {
                       className="flex-1"
                     >
                       <Phone className="w-4 h-4 mr-2" />
-                      Call
+                      {t({ en: 'Call', hi: 'कॉल', or: 'କଲ୍', bn: 'কল', te: 'కాల్', ta: 'அழை', mr: 'कॉल', gu: 'કૉલ' })}
                     </Button>
                   </>
                 )}
                 {visit.status === 'completed' && (
                   <Button disabled className="w-full bg-success/30 text-success cursor-not-allowed">
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Completed
+                    {statusLabel.completed}
                   </Button>
                 )}
               </div>

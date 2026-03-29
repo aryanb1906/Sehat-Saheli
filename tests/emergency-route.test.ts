@@ -18,6 +18,9 @@ vi.mock("@/lib/audit-log", () => ({
 describe("/api/emergency route", () => {
     beforeEach(() => {
         vi.clearAllMocks()
+            ; (global as any).__sosFallbackStore = {}
+            ; (global as any).__sosStatusFallbackStore = {}
+            ; (global as any).__emergencyContactsFallbackStore = {}
     })
 
     it("returns unauthorized without session", async () => {
@@ -41,5 +44,60 @@ describe("/api/emergency route", () => {
         )
 
         expect(res.status).toBe(400)
+    })
+
+    it("supports SOS status acknowledgement flow", async () => {
+        const { POST, GET } = await import("@/app/api/emergency/route")
+
+        sessionMock.mockResolvedValue({ id: "mother_1", role: "MOTHER", email: "m@x.com" })
+
+        const triggerRes = await POST(
+            new Request("http://localhost/api/emergency", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "trigger-sos",
+                    data: {
+                        location: { lat: 20.2, lng: 85.8 },
+                        reason: "severe pain",
+                    },
+                }),
+            }) as any,
+        )
+
+        expect(triggerRes.status).toBe(200)
+        const triggerPayload = await triggerRes.json()
+        expect(triggerPayload.success).toBe(true)
+
+        const sosId = triggerPayload.sos.id
+
+        sessionMock.mockResolvedValue({ id: "asha_1", role: "ASHA", email: "asha@x.com" })
+
+        const ackRes = await POST(
+            new Request("http://localhost/api/emergency", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    action: "update-sos-status",
+                    data: {
+                        userId: "mother_1",
+                        sosId,
+                        status: "acknowledged",
+                    },
+                }),
+            }) as any,
+        )
+
+        expect(ackRes.status).toBe(200)
+        const ackPayload = await ackRes.json()
+        expect(ackPayload.sos.status).toBe("acknowledged")
+
+        sessionMock.mockResolvedValue({ id: "mother_1", role: "MOTHER", email: "m@x.com" })
+        const historyRes = await GET(new Request("http://localhost/api/emergency?type=history") as any)
+        const historyPayload = await historyRes.json()
+
+        expect(historyRes.status).toBe(200)
+        expect(historyPayload.sosHistory[0].id).toBe(sosId)
+        expect(historyPayload.sosHistory[0].status).toBe("acknowledged")
     })
 })

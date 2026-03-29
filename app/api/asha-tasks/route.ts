@@ -4,8 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import { addAuditEvent } from "@/lib/audit-log";
 import { hasRole, requireSessionUser } from "@/lib/api-auth";
-import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized } from "@/lib/api-response";
+import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized, okWithRequestId } from "@/lib/api-response";
 import { readIdempotent, writeIdempotent } from "@/lib/idempotency";
+import { getRequestId } from "@/lib/observability";
 
 interface Task {
     id: string;
@@ -22,13 +23,14 @@ interface Task {
 }
 
 export async function GET(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const user = await requireSessionUser()
-        if (!user) return failUnauthorized()
-        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden("Not allowed to access this resource", requestId)
 
         const rl = await rateLimit(`asha-tasks-get:${user.id}:${clientIp(req)}`, 100, 60_000)
-        if (!rl.allowed) return failTooManyRequests("Too many requests")
+        if (!rl.allowed) return failTooManyRequests("Too many requests", undefined, requestId)
 
         const { searchParams } = new URL(req.url);
         const requestedAshId = searchParams.get("ashId");
@@ -36,7 +38,7 @@ export async function GET(req: NextRequest) {
         const status = searchParams.get("status");
 
         if (!ashId && user.role !== "DOCTOR") {
-            return failForbidden()
+            return failForbidden("Not allowed to access this resource", requestId)
         }
 
         const dbTasks = await prisma.ashaTask.findMany({
@@ -75,28 +77,28 @@ export async function GET(req: NextRequest) {
             completedAt: task.completedAt || undefined,
         }))
 
-        return NextResponse.json({
-            success: true,
+        return okWithRequestId({
             tasks: filteredTasks,
             totalTasks: filteredTasks.length,
-        });
+        }, requestId);
     } catch (error) {
-        return failInternal("Failed to fetch tasks")
+        return failInternal("Failed to fetch tasks", requestId)
     }
 }
 
 export async function POST(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const user = await requireSessionUser()
-        if (!user) return failUnauthorized()
-        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden("Not allowed to access this resource", requestId)
 
         const rl = await rateLimit(`asha-tasks-post:${user.id}:${clientIp(req)}`, 40, 60_000)
-        if (!rl.allowed) return failTooManyRequests("Too many create requests")
+        if (!rl.allowed) return failTooManyRequests("Too many create requests", undefined, requestId)
 
         const idempotencyKey = req.headers.get("idempotency-key")
         if (idempotencyKey) {
-            const cached = readIdempotent(`asha-tasks:create:${user.id}:${idempotencyKey}`)
+            const cached = await readIdempotent(`asha-tasks:create:${user.id}:${idempotencyKey}`)
             if (cached) return NextResponse.json(cached.body, { status: cached.status })
         }
 
@@ -114,12 +116,12 @@ export async function POST(req: NextRequest) {
             .safeParse(body)
 
         if (!parsed.success) {
-            return failBadRequest("Invalid payload")
+            return failBadRequest("Invalid payload", requestId)
         }
 
         const { ashId, patientId, taskType, description, dueDate, priority, location } = parsed.data;
         if (user.role === "ASHA" && ashId !== user.id) {
-            return failForbidden("Cannot create tasks for another ASHA worker")
+            return failForbidden("Cannot create tasks for another ASHA worker", requestId)
         }
 
         const created = await prisma.ashaTask.create({
@@ -148,28 +150,30 @@ export async function POST(req: NextRequest) {
 
         const payload = {
             success: true,
+            requestId,
             message: "Task created successfully",
             task: newTask,
         }
-        if (idempotencyKey) writeIdempotent(`asha-tasks:create:${user.id}:${idempotencyKey}`, 200, payload)
-        return NextResponse.json(payload);
+        if (idempotencyKey) await writeIdempotent(`asha-tasks:create:${user.id}:${idempotencyKey}`, 200, payload)
+        return okWithRequestId({ message: "Task created successfully", task: newTask }, requestId);
     } catch (error) {
-        return failInternal("Failed to create task")
+        return failInternal("Failed to create task", requestId)
     }
 }
 
 export async function PUT(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const user = await requireSessionUser()
-        if (!user) return failUnauthorized()
-        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden("Not allowed to access this resource", requestId)
 
         const rl = await rateLimit(`asha-tasks-put:${user.id}:${clientIp(req)}`, 60, 60_000)
-        if (!rl.allowed) return failTooManyRequests("Too many update requests")
+        if (!rl.allowed) return failTooManyRequests("Too many update requests", undefined, requestId)
 
         const idempotencyKey = req.headers.get("idempotency-key")
         if (idempotencyKey) {
-            const cached = readIdempotent(`asha-tasks:update:${user.id}:${idempotencyKey}`)
+            const cached = await readIdempotent(`asha-tasks:update:${user.id}:${idempotencyKey}`)
             if (cached) return NextResponse.json(cached.body, { status: cached.status })
         }
 
@@ -184,7 +188,7 @@ export async function PUT(req: NextRequest) {
             .safeParse(body)
 
         if (!parsed.success) {
-            return failBadRequest("Invalid payload")
+            return failBadRequest("Invalid payload", requestId)
         }
 
         const { taskId, status, notes, completedAt } = parsed.data;
@@ -207,12 +211,13 @@ export async function PUT(req: NextRequest) {
 
         const payload = {
             success: true,
+            requestId,
             message: "Task updated successfully",
             task: { id: taskId, status, notes, completedAt },
         }
-        if (idempotencyKey) writeIdempotent(`asha-tasks:update:${user.id}:${idempotencyKey}`, 200, payload)
-        return NextResponse.json(payload);
+        if (idempotencyKey) await writeIdempotent(`asha-tasks:update:${user.id}:${idempotencyKey}`, 200, payload)
+        return okWithRequestId({ message: "Task updated successfully", task: { id: taskId, status, notes, completedAt } }, requestId);
     } catch (error) {
-        return failInternal("Failed to update task")
+        return failInternal("Failed to update task", requestId)
     }
 }

@@ -16,13 +16,13 @@ export async function middleware(req: NextRequest) {
         return NextResponse.next()
     }
 
-    if (!token && !(isGuest && isMotherRoute)) {
+    if (!token && !(isGuest && (isMotherRoute || isAshaRoute))) {
         const signInUrl = new URL("/auth/signin", req.nextUrl.origin)
         signInUrl.searchParams.set("callbackUrl", req.nextUrl.pathname)
         return NextResponse.redirect(signInUrl)
     }
 
-    if (isGuest && (isAshaRoute || isDoctorRoute || isAdminRoute)) {
+    if (isGuest && (isDoctorRoute || isAdminRoute)) {
         const signInUrl = new URL("/auth/signin", req.nextUrl.origin)
         signInUrl.searchParams.set("callbackUrl", req.nextUrl.pathname)
         return NextResponse.redirect(signInUrl)

@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
-import { createAccessToken, createRefreshToken, verifyToken } from "@/lib/tokens"
+import { createAccessToken, verifyToken } from "@/lib/tokens"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
-
-const issueSchema = z.object({
-    userId: z.string().min(1),
-    email: z.string().email(),
-    role: z.enum(["MOTHER", "ASHA", "DOCTOR"]),
-})
 
 const refreshSchema = z.object({
     refreshToken: z.string().min(20),
@@ -20,22 +14,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Too many token requests" }, { status: 429 })
     }
 
-    const raw = await req.json()
-    const parsed = issueSchema.safeParse(raw)
-
-    if (!parsed.success) {
-        return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
-    }
-
-    const accessToken = createAccessToken(parsed.data)
-    const refreshToken = createRefreshToken({ userId: parsed.data.userId })
-
-    return NextResponse.json({
-        success: true,
-        accessToken,
-        refreshToken,
-        tokenType: "Bearer",
-    })
+    // Direct token minting is intentionally disabled.
+    // Authentication should be handled via NextAuth session endpoints.
+    return NextResponse.json(
+        {
+            error: "Direct token issuance is disabled. Use NextAuth sign-in flow.",
+        },
+        { status: 403 },
+    )
 }
 
 export async function PUT(req: NextRequest) {

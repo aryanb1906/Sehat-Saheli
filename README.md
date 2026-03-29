@@ -14,6 +14,7 @@
 - [The Problem](#-the-problem)
 - [Our Solution](#-our-solution)
 - [Latest Platform Update (March 2026)](#-latest-platform-update-march-2026)
+- [Critical Hardening Log (March 30, 2026)](#-critical-hardening-log-march-30-2026)
 - [Key Features](#-key-features)
 - [End-to-End Product Workflow](#-end-to-end-product-workflow)
 - [Technology Stack](#-technology-stack)
@@ -92,6 +93,47 @@ This release includes both the previously completed platform foundations and the
 
 - Unit and route tests passing in latest run: **13/13 tests passed**.
 - New and updated test coverage includes referrals, privacy consent, emergency and lab route auth/validation, and smoke route protections.
+
+---
+
+## 🔐 Critical Hardening Log (March 30, 2026)
+
+This section records the production-hardening work completed today so implementation and governance updates are visible in one place.
+
+### ✅ Security and Reliability Work Completed
+
+1. **Standard API response contract + request tracing**
+   - Added/expanded request-id propagation (`requestId` in JSON + `x-request-id` response header) for care-critical endpoints.
+   - Standardized success/error response envelope through shared helpers in `lib/api-response.ts`.
+
+2. **Routes normalized today for contract consistency**
+   - `app/api/audit-logs/route.ts`
+   - `app/api/asha-patients/route.ts`
+   - `app/api/lab-reports/route.ts`
+   - `app/api/check-symptom/route.ts`
+   - `app/api/video-consultation/route.ts`
+   - `app/api/medication-safety/route.ts`
+   - `app/api/maternal-risk/route.ts`
+   - `app/api/voice-assistant/parse/route.ts`
+   - `app/api/voice-assistant/analytics/route.ts`
+   - `app/api/asha-tasks/automation-plan/route.ts`
+
+3. **Persistence and fallback policy hardening**
+   - Production fail-closed policy in persistence layer for safety-critical operations (no silent in-memory fallback in production).
+   - Durable emergency status lifecycle support (`active -> acknowledged -> resolved/cancelled`) with status-history behavior.
+
+4. **Authentication and secret policy hardening**
+   - Removed weak fallback secrets and enforced required auth secret behavior for protected token/session flows.
+   - Strengthened guardrails for production-only config requirements.
+
+5. **Critical-flow tests added/updated**
+   - Added safety integration flow coverage in `tests/safety-critical-e2e-flow.test.ts`.
+   - Expanded emergency and privacy-consent flows, including audit expectations and SOS status acknowledgement behavior.
+
+### 🧪 Validation Executed Today
+
+- TypeScript compile check: `pnpm run typecheck` ✅
+- Targeted regression tests: `pnpm run test -- tests/lab-reports-route.test.ts tests/safety-critical-e2e-flow.test.ts tests/emergency-route.test.ts tests/privacy-consent-e2e-flow.test.ts` ✅ (8/8 tests)
 
 ---
 

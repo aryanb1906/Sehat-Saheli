@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { addAuditEvent, listAuditEvents } from "@/lib/audit-log"
 import { requireSessionUser } from "@/lib/api-auth"
-import { failBadRequest, failForbidden, failInternal, failUnauthorized } from "@/lib/api-response"
+import { failBadRequest, failForbidden, failInternal, failUnauthorized, okWithRequestId } from "@/lib/api-response"
 import { getRequestId, logError, withTiming } from "@/lib/observability"
 
 export async function GET(req: NextRequest) {
   const requestId = getRequestId(req)
   try {
     const user = await requireSessionUser()
-    if (!user) return failUnauthorized()
-    if (user.role !== "DOCTOR") return failForbidden("Only administrators can view audit logs")
+    if (!user) return failUnauthorized("Authentication required", requestId)
+    if (user.role !== "DOCTOR") return failForbidden("Only administrators can view audit logs", requestId)
 
     const { searchParams } = new URL(req.url)
     const limit = Math.max(1, Math.min(500, Number(searchParams.get("limit") || 100)))
@@ -31,10 +31,10 @@ export async function GET(req: NextRequest) {
       return true
     })
 
-    return NextResponse.json({ success: true, requestId, logs: filtered, total: filtered.length })
+    return okWithRequestId({ logs: filtered, total: filtered.length }, requestId)
   } catch (error) {
     logError("audit-logs.get.failed", { requestId, error: error instanceof Error ? error.message : "unknown" })
-    return failInternal("Failed to fetch audit logs")
+    return failInternal("Failed to fetch audit logs", requestId)
   }
 }
 
@@ -42,11 +42,11 @@ export async function POST(req: NextRequest) {
   const requestId = getRequestId(req)
   try {
     const user = await requireSessionUser()
-    if (!user) return failUnauthorized()
+    if (!user) return failUnauthorized("Authentication required", requestId)
 
     const body = await req.json()
     if (!body?.action || !body?.resource) {
-      return failBadRequest("action and resource are required")
+      return failBadRequest("action and resource are required", requestId)
     }
 
     const created = await withTiming("audit-logs.post", () =>
@@ -63,9 +63,9 @@ export async function POST(req: NextRequest) {
       }),
     )
 
-    return NextResponse.json({ success: true, event: created })
+    return okWithRequestId({ event: created }, requestId)
   } catch (error) {
     logError("audit-logs.post.failed", { requestId, error: error instanceof Error ? error.message : "unknown" })
-    return failInternal("Failed to write audit event")
+    return failInternal("Failed to write audit event", requestId)
   }
 }

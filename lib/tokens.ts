@@ -6,10 +6,10 @@ const REFRESH_EXPIRES_IN = "30d"
 
 function getSecret() {
     const secret = getAuthSecret()
-    if (!secret && process.env.NODE_ENV === "production") {
-        throw new Error("AUTH_SECRET is required in production")
+    if (!secret) {
+        throw new Error("AUTH_SECRET/NEXTAUTH_SECRET is required")
     }
-    return secret || "dev-secret-change-me"
+    return secret
 }
 
 export function createAccessToken(payload: Record<string, unknown>) {

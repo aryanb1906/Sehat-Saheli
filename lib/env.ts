@@ -20,7 +20,11 @@ export function assertCriticalEnv() {
 }
 
 export function getAuthSecret() {
-    return process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || ""
+    const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || ""
+    if (!secret && process.env.NODE_ENV === "production") {
+        throw new Error("Missing AUTH_SECRET/NEXTAUTH_SECRET in production")
+    }
+    return secret
 }
 
 export function hasRedisRateLimitConfig() {

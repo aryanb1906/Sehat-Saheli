@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { z } from "zod"
+import { failBadRequest, failInternal, okWithRequestId } from "@/lib/api-response"
+import { getRequestId } from "@/lib/observability"
 
 const requestSchema = z.object({
   gestationalWeeks: z.number().int().min(1).max(42),
@@ -131,11 +133,12 @@ function buildActions(tier: Tier, language: "en" | "hi") {
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = getRequestId(req)
   try {
     const body = await req.json()
     const parsed = requestSchema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.flatten() }, { status: 400 })
+      return failBadRequest("Invalid payload", requestId)
     }
 
     const {
@@ -217,8 +220,7 @@ export async function POST(req: NextRequest) {
             ? "Within 48 hours"
             : "Routine schedule"
 
-    return NextResponse.json({
-      success: true,
+    return okWithRequestId({
       assessment: {
         tier,
         score: Math.min(score, 100),
@@ -238,8 +240,8 @@ export async function POST(req: NextRequest) {
         actionsNow: buildActions(tier, language),
         followUpWindow,
       },
-    })
+    }, requestId)
   } catch {
-    return NextResponse.json({ error: "Failed to assess maternal risk" }, { status: 500 })
+    return failInternal("Failed to assess maternal risk", requestId)
   }
 }

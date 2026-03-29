@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
 import { hasRole, requireSessionUser } from "@/lib/api-auth"
-import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized } from "@/lib/api-response"
+import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized, okWithRequestId } from "@/lib/api-response"
+import { getRequestId } from "@/lib/observability"
 
 type Risk = "Low" | "Medium" | "High"
 
@@ -28,13 +29,14 @@ function toRiskLabel(risk: string): Risk {
 }
 
 export async function GET(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const user = await requireSessionUser()
-        if (!user) return failUnauthorized()
-        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden("Not allowed to access this resource", requestId)
 
         const rl = await rateLimit(`asha-patients:${user.id}:${clientIp(req)}`, 100, 60_000)
-        if (!rl.allowed) return failTooManyRequests("Too many requests")
+        if (!rl.allowed) return failTooManyRequests("Too many requests", undefined, requestId)
 
         const { searchParams } = new URL(req.url)
         const requestedAshaWorkerId = searchParams.get("ashaWorkerId")
@@ -75,8 +77,7 @@ export async function GET(req: NextRequest) {
             emergencyContact: p.emergencyContact,
         }))
 
-        return NextResponse.json({
-            success: true,
+        return okWithRequestId({
             patients: mapped,
             stats: {
                 total: mapped.length,
@@ -84,29 +85,30 @@ export async function GET(req: NextRequest) {
                 medium: mapped.filter((p) => p.risk === "Medium").length,
                 low: mapped.filter((p) => p.risk === "Low").length,
             },
-        })
+        }, requestId)
     } catch {
-        return failInternal("Failed to fetch ASHA patients")
+        return failInternal("Failed to fetch ASHA patients", requestId)
     }
 }
 
 export async function POST(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const user = await requireSessionUser()
-        if (!user) return failUnauthorized()
-        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden("Not allowed to access this resource", requestId)
 
         const rl = await rateLimit(`asha-patients-create:${user.id}:${clientIp(req)}`, 20, 60_000)
-        if (!rl.allowed) return failTooManyRequests("Too many create requests")
+        if (!rl.allowed) return failTooManyRequests("Too many create requests", undefined, requestId)
 
         const raw = await req.json()
         const parsed = createPatientSchema.safeParse(raw)
         if (!parsed.success) {
-            return failBadRequest("Invalid payload")
+            return failBadRequest("Invalid payload", requestId)
         }
 
         if (user.role === "ASHA" && parsed.data.ashaWorkerId !== user.id) {
-            return failForbidden("Cannot create patients for another ASHA worker")
+            return failForbidden("Cannot create patients for another ASHA worker", requestId)
         }
 
         const created = await prisma.patientProfile.create({
@@ -129,8 +131,8 @@ export async function POST(req: NextRequest) {
             },
         })
 
-        return NextResponse.json({ success: true, patient: created })
+        return okWithRequestId({ patient: created }, requestId)
     } catch {
-        return failInternal("Failed to create ASHA patient")
+        return failInternal("Failed to create ASHA patient", requestId)
     }
 }

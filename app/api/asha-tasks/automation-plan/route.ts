@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
+import { hasRole, requireSessionUser } from "@/lib/api-auth"
+import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized, okWithRequestId } from "@/lib/api-response"
+import { getRequestId } from "@/lib/observability"
 
 type RiskLabel = "high" | "medium" | "low"
 
@@ -97,12 +100,19 @@ function scoreTask(task: {
 }
 
 export async function GET(req: NextRequest) {
+  const requestId = getRequestId(req)
   try {
+    const user = await requireSessionUser()
+    if (!user) return failUnauthorized("Authentication required", requestId)
+    if (!hasRole(user.role, ["ASHA", "DOCTOR"])) return failForbidden("Not allowed to access this resource", requestId)
+
     const rl = await rateLimit(`asha-automation-plan:${clientIp(req)}`, 80, 60_000)
-    if (!rl.allowed) return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+    if (!rl.allowed) return failTooManyRequests("Too many requests", undefined, requestId)
 
     const { searchParams } = new URL(req.url)
-    const ashId = searchParams.get("ashId") || "asha_001"
+    const requestedAshId = searchParams.get("ashId")
+    const ashId = user.role === "ASHA" ? user.id : requestedAshId || undefined
+    if (!ashId) return failBadRequest("ashId is required", requestId)
 
     const tasks = await prisma.ashaTask.findMany({
       where: {
@@ -201,8 +211,7 @@ export async function GET(req: NextRequest) {
         return a.estimatedTravelMinutes - b.estimatedTravelMinutes
       })
 
-    return NextResponse.json({
-      success: true,
+    return okWithRequestId({
       ashId,
       generatedAt: new Date().toISOString(),
       stats: {
@@ -219,8 +228,8 @@ export async function GET(req: NextRequest) {
       },
       reminders,
       escalations,
-    })
+    }, requestId)
   } catch {
-    return NextResponse.json({ error: "Failed to generate automation plan" }, { status: 500 })
+    return failInternal("Failed to generate automation plan", requestId)
   }
 }

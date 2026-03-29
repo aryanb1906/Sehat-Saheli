@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { z } from "zod"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
 import { getRequestId, logError } from "@/lib/observability"
+import { failBadRequest, failInternal, failTooManyRequests, okWithRequestId } from "@/lib/api-response"
 import {
     VoiceAssistantAnalyticsEvent,
     VoiceIntent,
@@ -45,12 +46,12 @@ export async function POST(req: NextRequest) {
     try {
         const rl = await rateLimit(`voice-analytics-post:${clientIp(req)}`, 300, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many analytics events" }, { status: 429 })
+            return failTooManyRequests("Too many analytics events", undefined, requestId)
         }
 
         const parsed = postSchema.safeParse(await req.json())
         if (!parsed.success) {
-            return NextResponse.json({ error: "Invalid analytics payload" }, { status: 400 })
+            return failBadRequest("Invalid analytics payload", requestId)
         }
 
         const event: VoiceAssistantAnalyticsEvent = {
@@ -66,13 +67,13 @@ export async function POST(req: NextRequest) {
         }
 
         addVoiceAnalyticsEvent(event)
-        return NextResponse.json({ success: true, requestId })
+        return okWithRequestId({}, requestId)
     } catch (error) {
         logError("voice-assistant.analytics.post.failed", {
             requestId,
             error: error instanceof Error ? error.message : "unknown",
         })
-        return NextResponse.json({ error: "Failed to write analytics", requestId }, { status: 500 })
+        return failInternal("Failed to write analytics", requestId)
     }
 }
 
@@ -81,19 +82,19 @@ export async function GET(req: NextRequest) {
     try {
         const rl = await rateLimit(`voice-analytics-get:${clientIp(req)}`, 120, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many analytics read requests" }, { status: 429 })
+            return failTooManyRequests("Too many analytics read requests", undefined, requestId)
         }
 
         const { searchParams } = new URL(req.url)
         const limit = Number(searchParams.get("limit") || 50)
         const summary = getVoiceAnalyticsSummary(limit)
 
-        return NextResponse.json({ success: true, requestId, summary })
+        return okWithRequestId({ summary }, requestId)
     } catch (error) {
         logError("voice-assistant.analytics.get.failed", {
             requestId,
             error: error instanceof Error ? error.message : "unknown",
         })
-        return NextResponse.json({ error: "Failed to load analytics", requestId }, { status: 500 })
+        return failInternal("Failed to load analytics", requestId)
     }
 }

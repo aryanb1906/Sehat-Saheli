@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import type { VideoConsultation as PrismaVideoConsultation } from "@prisma/client";
+import { failBadRequest, failInternal, failTooManyRequests, okWithRequestId } from "@/lib/api-response";
+import { getRequestId } from "@/lib/observability";
 
 interface VideoConsultation {
     id: string;
@@ -18,11 +20,12 @@ interface VideoConsultation {
 }
 
 export async function GET(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const ip = clientIp(req)
         const rl = await rateLimit(`video-consultation-get:${ip}`, 90, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+            return failTooManyRequests("Too many requests", undefined, requestId)
         }
 
         const consultations: VideoConsultation[] = [
@@ -58,11 +61,10 @@ export async function GET(req: NextRequest) {
         });
 
         if (dbConsultations.length === 0) {
-            return NextResponse.json({
-                success: true,
+            return okWithRequestId({
                 consultations,
                 totalConsultations: consultations.length,
-            });
+            }, requestId);
         }
 
         const mapped: VideoConsultation[] = dbConsultations.map((row: PrismaVideoConsultation) => ({
@@ -78,25 +80,22 @@ export async function GET(req: NextRequest) {
             rating: row.rating ?? undefined,
         }));
 
-        return NextResponse.json({
-            success: true,
+        return okWithRequestId({
             consultations: mapped,
             totalConsultations: mapped.length,
-        });
+        }, requestId);
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to fetch consultations" },
-            { status: 500 }
-        );
+        return failInternal("Failed to fetch consultations", requestId);
     }
 }
 
 export async function POST(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const ip = clientIp(req)
         const rl = await rateLimit(`video-consultation-post:${ip}`, 30, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many booking attempts" }, { status: 429 })
+            return failTooManyRequests("Too many booking attempts", undefined, requestId)
         }
 
         const body = await req.json();
@@ -126,7 +125,7 @@ export async function POST(req: NextRequest) {
             .safeParse(body);
 
         if (!parsed.success) {
-            return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+            return failBadRequest("Invalid payload", requestId);
         }
 
         const payload = parsed.data.data
@@ -144,7 +143,7 @@ export async function POST(req: NextRequest) {
             };
 
         if (!payload.date || !payload.time) {
-            return NextResponse.json({ error: "date/time required" }, { status: 400 })
+            return failBadRequest("date/time required", requestId)
         }
 
         const patientId = parsed.data.patientId || "demo-mother";
@@ -175,25 +174,22 @@ export async function POST(req: NextRequest) {
             roomId: created.roomId || undefined,
         };
 
-        return NextResponse.json({
-            success: true,
+        return okWithRequestId({
             message: "Consultation scheduled successfully",
             consultation: newConsultation,
-        });
+        }, requestId);
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to schedule consultation" },
-            { status: 500 }
-        );
+        return failInternal("Failed to schedule consultation", requestId);
     }
 }
 
 export async function PUT(req: NextRequest) {
+    const requestId = getRequestId(req)
     try {
         const ip = clientIp(req)
         const rl = await rateLimit(`video-consultation-put:${ip}`, 30, 60_000)
         if (!rl.allowed) {
-            return NextResponse.json({ error: "Too many update attempts" }, { status: 429 })
+            return failTooManyRequests("Too many update attempts", undefined, requestId)
         }
 
         const body = await req.json();
@@ -204,7 +200,7 @@ export async function PUT(req: NextRequest) {
         }).safeParse(body)
 
         if (!parsed.success) {
-            return NextResponse.json({ error: "Invalid payload" }, { status: 400 })
+            return failBadRequest("Invalid payload", requestId)
         }
 
         const { consultationId, rating, notes } = parsed.data;
@@ -218,15 +214,11 @@ export async function PUT(req: NextRequest) {
             },
         });
 
-        return NextResponse.json({
-            success: true,
+        return okWithRequestId({
             message: "Consultation updated successfully",
             consultation: { id: consultationId, rating, notes },
-        });
+        }, requestId);
     } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to update consultation" },
-            { status: 500 }
-        );
+        return failInternal("Failed to update consultation", requestId);
     }
 }

@@ -1,11 +1,14 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { type NextRequest } from "next/server"
+import { failBadRequest, failInternal, okWithRequestId } from "@/lib/api-response"
+import { getRequestId } from "@/lib/observability"
 
 export async function POST(request: NextRequest) {
+  const requestId = getRequestId(request)
   try {
     const { text } = await request.json()
 
     if (!text) {
-      return NextResponse.json({ error: "Text is required" }, { status: 400 })
+      return failBadRequest("Text is required", requestId)
     }
 
     const lowerText = text.toLowerCase()
@@ -47,9 +50,9 @@ export async function POST(request: NextRequest) {
         "✅ Thank you for sharing. It sounds like you are doing well. Remember to eat healthy, stay hydrated, take your prenatal vitamins, and get regular checkups. Keep me updated on how you feel!"
     }
 
-    return NextResponse.json({ risk, advice })
+    return okWithRequestId({ risk, advice }, requestId)
   } catch (error) {
     console.error("[v0] Error in check-symptom API:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return failInternal("Internal server error", requestId)
   }
 }

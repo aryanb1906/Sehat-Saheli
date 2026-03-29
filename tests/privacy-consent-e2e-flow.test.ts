@@ -16,6 +16,7 @@ describe("Privacy consent revoke/history e2e", () => {
         vi.clearAllMocks()
             ; (global as any).__consentFallbackStore = {}
             ; (global as any).__consentHistoryFallbackStore = []
+            ; (global as any).__auditFallbackStore = []
     })
 
     it("saves consent, revokes consent, and keeps versioned history", async () => {
@@ -57,5 +58,10 @@ describe("Privacy consent revoke/history e2e", () => {
         expect(payload.consent.version).toBeGreaterThanOrEqual(2)
         expect(Array.isArray(payload.history)).toBe(true)
         expect(payload.history.some((entry: { action: string }) => entry.action === "REVOKED")).toBe(true)
+
+        const auditLogs = (global as any).__auditFallbackStore || []
+        const auditActions = auditLogs.map((entry: { action: string }) => entry.action)
+        expect(auditActions).toContain("PRIVACY_CONSENT_UPDATED")
+        expect(auditActions).toContain("PRIVACY_CONSENT_REVOKED")
     })
 })

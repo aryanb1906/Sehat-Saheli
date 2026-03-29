@@ -5,6 +5,7 @@ const getConsentMock = vi.fn()
 const getConsentHistoryMock = vi.fn()
 const saveConsentMock = vi.fn()
 const revokeConsentMock = vi.fn()
+const createAuditLogMock = vi.fn()
 
 vi.mock("@/lib/api-auth", () => ({
     requireSessionUser: () => sessionMock(),
@@ -15,6 +16,7 @@ vi.mock("@/lib/persistence-store", () => ({
     getConsentHistory: (...args: any[]) => getConsentHistoryMock(...args),
     saveConsent: (...args: any[]) => saveConsentMock(...args),
     revokeConsent: (...args: any[]) => revokeConsentMock(...args),
+    createAuditLog: (...args: any[]) => createAuditLogMock(...args),
 }))
 
 vi.mock("@/lib/rate-limit", () => ({

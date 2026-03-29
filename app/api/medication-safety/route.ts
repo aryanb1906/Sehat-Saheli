@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 import { z } from "zod"
+import { failBadRequest, failInternal, okWithRequestId } from "@/lib/api-response"
+import { getRequestId } from "@/lib/observability"
 
 const requestSchema = z.object({
   medicationName: z.string().min(2),
@@ -16,11 +18,12 @@ const safetyDatabase: Record<string, { safety: "safe" | "caution" | "avoid"; not
 }
 
 export async function POST(req: NextRequest) {
+  const requestId = getRequestId(req)
   try {
     const body = await req.json()
     const parsed = requestSchema.safeParse(body)
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.flatten() }, { status: 400 })
+      return failBadRequest("Invalid payload", requestId)
     }
 
     const normalized = parsed.data.medicationName.trim().toLowerCase()
@@ -29,13 +32,12 @@ export async function POST(req: NextRequest) {
       note: "Medication not found in local guide. Consult doctor/ASHA before use.",
     }
 
-    return NextResponse.json({
-      success: true,
+    return okWithRequestId({
       medicationName: parsed.data.medicationName,
       trimester: parsed.data.trimester || "not-specified",
       ...result,
-    })
+    }, requestId)
   } catch {
-    return NextResponse.json({ error: "Failed to check medication safety" }, { status: 500 })
+    return failInternal("Failed to check medication safety", requestId)
   }
 }

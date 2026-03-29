@@ -37,6 +37,9 @@ async function inMemoryRateLimit(key: string, limit: number, windowMs: number) {
 export async function rateLimit(key: string, limit: number, windowMs: number) {
     const redis = getRedisClient()
     if (!redis) {
+        if (process.env.NODE_ENV === "production") {
+            throw new Error("UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production")
+        }
         return inMemoryRateLimit(key, limit, windowMs)
     }
 

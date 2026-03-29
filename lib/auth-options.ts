@@ -76,7 +76,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
 export const authOptions: NextAuthOptions = {
     ...(hasDb ? { adapter: PrismaAdapter(prisma) } : {}),
-    secret: getAuthSecret() || "dev-secret-change-me",
+    secret: getAuthSecret(),
     session: { strategy: "jwt" },
     providers,
     callbacks: {

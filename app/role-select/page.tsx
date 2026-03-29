@@ -12,10 +12,20 @@ export default function RoleSelect() {
   const setUserRole = useAppStore((state) => state.setUserRole)
 
   const selectRole = (role: "mother" | "asha") => {
+    const targetPath = `/${role}`
     setUserRole(role)
     localStorage.setItem("userRole", role)
     localStorage.setItem("demoRole", role)
-    router.push(`/${role}`)
+
+    // Keep role-select usable in demo mode where users are not fully signed in.
+    document.cookie = "sehat_guest=1; path=/; max-age=2592000; SameSite=Lax"
+
+    router.push(targetPath)
+    setTimeout(() => {
+      if (window.location.pathname !== targetPath) {
+        window.location.assign(targetPath)
+      }
+    }, 120)
   }
 
   return (
@@ -29,27 +39,29 @@ export default function RoleSelect() {
         <div className="grid md:grid-cols-2 gap-6">
           <Button
             onClick={() => selectRole("mother")}
-            className="h-auto p-0 overflow-hidden group bg-white hover:bg-white/95 border-0"
+            type="button"
+            className="h-auto p-0 overflow-hidden group bg-white hover:bg-white/95 border-0 whitespace-normal"
           >
             <div className="p-8 flex flex-col items-center text-center">
               <div className="w-24 h-24 bg-gradient-to-br from-warm to-care rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Heart className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-3">{content.iAmMother}</h2>
-              <p className="text-muted-foreground">{content.motherDescription}</p>
+              <h2 className="mb-3 text-2xl font-bold text-foreground break-words">{content.iAmMother}</h2>
+              <p className="max-w-[34ch] text-muted-foreground leading-relaxed break-words">{content.motherDescription}</p>
             </div>
           </Button>
 
           <Button
             onClick={() => selectRole("asha")}
-            className="h-auto p-0 overflow-hidden group bg-white hover:bg-white/95 border-0"
+            type="button"
+            className="h-auto p-0 overflow-hidden group bg-white hover:bg-white/95 border-0 whitespace-normal"
           >
             <div className="p-8 flex flex-col items-center text-center">
               <div className="w-24 h-24 bg-gradient-to-br from-trust to-accent rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Stethoscope className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-foreground mb-3">{content.iAmASHA}</h2>
-              <p className="text-muted-foreground">{content.ashaDescription}</p>
+              <h2 className="mb-3 text-2xl font-bold text-foreground break-words">{content.iAmASHA}</h2>
+              <p className="max-w-[34ch] text-muted-foreground leading-relaxed break-words">{content.ashaDescription}</p>
             </div>
           </Button>
         </div>

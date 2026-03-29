@@ -56,6 +56,35 @@ type AuditRecord = {
     metadata?: Record<string, unknown>
 }
 
+type EmergencyContactRecord = {
+    id: string
+    userId: string
+    name: string
+    relationship: string
+    phone: string
+    priority: number
+    canReceiveLocation: boolean
+    createdAt: string
+}
+
+type SOSRecord = {
+    id: string
+    userId: string
+    timestamp: string
+    location: { lat: number; lng: number }
+    status: "active" | "acknowledged" | "resolved" | "cancelled"
+    contactsNotified: string[]
+    emergencyReason?: string
+}
+
+type SOSStatusUpdateRecord = {
+    sosId: string
+    userId: string
+    status: "acknowledged" | "resolved" | "cancelled"
+    updatedAt: string
+    updatedBy?: string
+}
+
 declare global {
     // eslint-disable-next-line no-var
     var __consentFallbackStore: Record<string, ConsentRecord> | undefined
@@ -65,6 +94,12 @@ declare global {
     var __referralFallbackStore: Record<string, ReferralRecord> | undefined
     // eslint-disable-next-line no-var
     var __auditFallbackStore: AuditRecord[] | undefined
+    // eslint-disable-next-line no-var
+    var __emergencyContactsFallbackStore: Record<string, EmergencyContactRecord[]> | undefined
+    // eslint-disable-next-line no-var
+    var __sosFallbackStore: Record<string, SOSRecord[]> | undefined
+    // eslint-disable-next-line no-var
+    var __sosStatusFallbackStore: Record<string, SOSStatusUpdateRecord[]> | undefined
 }
 
 function fallbackConsentStore() {
@@ -85,6 +120,31 @@ function fallbackReferralStore() {
 function fallbackAuditStore() {
     if (!global.__auditFallbackStore) global.__auditFallbackStore = []
     return global.__auditFallbackStore
+}
+
+function fallbackEmergencyContactsStore() {
+    if (!global.__emergencyContactsFallbackStore) global.__emergencyContactsFallbackStore = {}
+    return global.__emergencyContactsFallbackStore
+}
+
+function fallbackSosStore() {
+    if (!global.__sosFallbackStore) global.__sosFallbackStore = {}
+    return global.__sosFallbackStore
+}
+
+function fallbackSosStatusStore() {
+    if (!global.__sosStatusFallbackStore) global.__sosStatusFallbackStore = {}
+    return global.__sosStatusFallbackStore
+}
+
+function canUseFallback() {
+    return process.env.NODE_ENV !== "production"
+}
+
+function ensurePersistentStore(operation: string) {
+    if (!canUseFallback()) {
+        throw new Error(`${operation} unavailable: persistent store is required in production`)
+    }
 }
 
 function toPrismaReferralStatus(status: ReferralStatus) {
@@ -132,6 +192,7 @@ export async function saveConsent(record: {
     const nowIso = new Date().toISOString()
 
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("saveConsent")
         const existing = fallbackConsentStore()[record.userId]
         const nextVersion = (existing?.version || 0) + 1
         const full: ConsentRecord = {
@@ -208,6 +269,7 @@ export async function saveConsent(record: {
             updatedAt: result.updatedAt.toISOString(),
         } satisfies ConsentRecord
     } catch {
+        ensurePersistentStore("saveConsent")
         const existing = fallbackConsentStore()[record.userId]
         const nextVersion = (existing?.version || 0) + 1
         const nowIso = new Date().toISOString()
@@ -267,6 +329,7 @@ export async function revokeConsent(userId: string, actorId?: string) {
     }
 
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("revokeConsent")
         return revokeInFallback()
     }
 
@@ -313,12 +376,14 @@ export async function revokeConsent(userId: string, actorId?: string) {
             updatedAt: result.updatedAt.toISOString(),
         } satisfies ConsentRecord
     } catch {
+        ensurePersistentStore("revokeConsent")
         return revokeInFallback()
     }
 }
 
 export async function getConsent(userId: string): Promise<ConsentRecord | null> {
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("getConsent")
         return fallbackConsentStore()[userId] || null
     }
 
@@ -336,12 +401,14 @@ export async function getConsent(userId: string): Promise<ConsentRecord | null> 
             updatedAt: consent.updatedAt.toISOString(),
         }
     } catch {
+        ensurePersistentStore("getConsent")
         return fallbackConsentStore()[userId] || null
     }
 }
 
 export async function getConsentHistory(userId: string, limit = 20): Promise<ConsentHistoryRecord[]> {
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("getConsentHistory")
         return fallbackConsentHistoryStore().filter((entry) => entry.userId === userId).slice(0, limit)
     }
 
@@ -364,6 +431,7 @@ export async function getConsentHistory(userId: string, limit = 20): Promise<Con
             createdAt: row.createdAt.toISOString(),
         }))
     } catch {
+        ensurePersistentStore("getConsentHistory")
         return fallbackConsentHistoryStore().filter((entry) => entry.userId === userId).slice(0, limit)
     }
 }
@@ -398,6 +466,7 @@ export async function createReferral(input: {
     }
 
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("createReferral")
         return createInFallback()
     }
 
@@ -428,6 +497,7 @@ export async function createReferral(input: {
             capacityScore: created.capacityScore || undefined,
         } satisfies ReferralRecord
     } catch {
+        ensurePersistentStore("createReferral")
         return createInFallback()
     }
 }
@@ -441,6 +511,7 @@ export async function updateReferralStatus(id: string, status: Exclude<ReferralS
     }
 
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("updateReferralStatus")
         return store[id] || null
     }
 
@@ -466,6 +537,7 @@ export async function updateReferralStatus(id: string, status: Exclude<ReferralS
             capacityScore: updated.capacityScore || undefined,
         } satisfies ReferralRecord
     } catch {
+        ensurePersistentStore("updateReferralStatus")
         return store[id] || null
     }
 }
@@ -494,6 +566,7 @@ export async function listReferrals(patientId: string) {
     }
 
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("listReferrals")
         return listFromFallback()
     }
 
@@ -532,6 +605,7 @@ export async function listReferrals(patientId: string) {
             capacityScore: row.capacityScore || undefined,
         }))
     } catch {
+        ensurePersistentStore("listReferrals")
         return listFromFallback()
     }
 }
@@ -555,7 +629,10 @@ export async function createAuditLog(input: Omit<AuditRecord, "id" | "timestamp"
     fallback.unshift(item)
     if (fallback.length > 1000) fallback.length = 1000
 
-    if (!hasDatabaseUrl()) return item
+    if (!hasDatabaseUrl()) {
+        ensurePersistentStore("createAuditLog")
+        return item
+    }
 
     try {
         const created = await prismaAny.auditLog.create({
@@ -578,12 +655,14 @@ export async function createAuditLog(input: Omit<AuditRecord, "id" | "timestamp"
             timestamp: created.timestamp.toISOString(),
         }
     } catch {
+        ensurePersistentStore("createAuditLog")
         return item
     }
 }
 
 export async function getAuditLogs(limit = 100, role?: AuditRecord["actorRole"]) {
     if (!hasDatabaseUrl()) {
+        ensurePersistentStore("getAuditLogs")
         return fallbackAuditStore()
             .filter((item) => (!role ? true : item.actorRole === role))
             .slice(0, Math.max(1, Math.min(500, limit)))
@@ -610,8 +689,260 @@ export async function getAuditLogs(limit = 100, role?: AuditRecord["actorRole"])
             metadata: (row.metadata as Record<string, unknown> | null) || undefined,
         }))
     } catch {
+        ensurePersistentStore("getAuditLogs")
         return fallbackAuditStore()
             .filter((item) => (!role ? true : item.actorRole === role))
             .slice(0, Math.max(1, Math.min(500, limit)))
+    }
+}
+
+export async function listEmergencyContacts(userId: string): Promise<EmergencyContactRecord[]> {
+    if (!hasDatabaseUrl()) {
+        ensurePersistentStore("listEmergencyContacts")
+        return (fallbackEmergencyContactsStore()[userId] || []).sort((a, b) => a.priority - b.priority)
+    }
+
+    try {
+        const rows = await prismaAny.auditLog.findMany({
+            where: { action: "EMERGENCY_CONTACT_ADDED", actorId: userId },
+            orderBy: { timestamp: "desc" },
+            take: 50,
+        })
+
+        const uniqueByPhone = new Map<string, EmergencyContactRecord>()
+        for (const row of rows) {
+            const meta = row.metadata as Record<string, unknown> | null
+            if (!meta) continue
+            const phone = String(meta.phone || "")
+            if (!phone || uniqueByPhone.has(phone)) continue
+            uniqueByPhone.set(phone, {
+                id: String(meta.id || row.id),
+                userId,
+                name: String(meta.name || ""),
+                relationship: String(meta.relationship || ""),
+                phone,
+                priority: Number(meta.priority || 3),
+                canReceiveLocation: Boolean(meta.canReceiveLocation ?? true),
+                createdAt: row.timestamp.toISOString(),
+            })
+        }
+
+        return Array.from(uniqueByPhone.values()).sort((a, b) => a.priority - b.priority)
+    } catch {
+        ensurePersistentStore("listEmergencyContacts")
+        return (fallbackEmergencyContactsStore()[userId] || []).sort((a, b) => a.priority - b.priority)
+    }
+}
+
+export async function addEmergencyContactForUser(input: {
+    userId: string
+    name: string
+    relationship: string
+    phone: string
+    priority: number
+    canReceiveLocation?: boolean
+}) {
+    const item: EmergencyContactRecord = {
+        id: `contact_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        userId: input.userId,
+        name: input.name,
+        relationship: input.relationship,
+        phone: input.phone,
+        priority: input.priority,
+        canReceiveLocation: input.canReceiveLocation ?? true,
+        createdAt: new Date().toISOString(),
+    }
+
+    if (!hasDatabaseUrl()) {
+        ensurePersistentStore("addEmergencyContactForUser")
+        const store = fallbackEmergencyContactsStore()
+        const existing = store[input.userId] || []
+        store[input.userId] = [...existing.filter((entry) => entry.phone !== input.phone), item]
+        return item
+    }
+
+    try {
+        await createAuditLog({
+            actorRole: "MOTHER",
+            actorId: input.userId,
+            action: "EMERGENCY_CONTACT_ADDED",
+            resource: "emergency-contact",
+            metadata: {
+                id: item.id,
+                name: item.name,
+                relationship: item.relationship,
+                phone: item.phone,
+                priority: item.priority,
+                canReceiveLocation: item.canReceiveLocation,
+            },
+        })
+        return item
+    } catch {
+        ensurePersistentStore("addEmergencyContactForUser")
+        const store = fallbackEmergencyContactsStore()
+        const existing = store[input.userId] || []
+        store[input.userId] = [...existing.filter((entry) => entry.phone !== input.phone), item]
+        return item
+    }
+}
+
+export async function createSOSForUser(input: {
+    userId: string
+    reason?: string
+    location: { lat: number; lng: number }
+    contactsNotified: string[]
+}) {
+    const item: SOSRecord = {
+        id: `sos_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        userId: input.userId,
+        timestamp: new Date().toISOString(),
+        location: input.location,
+        status: "active",
+        contactsNotified: input.contactsNotified,
+        emergencyReason: input.reason,
+    }
+
+    if (!hasDatabaseUrl()) {
+        ensurePersistentStore("createSOSForUser")
+        const store = fallbackSosStore()
+        const existing = store[input.userId] || []
+        store[input.userId] = [item, ...existing]
+        return item
+    }
+
+    try {
+        await createAuditLog({
+            actorRole: "MOTHER",
+            actorId: input.userId,
+            action: "SOS_TRIGGERED",
+            resource: "emergency",
+            metadata: item as unknown as Record<string, unknown>,
+        })
+        return item
+    } catch {
+        ensurePersistentStore("createSOSForUser")
+        const store = fallbackSosStore()
+        const existing = store[input.userId] || []
+        store[input.userId] = [item, ...existing]
+        return item
+    }
+}
+
+export async function updateSOSStatusForUser(input: {
+    userId: string
+    sosId: string
+    status: "acknowledged" | "resolved" | "cancelled"
+    updatedBy?: string
+}) {
+    const statusUpdate: SOSStatusUpdateRecord = {
+        sosId: input.sosId,
+        userId: input.userId,
+        status: input.status,
+        updatedAt: new Date().toISOString(),
+        updatedBy: input.updatedBy,
+    }
+
+    if (!hasDatabaseUrl()) {
+        ensurePersistentStore("updateSOSStatusForUser")
+        const store = fallbackSosStore()
+        const list = store[input.userId] || []
+        const index = list.findIndex((item) => item.id === input.sosId)
+        if (index === -1) return null
+        const current = list[index]
+        list[index] = { ...current, status: input.status }
+        store[input.userId] = list
+
+        const statusStore = fallbackSosStatusStore()
+        const history = statusStore[input.userId] || []
+        statusStore[input.userId] = [statusUpdate, ...history]
+        return list[index]
+    }
+
+    try {
+        await createAuditLog({
+            actorRole: "SYSTEM",
+            actorId: input.updatedBy,
+            action: "SOS_STATUS_UPDATED",
+            resource: "emergency",
+            metadata: {
+                sosId: input.sosId,
+                userId: input.userId,
+                status: input.status,
+            },
+        })
+
+        const existing = await listSOSHistoryForUser(input.userId)
+        const target = existing.find((item) => item.id === input.sosId)
+        if (!target) return null
+        return { ...target, status: input.status }
+    } catch {
+        ensurePersistentStore("updateSOSStatusForUser")
+        const store = fallbackSosStore()
+        const list = store[input.userId] || []
+        const index = list.findIndex((item) => item.id === input.sosId)
+        if (index === -1) return null
+        const current = list[index]
+        list[index] = { ...current, status: input.status }
+        store[input.userId] = list
+
+        const statusStore = fallbackSosStatusStore()
+        const history = statusStore[input.userId] || []
+        statusStore[input.userId] = [statusUpdate, ...history]
+        return list[index]
+    }
+}
+
+export async function listSOSHistoryForUser(userId: string): Promise<SOSRecord[]> {
+    if (!hasDatabaseUrl()) {
+        ensurePersistentStore("listSOSHistoryForUser")
+        return (fallbackSosStore()[userId] || []).sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+    }
+
+    try {
+        const [rows, statusRows] = await Promise.all([
+            prismaAny.auditLog.findMany({
+                where: { action: "SOS_TRIGGERED", actorId: userId },
+                orderBy: { timestamp: "desc" },
+                take: 100,
+            }),
+            prismaAny.auditLog.findMany({
+                where: { action: "SOS_STATUS_UPDATED" },
+                orderBy: { timestamp: "desc" },
+                take: 200,
+            }),
+        ])
+
+        const statusBySosId = new Map<string, SOSRecord["status"]>()
+        for (const row of statusRows) {
+            const meta = (row.metadata || {}) as Record<string, unknown>
+            const targetUserId = typeof meta.userId === "string" ? meta.userId : undefined
+            const sosId = typeof meta.sosId === "string" ? meta.sosId : ""
+            const status = meta.status as SOSRecord["status"] | undefined
+            if (targetUserId !== userId || !sosId || !statusBySosId.has(sosId) && !status) continue
+            if (!statusBySosId.has(sosId) && status) {
+                statusBySosId.set(sosId, status)
+            }
+        }
+
+        return rows.map((row: any) => {
+            const meta = (row.metadata || {}) as Record<string, unknown>
+            const id = String(meta.id || row.id)
+            const trackedStatus = statusBySosId.get(id)
+            return {
+                id,
+                userId,
+                timestamp: row.timestamp.toISOString(),
+                location: {
+                    lat: Number((meta.location as any)?.lat || 0),
+                    lng: Number((meta.location as any)?.lng || 0),
+                },
+                status: trackedStatus || (meta.status as SOSRecord["status"]) || "active",
+                contactsNotified: Array.isArray(meta.contactsNotified) ? (meta.contactsNotified as string[]) : [],
+                emergencyReason: typeof meta.emergencyReason === "string" ? meta.emergencyReason : undefined,
+            }
+        })
+    } catch {
+        ensurePersistentStore("listSOSHistoryForUser")
+        return (fallbackSosStore()[userId] || []).sort((a, b) => b.timestamp.localeCompare(a.timestamp))
     }
 }
