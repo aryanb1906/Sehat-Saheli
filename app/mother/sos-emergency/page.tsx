@@ -26,10 +26,10 @@ export default function SOSEmergency() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-alert/10 to-background">
-      <div className="bg-gradient-to-r from-alert to-alert/80 p-6 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
+      <div className="mx-3 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-princess-4 to-primary p-6 text-white shadow-lg shadow-princess-4/20 border border-white/20 md:mx-6 2xl:mx-auto 2xl:max-w-7xl">
         <div className="flex items-center gap-4 mb-4">
-          <Button onClick={() => router.back()} variant="ghost" size="icon" className="text-white hover:bg-white/20">
+          <Button onClick={() => router.back()} variant="ghost" size="icon" className="text-white hover:bg-white/20 -ml-2">
             <ArrowLeft className="w-6 h-6" />
           </Button>
           <div className="flex-1">

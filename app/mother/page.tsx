@@ -282,17 +282,17 @@ export default function MotherDashboard() {
     ]
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#FDF2F4] via-background to-background dark:from-[#1A1418] dark:via-[#12141A] dark:to-[#111318]">
+        <div className="min-h-screen bg-background">
             <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} role="mother" />
 
             <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
-                <Card className="animate-fade-up overflow-hidden border-border/70 bg-white shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
-                    <div className="bg-gradient-to-r from-[#FADADD] to-[#F5E2F7] px-5 py-6 dark:from-[#3E2A35] dark:to-[#3A2B46] md:px-7">
+                <Card className="animate-fade-up overflow-hidden border-border bg-card shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+                    <div className="bg-primary text-primary-foreground px-5 py-6 md:px-7">
                         <div className="mb-5 flex items-center justify-between">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-foreground hover:bg-white/60"
+                                className="text-primary-foreground hover:bg-black/10"
                                 onClick={() => setSidebarOpen(true)}
                             >
                                 <Menu className="h-6 w-6" />
@@ -310,10 +310,10 @@ export default function MotherDashboard() {
                             <div>
                                 {hydrated ? (
                                     <>
-                                        <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white md:text-4xl">
+                                        <h1 className="text-3xl font-bold tracking-tight text-primary-foreground md:text-4xl">
                                             {content.greeting || "Namaste"}, {userName}
                                         </h1>
-                                        <p className="mt-2 text-sm font-medium text-foreground/80 dark:text-white/85 md:text-base">
+                                        <p className="mt-2 text-sm font-medium text-primary-foreground/90 md:text-base">
                                             {tr(
                                                 "You are doing great today. Let us keep mother and baby safe.",
                                                 "आज आप बहुत अच्छा कर रही हैं। माँ और शिशु को सुरक्षित रखें।",
@@ -328,19 +328,19 @@ export default function MotherDashboard() {
                                 )}
                             </div>
 
-                            <div className="rounded-xl border border-white/60 bg-white/65 px-4 py-3 backdrop-blur-sm dark:border-white/20 dark:bg-white/10">
-                                <p className="text-xs font-semibold uppercase tracking-wide text-foreground/70">{content.pregnancyWeek || "Pregnancy Week"}</p>
+                            <div className="rounded-xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm shadow-inner">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-primary-foreground/80">{content.pregnancyWeek || "Pregnancy Week"}</p>
                                 {hydrated ? (
-                                    <p className="mt-1 text-xl font-bold text-foreground dark:text-white">{tr("Week", "हफ्ता")} {pregnancyWeek}</p>
+                                    <p className="mt-1 text-xl font-bold text-primary-foreground">{tr("Week", "हफ्ता")} {pregnancyWeek}</p>
                                 ) : (
-                                    <Skeleton className="mt-2 h-6 w-24 bg-white/55 dark:bg-white/20" />
+                                    <Skeleton className="mt-2 h-6 w-24 bg-white/20" />
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid gap-4 border-t border-border/70 bg-[#FCFCFC] p-5 dark:bg-[#141925] md:grid-cols-[1.4fr_1fr] md:p-6">
-                        <Card className="border border-[#DFF5E1] bg-[#F4FFF5] p-5 shadow-none dark:border-[#2C4A37] dark:bg-[#1A2A22]">
+                    <div className="grid gap-4 border-t border-border bg-card p-5 md:grid-cols-[1.4fr_1fr] md:p-6">
+                        <Card className="border border-border bg-secondary/30 p-5 shadow-none">
                             <div className="flex items-center justify-between gap-3">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{tr("Risk Indicator", "जोखिम संकेतक")}</p>
@@ -351,17 +351,17 @@ export default function MotherDashboard() {
                                 <Activity className="h-9 w-9 text-success" />
                             </div>
 
-                            <div className="mt-4 h-2.5 rounded-full bg-[#EAF4EC]">
+                            <div className="mt-4 h-2.5 rounded-full bg-border">
                                 <div
-                                    className="h-2.5 rounded-full bg-gradient-to-r from-[#B7E7BE] to-[#58B56C] transition-all"
+                                    className="h-2.5 rounded-full bg-gradient-to-r from-success/50 to-success transition-all"
                                     style={{ width: `${riskMeta.value}%` }}
                                 />
                             </div>
 
-                            <p className="mt-3 text-sm text-foreground/80 dark:text-white/80">{riskMeta.reason}</p>
+                            <p className="mt-3 text-sm text-foreground/80">{riskMeta.reason}</p>
                         </Card>
 
-                        <Card className="border border-[#E3F2FD] bg-[#F5FAFF] p-5 shadow-none dark:border-[#2A3E52] dark:bg-[#1A2533]">
+                        <Card className="border border-border bg-secondary/30 p-5 shadow-none">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{content.dailyChecklist || tr("Smart Daily Checklist", "स्मार्ट दैनिक चेकलिस्ट")}</p>
                             <h3 className="mt-2 text-lg font-semibold text-foreground">{checklistDone}/{checklist.length} tasks complete</h3>
                             <div className="mt-3 h-2.5 rounded-full bg-trust/10">
@@ -407,7 +407,7 @@ export default function MotherDashboard() {
 
                 <DashboardSection title="Daily Care + Mood" className="mt-6 animate-fade-up animate-fade-up-delay-2">
                     <div id="mother-checklist-section" className="grid gap-4 lg:grid-cols-2">
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <div className="space-y-3">
                                 {checklist.map((item) => (
                                     <button
@@ -422,7 +422,7 @@ export default function MotherDashboard() {
                             </div>
                         </Card>
 
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mood strip</p>
                             <h3 className="mt-2 text-lg font-semibold">How are you feeling now?</h3>
                             <div className="mt-4 grid grid-cols-3 gap-2">
@@ -454,7 +454,7 @@ export default function MotherDashboard() {
 
                 <DashboardSection title="Risk Timeline + Shared Notes" subtitle="One source of truth" className="mt-6 animate-fade-up animate-fade-up-delay-3">
                     <div className="grid gap-4 lg:grid-cols-2">
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Real-time Risk Timeline</p>
                             <div className="mt-4 space-y-3">
                                 {riskTimeline.map((row) => (
@@ -469,7 +469,7 @@ export default function MotherDashboard() {
                             </div>
                         </Card>
 
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <div className="flex items-center justify-between">
                                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Shared Notes</p>
                                 <Badge className="border-success/30 bg-success/10 text-success">Care Team Synced</Badge>
@@ -491,7 +491,7 @@ export default function MotherDashboard() {
 
                 <DashboardSection title="Trust-Verified Guidance" subtitle="Reviewed by maternal experts" className="mt-6 animate-fade-up">
                     <div className="grid gap-4 lg:grid-cols-2">
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <div className="flex items-start justify-between gap-3">
                                 <div>
                                     <h4 className="text-lg font-semibold">Critical warning signs</h4>
@@ -505,7 +505,7 @@ export default function MotherDashboard() {
                             <Button variant="outline" className="mt-4 w-full" onClick={() => router.push("/mother/danger-signs")}>Open Danger Signs</Button>
                         </Card>
 
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <h4 className="text-lg font-semibold">Nutrition Planner with Budget Mode</h4>
                             <div className="mt-3 grid grid-cols-3 gap-2">
                                 {(["low", "medium", "high"] as BudgetMode[]).map((mode) => (
@@ -530,7 +530,7 @@ export default function MotherDashboard() {
 
                 <DashboardSection title="Milestones + Resources" className="mt-6 animate-fade-up pb-24 md:pb-10">
                     <div className="grid gap-4 lg:grid-cols-2">
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Pregnancy Progress Milestones</p>
                             <div className="mt-4 space-y-3">
                                 {milestones.map((m) => (
@@ -542,7 +542,7 @@ export default function MotherDashboard() {
                             </div>
                         </Card>
 
-                        <Card className="border-border/70 bg-white p-5 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Local Resource Map Cards</p>
                             <div className="mt-4 space-y-3">
                                 {localResources.map((resource) => (
@@ -567,22 +567,22 @@ export default function MotherDashboard() {
                 </DashboardSection>
 
                 <DashboardSection title="Tools" subtitle="Organized by category" className="mt-6 animate-fade-up">
-                    <div className="grid grid-cols-3 gap-2 rounded-xl border border-border/80 bg-white p-2 dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                    <div className="flex w-full items-center justify-between rounded-full border border-princess-1 bg-white p-1.5 shadow-[0_2px_12px_rgba(255,194,205,0.3)]">
                         <button
                             onClick={() => setActiveCategory("tracking")}
-                            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${activeCategory === "tracking" ? "bg-[#FADADD] text-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                            className={`flex-1 rounded-full px-4 py-3 text-[15px] font-bold transition-all duration-300 ${activeCategory === "tracking" ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]" : "text-primary/70 hover:bg-secondary/50"}`}
                         >
                             Tracking
                         </button>
                         <button
                             onClick={() => setActiveCategory("medical")}
-                            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${activeCategory === "medical" ? "bg-[#E3F2FD] text-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                            className={`flex-1 rounded-full px-4 py-3 text-[15px] font-bold transition-all duration-300 ${activeCategory === "medical" ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]" : "text-primary/70 hover:bg-secondary/50"}`}
                         >
                             Medical
                         </button>
                         <button
                             onClick={() => setActiveCategory("support")}
-                            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${activeCategory === "support" ? "bg-[#DFF5E1] text-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                            className={`flex-1 rounded-full px-4 py-3 text-[15px] font-bold transition-all duration-300 ${activeCategory === "support" ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]" : "text-primary/70 hover:bg-secondary/50"}`}
                         >
                             Support
                         </button>
@@ -596,15 +596,15 @@ export default function MotherDashboard() {
                                     <button
                                         key={item.route}
                                         onClick={() => router.push(item.route)}
-                                        className="flex min-h-[88px] items-center justify-between rounded-xl border border-border/80 bg-white px-4 py-3 text-left shadow-sm transition-all duration-200 hover:border-trust/40 hover:bg-trust/5 hover:shadow-md active:scale-[0.99] dark:border-[#2A3040] dark:bg-[#1A1E27] dark:hover:bg-trust/20"
+                                        className="group flex min-h-[96px] items-center justify-between rounded-[24px] border border-princess-1 bg-white px-5 py-4 text-left shadow-[0_4px_16px_rgba(255,194,205,0.15)] transition-all duration-300 hover:-translate-y-1 hover:border-princess-4 hover:shadow-[0_8px_24px_rgba(252,52,104,0.2)] active:scale-[0.98]"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-trust/10 text-trust">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-princess-1/40 text-primary transition-colors duration-300 group-hover:bg-princess-2 group-hover:text-[#660022]">
                                                 <Icon className="h-5 w-5" />
                                             </div>
-                                            <p className="text-sm font-semibold text-foreground dark:text-white">{item.label}</p>
+                                            <p className="text-[15px] font-bold text-foreground">{item.label}</p>
                                         </div>
-                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                        <ChevronRight className="h-5 w-5 text-muted-foreground/50 transition-transform group-hover:translate-x-1 group-hover:text-princess-4" />
                                     </button>
                                 )
                             })}
@@ -612,10 +612,10 @@ export default function MotherDashboard() {
                     ) : (
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             {Array.from({ length: 6 }).map((_, index) => (
-                                <Card key={index} className="border-border/70 bg-white p-4 dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                                <Card key={index} className="border-border bg-card p-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
                                     <div className="flex items-center gap-3">
-                                        <Skeleton className="h-10 w-10 rounded-lg dark:bg-white/15" />
-                                        <Skeleton className="h-4 w-36 dark:bg-white/15" />
+                                        <Skeleton className="h-10 w-10 rounded-lg " />
+                                        <Skeleton className="h-4 w-36 " />
                                     </div>
                                 </Card>
                             ))}

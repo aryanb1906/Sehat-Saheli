@@ -131,14 +131,14 @@ export default function ASHADashboard() {
         syncState === "synced" ? "Synced" : syncState === "syncing" ? "Syncing field data" : "Queued (offline)"
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-trust/10 via-background to-background dark:from-[#141B28] dark:via-[#12141A] dark:to-[#111318]">
+        <div className="min-h-screen bg-background">
             <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} role="asha" />
 
             <div className="mx-auto w-full max-w-6xl px-4 py-5 md:px-6 md:py-8">
-                <Card className="animate-fade-up overflow-hidden border-border/70 bg-white shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
-                    <div className="bg-gradient-to-r from-trust to-accent px-5 py-6 text-white dark:from-[#2A3D56] dark:to-[#3A3552] md:px-7">
+                <Card className="animate-fade-up overflow-hidden border-border bg-card shadow-sm">
+                    <div className="bg-primary text-primary-foreground px-5 py-6 md:px-7">
                         <div className="mb-5 flex items-center justify-between">
-                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20" onClick={() => setSidebarOpen(true)}>
+                            <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-black/10" onClick={() => setSidebarOpen(true)}>
                                 <Menu className="h-6 w-6" />
                             </Button>
                             <div className="flex items-center gap-2">
@@ -154,52 +154,52 @@ export default function ASHADashboard() {
 
                         <div className="flex flex-wrap items-start justify-between gap-4">
                             <div>
-                                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{content.ashaDashboard || "ASHA Dashboard"}</h1>
-                                <p className="mt-2 text-base font-medium text-white/90">{content.welcomeBack || "Welcome back"}, Meera Devi</p>
+                                <h1 className="text-3xl font-bold tracking-tight text-primary-foreground md:text-4xl">{content.ashaDashboard || "ASHA Dashboard"}</h1>
+                                <p className="mt-2 text-base font-medium text-primary-foreground/90">{content.welcomeBack || "Welcome back"}, Meera Devi</p>
                             </div>
-                            <div className="rounded-xl bg-white/20 px-4 py-3 backdrop-blur-sm">
-                                <p className="text-xs font-semibold uppercase tracking-wide text-white/85">{tr("Today", "आज")}</p>
-                                <p className="mt-1 text-lg font-semibold">{stats.total} {tr("patients assigned", "मरीज असाइन")}</p>
+                            <div className="rounded-xl border border-white/20 bg-black/10 px-4 py-3 backdrop-blur-sm shadow-inner">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-primary-foreground/80">{tr("Today", "आज")}</p>
+                                <p className="mt-1 text-lg font-semibold text-primary-foreground">{stats.total} {tr("patients assigned", "मरीज असाइन")}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="grid gap-4 border-t border-border/70 bg-muted/20 p-5 dark:bg-[#141925] md:grid-cols-4 md:p-6">
-                        <Card className="border-border/70 bg-white p-4 shadow-none dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                    <div className="grid gap-4 border-t border-border bg-card p-5 md:grid-cols-4 md:p-6">
+                        <Card className="border-border bg-card p-4 shadow-none">
                             <div className="flex items-center gap-3">
                                 <Users className="h-7 w-7 text-trust" />
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground dark:text-white">{stats.total}</p>
+                                    <p className="text-2xl font-bold text-foreground">{stats.total}</p>
                                     <p className="text-xs font-medium text-muted-foreground">{content.totalPatients || "Total Patients"}</p>
                                 </div>
                             </div>
                         </Card>
 
-                        <Card className="border-alert/30 bg-alert/10 p-4 shadow-none dark:bg-alert/20">
+                        <Card className="border-alert/30 bg-alert/10 p-4 shadow-none">
                             <div className="flex items-center gap-3">
                                 <AlertTriangle className="h-7 w-7 text-alert" />
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground dark:text-white">{stats.high}</p>
+                                    <p className="text-2xl font-bold text-foreground">{stats.high}</p>
                                     <p className="text-xs font-medium text-muted-foreground">{content.highRisk || "High Risk"}</p>
                                 </div>
                             </div>
                         </Card>
 
-                        <Card className="border-warning/30 bg-warning/10 p-4 shadow-none dark:bg-warning/20">
+                        <Card className="border-warning/30 bg-warning/10 p-4 shadow-none">
                             <div className="flex items-center gap-3">
                                 <Clock3 className="h-7 w-7 text-warning" />
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground dark:text-white">{stats.medium}</p>
+                                    <p className="text-2xl font-bold text-foreground">{stats.medium}</p>
                                     <p className="text-xs font-medium text-muted-foreground">{content.mediumRisk || "Medium Risk"}</p>
                                 </div>
                             </div>
                         </Card>
 
-                        <Card className="border-success/30 bg-success/10 p-4 shadow-none dark:bg-success/20">
+                        <Card className="border-success/30 bg-success/10 p-4 shadow-none">
                             <div className="flex items-center gap-3">
                                 <CheckCircle className="h-7 w-7 text-success" />
                                 <div>
-                                    <p className="text-2xl font-bold text-foreground dark:text-white">{stats.low}</p>
+                                    <p className="text-2xl font-bold text-foreground">{stats.low}</p>
                                     <p className="text-xs font-medium text-muted-foreground">{content.lowRisk || "Low Risk"}</p>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@ export default function ASHADashboard() {
                 </DashboardSection>
 
                 <DashboardSection title={content.patientDirectoryTitle || tr("Patient Directory", "मरीज निर्देशिका")} subtitle={tr("Search and open profile", "खोजें और प्रोफाइल खोलें")} className="mt-7 animate-fade-up animate-fade-up-delay-3 pb-24 md:pb-8">
-                    <Card className="border-border/70 bg-white p-3 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27] md:p-4">
+                    <Card className="border-border bg-card p-3 shadow-sm md:p-4">
                         <div className="flex items-center gap-3">
                             <Search className="h-5 w-5 text-muted-foreground" />
                             <Input
@@ -281,11 +281,11 @@ export default function ASHADashboard() {
                     {loading ? (
                         <div className="grid gap-3 sm:grid-cols-2">
                             {Array.from({ length: 4 }).map((_, index) => (
-                                <Card key={index} className="border-border/70 bg-white p-4 shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                                <Card key={index} className="border-border bg-card p-4 shadow-sm">
                                     <div className="space-y-3">
-                                        <Skeleton className="h-5 w-40 dark:bg-white/15" />
-                                        <Skeleton className="h-4 w-56 dark:bg-white/15" />
-                                        <Skeleton className="h-3 w-44 dark:bg-white/15" />
+                                        <Skeleton className="h-5 w-40 " />
+                                        <Skeleton className="h-4 w-56 " />
+                                        <Skeleton className="h-3 w-44 " />
                                     </div>
                                 </Card>
                             ))}
@@ -294,7 +294,7 @@ export default function ASHADashboard() {
                         filteredPatients.map((patient) => (
                             <Card
                                 key={patient.id}
-                                className="cursor-pointer border-border/80 bg-white p-4 shadow-sm transition-all hover:border-trust/40 hover:bg-trust/5 dark:border-[#2A3040] dark:bg-[#1A1E27] dark:hover:bg-trust/20"
+                                className="cursor-pointer border-border bg-card p-4 shadow-sm transition-all hover:border-primary/40 hover:bg-secondary/40"
                                 onClick={() => router.push(`/asha/patient/${patient.id}`)}
                             >
                                 <div className="flex items-center justify-between">
@@ -316,7 +316,7 @@ export default function ASHADashboard() {
                     )}
 
                     {!loading && filteredPatients.length === 0 && (
-                        <Card className="border-border/70 bg-white p-6 text-center shadow-sm dark:border-[#2A3040] dark:bg-[#1A1E27]">
+                        <Card className="border-border bg-card p-6 text-center shadow-sm">
                             <p className="text-sm text-muted-foreground">{tr("No patients found for this search.", "इस खोज के लिए कोई मरीज नहीं मिला।")}</p>
                         </Card>
                     )}

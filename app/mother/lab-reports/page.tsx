@@ -35,7 +35,7 @@ export default function LabReportsPage() {
         try {
             const response = await fetch("/api/lab-reports")
             const data = await response.json()
-            setReports(data.reports)
+            setReports(data.reports || [])
         } catch (error) {
             console.error("Failed to fetch reports:", error)
             toast({
@@ -80,9 +80,9 @@ export default function LabReportsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-care/10 to-background">
+        <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
             {/* Header */}
-            <div className="bg-gradient-to-r from-trust to-accent p-6 text-white sticky top-0 z-50">
+            <div className="mx-3 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-princess-4 to-primary p-5 text-white sticky top-4 z-30 shadow-lg shadow-princess-4/20 border border-white/20 md:mx-6 2xl:mx-auto 2xl:max-w-7xl">
                 <div className="flex items-center gap-4">
                     <Button
                         variant="ghost"
@@ -130,7 +130,7 @@ export default function LabReportsPage() {
                             </Card>
                         ))}
                     </div>
-                ) : reports.length === 0 ? (
+                ) : !reports || reports.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                         <AlertCircle className="w-12 h-12 text-trust/30 mb-4" />
                         <p className="text-lg font-semibold text-foreground/80">No lab reports yet</p>
@@ -144,7 +144,7 @@ export default function LabReportsPage() {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {reports.map((report) => (
+                        {reports?.map((report) => (
                             <Card
                                 key={report.id}
                                 className={`p-6 cursor-pointer hover:shadow-lg transition-all border ${getStatusColor(

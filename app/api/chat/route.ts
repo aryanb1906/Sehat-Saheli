@@ -87,8 +87,65 @@ IMPORTANT:
 - Write in plain, natural language without any special formatting
 - ${language ? `Respond in ${language} language` : "Respond in simple English"}
 
-If you detect high-risk symptoms, start your response with [HIGH RISK] 
-If you detect medium-risk symptoms, start with [MEDIUM RISK]`
+If the user reports symptoms, you MUST reply with an interactive Symptom Card UI component.
+If the user asks about or wants to track baby's movements/kicks, you MUST reply with a Fetal Kick Counter UI component.
+If the user asks for nearest hospitals or clinics, you MUST reply with a Hospital Finder UI component.
+If the user asks about diet, food, or what to eat, you MUST reply with a Nutrition Planner UI component.
+If the user reports their weight, blood pressure, or blood sugar, or wants to log them, you MUST reply with a Vital Signs UI component.
+If the user expresses a severe emergency (like "help", "severe bleeding", "I can't breathe"), you MUST reply with an SOS Emergency UI component.
+
+To do this, use exactly this JSON format at the very end of your response inside markdown backticks:
+
+For Symptoms:
+\`\`\`json
+{
+  "component": "SymptomCard",
+  "data": { "symptom": "...", "severity": "Mild | Moderate | Severe", "recommendation": "...", "requiresDoctor": true }
+}
+\`\`\`
+
+For Kick Counter:
+\`\`\`json
+{
+  "component": "KickCounterCard",
+  "data": { "instructions": "Brief instruction on how to count kicks" }
+}
+\`\`\`
+
+For Hospital:
+\`\`\`json
+{
+  "component": "HospitalFinderCard",
+  "data": { "reason": "Why they need a hospital" }
+}
+\`\`\`
+
+For Nutrition:
+\`\`\`json
+{
+  "component": "NutritionCard",
+  "data": { "focus": "E.g. Iron-rich foods", "quickTip": "Brief diet tip" }
+}
+\`\`\`
+
+For Vitals:
+\`\`\`json
+{
+  "component": "VitalsCard",
+  "data": { "message": "E.g. Let's log your blood pressure." }
+}
+\`\`\`
+
+For Emergency SOS:
+\`\`\`json
+{
+  "component": "SOSCard",
+  "data": { "alert": "Critical medical situation requires immediate attention" }
+}
+\`\`\`
+
+If you detect high-risk symptoms, start your text response with [HIGH RISK] 
+If you detect medium-risk symptoms, start your text response with [MEDIUM RISK]`
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash",

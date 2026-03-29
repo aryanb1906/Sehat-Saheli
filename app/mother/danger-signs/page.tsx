@@ -92,7 +92,7 @@ export default function DangerSignsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-alert/10 via-alert/5 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
       <div className="sticky top-0 bg-gradient-to-r from-alert to-alert/80 p-6 text-white z-10">
         <div className="flex items-center gap-4 mb-4">
           <Button variant="ghost" size="icon" className="text-white" onClick={() => router.back()}>

@@ -1,115 +1,149 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "leaflet/dist/leaflet.css";
+
+@theme {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: var(--font-serif), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+}
+
+::selection {
+  background-color: var(--color-princess-3);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in oklch, var(--color-princess-2) 50%, transparent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-princess-3);
+}
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  scroll-behavior: smooth;
+}
+
 :root {
-  /* Updated to "Calm Care" theme with warm, soft gradients */
-  --background: oklch(0.99 0.005 90);
-  --foreground: oklch(0.15 0.02 270);
-  /* #222222 equivalent */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 270);
+  /* NexaVerse Light Theme Palette */
+  --background: oklch(0.98 0.005 15); /* Off-white cream */
+  --foreground: oklch(0.2 0.02 15); /* Dark charcoal/maroon text */
+  --card: oklch(1 0 0); /* Pure white cards */
+  --card-foreground: oklch(0.2 0.02 15);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 270);
+  --popover-foreground: oklch(0.2 0.02 15);
 
-  /* Primary gradient colors - Warm peach/pink tones */
-  --primary: oklch(0.73 0.11 15);
-  /* Warm pink-peach */
+  --primary: oklch(0.35 0.15 15); /* Dark Maroon */
   --primary-foreground: oklch(0.99 0 0);
+  
+  --secondary: oklch(0.95 0.02 355); /* Soft pink/gray bg */
+  --secondary-foreground: oklch(0.35 0.15 15);
 
-  /* Secondary soft background */
-  --secondary: oklch(0.98 0.01 15);
-  /* #FFF6F6 soft pink background */
-  --secondary-foreground: oklch(0.15 0.02 270);
+  --muted: oklch(0.92 0.02 15); /* Warm gray */
+  --muted-foreground: oklch(0.5 0.05 15); /* Muted maroon */
 
-  --muted: oklch(0.97 0.005 270);
-  --muted-foreground: oklch(0.45 0.02 270);
-  /* #555555 equivalent */
+  --accent: oklch(0.8 0.1 355); /* Light Pink Accent */
+  --accent-foreground: oklch(0.2 0.02 15);
 
-  /* Accent gradient - Purple to pink */
-  --accent: oklch(0.63 0.12 295);
-  /* Purple accent */
-  --accent-foreground: oklch(0.99 0 0);
+  --success: oklch(0.65 0.15 145); /* Soft green, kept for semantics but muted */
+  --warning: oklch(0.7 0.15 30); /* Orange-peach */
+  --alert: oklch(0.55 0.22 15); /* Deep Red/Magenta */
 
-  /* Health status colors */
-  --success: oklch(0.55 0.15 145);
-  --warning: oklch(0.75 0.15 85);
-  --alert: oklch(0.55 0.22 25);
+  /* Extracted custom pink/red shades */
+  --warm: oklch(0.55 0.22 15); /* Deep Red */
+  --warm-end: oklch(0.7 0.15 355); /* Vibrant Pink */
+  --care: oklch(0.8 0.1 355); /* Light Pink */
+  --trust: oklch(0.35 0.15 15); /* Dark Maroon */
+  --button-gradient: oklch(0.55 0.22 15);
 
-  /* Calm Care custom colors */
-  --warm: oklch(0.73 0.11 15);
-  /* #FF9A9E to #FAD0C4 gradient start */
-  --warm-end: oklch(0.88 0.06 25);
-  /* gradient end */
-  --care: oklch(0.73 0.1 340);
-  /* Pink accent #FFE3E3 */
-  --trust: oklch(0.6 0.13 245);
-  /* Trustworthy blue #4BA3C3 */
-  --button-gradient: oklch(0.65 0.18 355);
-  /* #FF758C to #FF7EB3 */
-
-  --destructive: oklch(0.55 0.22 25);
+  --destructive: oklch(0.55 0.22 15);
   --destructive-foreground: oklch(0.99 0 0);
 
-  --border: oklch(0.93 0.005 270);
-  --input: oklch(0.93 0.005 270);
-  --ring: oklch(0.73 0.11 15);
+  --border: oklch(0.9 0.02 15); /* Light pinkish-gray border */
+  --input: oklch(0.9 0.02 15);
+  --ring: oklch(0.55 0.22 15);
+
+  --princess-1: #ffc2cd;
+  --princess-2: #ff93ac;
+  --princess-3: #ff6289;
+  --princess-4: #fc3468;
+  --princess-5: #ff084a;
 
   --radius: 1rem;
-  /* 2xl rounded corners */
 
-  --chart-1: oklch(0.73 0.11 15);
-  --chart-2: oklch(0.63 0.12 295);
-  --chart-3: oklch(0.6 0.13 245);
-  --chart-4: oklch(0.75 0.15 85);
-  --chart-5: oklch(0.55 0.15 145);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.35 0.15 15);
+  --chart-2: oklch(0.55 0.22 15);
+  --chart-3: oklch(0.7 0.15 355);
+  --chart-4: oklch(0.8 0.1 355);
+  --chart-5: oklch(0.92 0.04 355);
+  --sidebar: oklch(0.35 0.15 15); /* Dark maroon sidebar */
+  --sidebar-foreground: oklch(0.99 0 0);
+  --sidebar-primary: oklch(0.55 0.22 15);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.4 0.15 15);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(0.3 0.1 15);
+  --sidebar-ring: oklch(0.55 0.22 15);
 }
 
 .dark {
-  --background: oklch(0.15 0.01 270);
-  --foreground: oklch(0.98 0.005 90);
-  --card: oklch(0.18 0.01 270);
-  --card-foreground: oklch(0.98 0.005 90);
-  --popover: oklch(0.18 0.01 270);
-  --popover-foreground: oklch(0.98 0.005 90);
-  --primary: oklch(0.75 0.12 15);
-  --primary-foreground: oklch(0.15 0.01 270);
-  --secondary: oklch(0.25 0.01 270);
-  --secondary-foreground: oklch(0.98 0.005 90);
-  --muted: oklch(0.25 0.01 270);
-  --muted-foreground: oklch(0.65 0.02 270);
-  --accent: oklch(0.65 0.14 295);
-  --accent-foreground: oklch(0.98 0.005 90);
-  --success: oklch(0.6 0.18 145);
-  --warning: oklch(0.7 0.18 85);
-  --alert: oklch(0.6 0.25 25);
-  --warm: oklch(0.75 0.12 15);
-  --warm-end: oklch(0.88 0.08 25);
-  --care: oklch(0.75 0.11 340);
-  --trust: oklch(0.62 0.15 245);
-  --button-gradient: oklch(0.67 0.19 355);
-  --destructive: oklch(0.6 0.25 25);
-  --destructive-foreground: oklch(0.98 0.005 90);
-  --border: oklch(0.25 0.01 270);
-  --input: oklch(0.25 0.01 270);
-  --ring: oklch(0.75 0.12 15);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Forced light mode theme applied to dark mode */
+  --background: oklch(0.98 0.005 15);
+  --foreground: oklch(0.2 0.02 15);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.02 15);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.02 15);
+  --primary: oklch(0.35 0.15 15);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.02 355);
+  --secondary-foreground: oklch(0.35 0.15 15);
+  --muted: oklch(0.92 0.02 15);
+  --muted-foreground: oklch(0.5 0.05 15);
+  --accent: oklch(0.8 0.1 355);
+  --accent-foreground: oklch(0.2 0.02 15);
+  --success: oklch(0.65 0.15 145);
+  --warning: oklch(0.7 0.15 30);
+  --alert: oklch(0.55 0.22 15);
+  --warm: oklch(0.55 0.22 15);
+  --warm-end: oklch(0.7 0.15 355);
+  --care: oklch(0.8 0.1 355);
+  --trust: oklch(0.35 0.15 15);
+  --button-gradient: oklch(0.55 0.22 15);
+  --destructive: oklch(0.55 0.22 15);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.9 0.02 15);
+  --input: oklch(0.9 0.02 15);
+  --ring: oklch(0.55 0.22 15);
+  --princess-1: #ffc2cd;
+  --princess-2: #ff93ac;
+  --princess-3: #ff6289;
+  --princess-4: #fc3468;
+  --princess-5: #ff084a;
+  --sidebar: oklch(0.35 0.15 15);
+  --sidebar-foreground: oklch(0.99 0 0);
+  --sidebar-primary: oklch(0.55 0.22 15);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.4 0.15 15);
+  --sidebar-accent-foreground: oklch(0.99 0 0);
+  --sidebar-border: oklch(0.3 0.1 15);
+  --sidebar-ring: oklch(0.55 0.22 15);
 }
 
 @theme inline {
@@ -139,6 +173,12 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  --color-princess-1: var(--princess-1);
+  --color-princess-2: var(--princess-2);
+  --color-princess-3: var(--princess-3);
+  --color-princess-4: var(--princess-4);
+  --color-princess-5: var(--princess-5);
 
   /* Added Calm Care theme colors */
   --color-success: var(--success);

@@ -18,6 +18,7 @@ import {
 
 export function OfflineSyncStatusWidget() {
     const [mounted, setMounted] = useState(false)
+    const [isMinimized, setIsMinimized] = useState(true)
     const [status, setStatus] = useState<OfflineSyncStatus>(() => ({
         online: true,
         queuedCount: 0,
@@ -44,10 +45,30 @@ export function OfflineSyncStatusWidget() {
     const isIdle = status.online && status.queuedCount === 0 && status.conflictsCount === 0 && !status.isSyncing
     if (isIdle) return null
 
+    if (isMinimized) {
+        return (
+            <div className="fixed bottom-4 left-4 z-50 animate-fade-up">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.08)] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8] border border-white/70 gap-2 px-4 h-12 transition-all hover:scale-105 hover:bg-white/80 active:scale-95 text-foreground"
+                    onClick={() => setIsMinimized(false)}
+                >
+                    {status.online ? (
+                        <Wifi className="h-4 w-4 text-success" />
+                    ) : (
+                        <WifiOff className="h-4 w-4 text-alert" />
+                    )}
+                    {status.queuedCount > 0 && <span className="text-xs font-semibold">{status.queuedCount} pending</span>}
+                </Button>
+            </div>
+        )
+    }
+
     return (
-        <div className="fixed bottom-4 left-4 z-50 w-[min(24rem,calc(100vw-2rem))]">
-            <Card className="gap-3 border px-3 py-3 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/90">
-                <div className="flex items-center justify-between gap-2">
+        <div className="fixed bottom-4 left-4 z-50 w-[min(20rem,calc(100vw-2rem))] animate-fade-up">
+            <Card className="gap-3 border border-white/70 px-4 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8]">
+                <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
                         {status.online ? (
                             <Wifi className="h-4 w-4 text-green-600" />
@@ -58,7 +79,12 @@ export function OfflineSyncStatusWidget() {
                             {status.online ? (status.isSyncing ? "Sync in progress" : "Online") : "Offline mode"}
                         </p>
                     </div>
-                    <Badge variant={status.queuedCount > 0 ? "secondary" : "outline"}>{status.queuedCount} pending</Badge>
+                    <div className="flex items-center gap-2">
+                        <Badge variant={status.queuedCount > 0 ? "secondary" : "outline"}>{status.queuedCount} pending</Badge>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 -mr-2 text-muted-foreground hover:text-foreground" onClick={() => setIsMinimized(true)}>
+                            <span className="text-xs">✕</span>
+                        </Button>
+                    </div>
                 </div>
 
                 {status.conflictsCount > 0 && (

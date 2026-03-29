@@ -133,8 +133,8 @@ export default function VideoConsultationPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-trust/10 to-background">
-            <div className="bg-gradient-to-r from-trust to-accent p-6 text-white sticky top-0 z-50">
+        <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
+            <div className="mx-3 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-princess-4 to-primary p-5 text-white sticky top-4 z-30 shadow-lg shadow-princess-4/20 border border-white/20 md:mx-6 2xl:mx-auto 2xl:max-w-7xl">
                 <div className="flex items-center gap-4 mb-4">
                     <Button
                         variant="ghost"

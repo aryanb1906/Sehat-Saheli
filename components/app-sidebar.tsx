@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, Mic, BookOpen, Heart, Phone, Calendar, MessageCircle, Baby, Pill, TrendingUp, Users, BarChart3, LogOut, Utensils, Dumbbell, GraduationCap, FileText, Video, Share2, Zap, AlertTriangle, MapPin } from 'lucide-react'
+import { Home, Mic, BookOpen, Heart, Phone, Calendar, MessageCircle, Baby, Pill, TrendingUp, Users, BarChart3, LogOut, Utensils, Dumbbell, GraduationCap, FileText, Video, Share2, Zap, AlertTriangle, MapPin, Globe } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/lib/language-context"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -83,7 +83,15 @@ export function AppSidebar({ isOpen, onClose, role }: AppSidebarProps) {
             )
           })}
 
-          <div className="pt-4 border-t mt-4">
+          <div className="pt-4 border-t mt-4 space-y-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3 h-12 text-base border-trust/30 text-trust hover:bg-trust/10"
+              onClick={() => handleNavigation("/")}
+            >
+              <Globe className="w-5 h-5" />
+              <span>Landing Page Demo</span>
+            </Button>
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 h-12 text-base text-alert hover:text-alert hover:bg-alert/10"

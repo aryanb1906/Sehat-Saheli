@@ -50,9 +50,9 @@ export default function HealthTips() {
   ]
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-care/10 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
       {/* Header */}
-      <div className="bg-linear-to-r from-care to-warm p-6 text-white">
+      <div className="mx-3 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-princess-4 to-primary p-6 text-white shadow-lg shadow-princess-4/20 border border-white/20 md:mx-6 2xl:mx-auto 2xl:max-w-7xl">
         <div className="flex items-center gap-4 mb-4">
           <Button onClick={() => router.back()} variant="ghost" size="icon" className="text-white">
             <ArrowLeft className="w-6 h-6" />

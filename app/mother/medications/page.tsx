@@ -118,9 +118,9 @@ export default function Medications() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-warm/10 via-care/10 to-background">
-      <div className="bg-gradient-to-r from-trust to-accent p-6 text-white">
-        <Button variant="ghost" size="icon" className="text-white mb-4" onClick={() => router.back()}>
+    <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
+      <div className="mx-3 mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-princess-4 to-primary p-6 text-white shadow-lg shadow-princess-4/20 border border-white/20 md:mx-6 2xl:mx-auto 2xl:max-w-7xl">
+        <Button variant="ghost" size="icon" className="text-white mb-4 hover:bg-white/20 -ml-2" onClick={() => router.back()}>
           <ArrowLeft className="w-6 h-6" />
         </Button>
         <h1 className="text-3xl font-bold mb-2">Medications</h1>

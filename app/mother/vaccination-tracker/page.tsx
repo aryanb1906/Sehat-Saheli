@@ -37,7 +37,7 @@ export default function VaccinationTrackerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-trust/10 via-accent/5 to-background">
+    <div className="min-h-screen bg-gradient-to-br from-princess-1/20 via-white to-princess-1/10 pb-10">
       <div className="sticky top-0 bg-gradient-to-r from-trust to-accent p-6 text-white z-10">
         <div className="flex items-center gap-4 mb-4">
           <Button variant="ghost" size="icon" className="text-white" onClick={() => router.back()}>

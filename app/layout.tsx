@@ -1,7 +1,7 @@
 import type React from "react"
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
+import type { Metadata, Viewport } from "next"
+import { Nunito, Lora } from "next/font/google"
+import { Analytics } from "@vercel/analytics/react"
 import { AppProviders } from "@/components/app-providers"
 import { GuestModeBanner } from "@/components/guest-mode-banner"
 import { OfflineSyncStatusWidget } from "@/components/offline-sync-status"
@@ -10,8 +10,23 @@ import { VoiceAssistWidget } from "@/components/voice-assist-widget"
 import { WebVitals } from "@/components/web-vitals"
 import "./globals.css"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const nunito = Nunito({ 
+  subsets: ["latin"],
+  variable: "--font-sans"
+})
+
+const lora = Lora({ 
+  subsets: ["latin"],
+  variable: "--font-serif"
+})
+
+export const viewport: Viewport = {
+  themeColor: "#ffc2cd",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export const metadata: Metadata = {
   title: "SehatSaheli - AI Maternal Health Companion",
@@ -43,7 +58,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`font-sans antialiased`}>
+      <body className={`${nunito.variable} ${lora.variable} font-sans antialiased bg-background text-foreground`} suppressHydrationWarning>
         <AppProviders>
           <GuestModeBanner />
           {children}

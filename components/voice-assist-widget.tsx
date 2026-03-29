@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Languages, Mic, MicOff, Sparkles, Volume2, Waveform } from "lucide-react"
+import { Activity, Languages, Mic, MicOff, Sparkles, Volume2, ChevronDown } from "lucide-react"
 import { usePathname, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -30,6 +30,7 @@ export function VoiceAssistWidget() {
     const [showSettings, setShowSettings] = useState(false)
     const [settings, setSettings] = useState<VoiceAssistantSettings>(defaultSettings)
     const [analytics, setAnalytics] = useState<VoiceAssistantAnalyticsSummary | null>(null)
+    const [isMinimized, setIsMinimized] = useState(true)
 
     useEffect(() => {
         const raw = localStorage.getItem(SETTINGS_KEY)
@@ -120,9 +121,25 @@ export function VoiceAssistWidget() {
                             ? "तैयार"
                             : "Idle"
 
+    if (isMinimized) {
+        return (
+            <div className="fixed bottom-4 right-4 z-50">
+                <Button
+                    variant="default"
+                    size="icon"
+                    className={`h-14 w-14 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-all hover:scale-105 active:scale-95 ${isListening ? "voice-mic-glow bg-alert hover:bg-alert/90 text-white" : "bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8] border border-white/70 text-foreground hover:bg-white/80"} animate-fade-up`}
+                    onClick={() => setIsMinimized(false)}
+                    aria-label="Expand voice assist"
+                >
+                    {isListening ? <Mic className="h-6 w-6 animate-pulse" /> : <Mic className="h-6 w-6 text-trust" />}
+                </Button>
+            </div>
+        )
+    }
+
     return (
         <div className="fixed bottom-4 right-4 z-50 w-[min(24rem,calc(100vw-2rem))]">
-            <Card className="gap-3 border px-3 py-3 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/90 animate-fade-up">
+            <Card className="gap-3 border border-white/70 px-3 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8] animate-fade-up">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Languages className="h-4 w-4 text-trust" />
@@ -131,6 +148,9 @@ export function VoiceAssistWidget() {
                     <div className="flex items-center gap-2">
                         <span className="text-[11px] font-medium text-muted-foreground">{stateLabel}</span>
                         <span className={`h-2.5 w-2.5 rounded-full ${isListening ? "bg-red-500 animate-pulse" : "bg-green-500"}`} />
+                        <Button variant="ghost" size="icon" className="h-6 w-6 ml-1 -mr-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" onClick={() => setIsMinimized(true)}>
+                            <ChevronDown className="h-4 w-4" />
+                        </Button>
                     </div>
                 </div>
 
@@ -142,7 +162,7 @@ export function VoiceAssistWidget() {
 
                     {(status === "listening" || status === "processing" || status === "responding") && (
                         <div className="mt-2 flex items-center gap-2">
-                            <Waveform className="h-4 w-4 text-trust" />
+                            <Activity className="h-4 w-4 text-trust" />
                             <div className="voice-wave-bars" aria-hidden="true">
                                 <span />
                                 <span />

@@ -74,6 +74,12 @@ This release includes both the previously completed platform foundations and the
     - Mother dashboard and sidebar labels aligned to multilingual content keys.
     - Hindi/English display consistency in primary dashboard actions and test selectors.
 
+7. **Hospital Finder & GPS Map Integration**
+    - GPS-first location detection with auto-detection on browser permission grant.
+    - Integrated Leaflet + OpenStreetMap tiles with custom, scalable bounds-aware markers.
+    - Real-time facility fetch from Overpass API, cached server-side to minimize rate limits.
+    - Fallback Nominatim city-search geocoding when GPS is denied or unavailable.
+
 ### ✅ Existing Foundations Preserved
 
 - NextAuth authentication and role-aware access model.
@@ -152,6 +158,7 @@ All 8 pages now feature professional UI/UX patterns:
 6. **🔍 Symptom Checker** - AI analysis with severity-based actions
 7. **📋 ASHA Task Management** - Priority-based task tracking with real-time updates
 8. **📊 Analytics Dashboard** - ASHA performance metrics with progress bars
+9. **🏥 Hospital Finder** - GPS-enabled interactive map with nearby facilities and emergency filters
 
 ---
 
@@ -496,5 +503,6 @@ Built with ❤️ by **Team Sehat Saheli**
 *   👨‍💻 **Naman Surana** - Frontend & UX Lead &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/newman05) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/naman-surana-work)
 *   👨‍💻 **Vaidik** - Backend & Architecture Lead &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/Vaidik-7781) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/vaidik-gupta-ss2311383/)
 *   👩‍💻 **Shrinkhala** - Research & ML Lead &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/Shrinkhalaa27) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shrinkhala-anand-484998274/)
+*   👩‍💻 **Aryan Kumar** - Backend & UI/UX &nbsp; [![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/Aryankumar102907) [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/aryankumar102907/)
 
 ---
