@@ -454,23 +454,60 @@ Below is a production-ready, interview-style system design for Sehat Saheli. It 
 
 Request Flow (step-by-step): Client → DNS → CDN → Load Balancer → API Gateway → Auth Layer → Microservices → Cache → DB → Object Storage
 
-- Client: Next.js PWA (mobile-first) — interacts with Edge / CDN for static assets. Uses Service Worker for offline caching.
-- DNS: Route53/Cloud DNS — routes domain to CDN/Load Balancer.
-- CDN: CloudFront / Fastly / Vercel Edge — caches static assets and caches safe API responses.
-- Load Balancer: ALB / Cloud Load Balancer — routes to API Gateway/ingress.
-- API Gateway: Kong/NGINX/Cloud API Gateway — central auth, throttling, routing, API versioning.
-- Authentication Flow: Client obtains token via NextAuth (cookie + JWT). API Gateway validates token signature, passes user context to services.
-- Microservices vs Monolith: Recommended hybrid—start modular-monolith or microservices with clear Bounded Contexts: Auth, User, Consent, Tasks, AI Gateway, Notification, Analytics. Rationale: faster iteration early, incremental decomposition later.
+**Visual Request Flow Diagram:**
 
-Components & why:
-- CDN: offload static content and reduce latency.
-- Reverse proxy (NGINX on edge): TLS termination, basic routing, and health checks.
-- API Gateway: central policy enforcement (rate-limits, API keys), authentication enforcement.
-- AI Gateway: shielded service that orchestrates requests to Google Gemini and caches results.
-- Cache: Redis (session store + hot data) for short-lived reads and locks.
-- DB: PostgreSQL primary for OLTP, with read replicas.
-- Object Storage: AWS S3 for images, lab reports, videos.
-- Queue: Kafka or SQS for async processing (notifications, audit ingestion, offline sync replay).
+```mermaid
+sequenceDiagram
+    participant User as 📱 User (PWA Client)
+    participant DNS as 🌍 DNS (Route53)
+    participant CDN as ⚡ CDN/Edge
+    participant LB as 🔀 Load Balancer
+    participant APIGW as 🚪 API Gateway
+    participant Auth as 🔐 Auth Service
+    participant Svc as 🧠 Microservices
+    participant Cache as 📦 Redis Cache
+    participant DB as 💾 Database
+    participant S3 as 🗂️ Object Storage
+
+    User->>DNS: Request sehat-saheli.com
+    DNS-->>User: Returns CDN/LB IP
+    User->>CDN: Fetch static assets (JS/CSS/HTML)
+    CDN-->>User: Cached response (< 100ms)
+    User->>LB: API request (symptom check, task list)
+    LB->>APIGW: Route to API Gateway
+    APIGW->>Auth: Validate JWT token
+    Auth-->>APIGW: User context + roles
+    APIGW->>Svc: Route to microservice (Consent/Tasks/AI)
+    Svc->>Cache: Check Redis for hot data
+    Cache-->>Svc: Cache hit or miss
+    Svc->>DB: Query/write to PostgreSQL
+    DB-->>Svc: Data returned
+    Svc->>S3: Upload/retrieve files if needed
+    S3-->>Svc: File URL or data
+    Svc-->>APIGW: Response payload
+    APIGW-->>User: 200 OK + JSON
+```
+
+**Architecture Explanation:**
+
+- **Client:** Next.js PWA (mobile-first) — interacts with Edge / CDN for static assets. Uses Service Worker for offline caching.
+- **DNS:** Route53/Cloud DNS — routes domain to CDN/Load Balancer.
+- **CDN:** CloudFront / Fastly / Vercel Edge — caches static assets and caches safe API responses.
+- **Load Balancer:** ALB / Cloud Load Balancer — routes to API Gateway/ingress.
+- **API Gateway:** Kong/NGINX/Cloud API Gateway — central auth, throttling, routing, API versioning.
+- **Authentication Flow:** Client obtains token via NextAuth (cookie + JWT). API Gateway validates token signature, passes user context to services.
+- **Microservices vs Monolith:** Recommended hybrid—start modular-monolith or microservices with clear Bounded Contexts: Auth, User, Consent, Tasks, AI Gateway, Notification, Analytics. Rationale: faster iteration early, incremental decomposition later.
+
+**Components & Why:**
+
+- **CDN:** offload static content and reduce latency.
+- **Reverse proxy (NGINX on edge):** TLS termination, basic routing, and health checks.
+- **API Gateway:** central policy enforcement (rate-limits, API keys), authentication enforcement.
+- **AI Gateway:** shielded service that orchestrates requests to Google Gemini and caches results.
+- **Cache:** Redis (session store + hot data) for short-lived reads and locks.
+- **DB:** PostgreSQL primary for OLTP, with read replicas.
+- **Object Storage:** AWS S3 for images, lab reports, videos.
+- **Queue:** Kafka or SQS for async processing (notifications, audit ingestion, offline sync replay).
 
 ---
 
