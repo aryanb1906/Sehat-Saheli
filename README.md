@@ -476,46 +476,94 @@ Components & why:
 
 **3. COMPLETE SYSTEM DESIGN DIAGRAM**
 
-ASCII Architecture Diagram
+```mermaid
+flowchart TB
+    subgraph CLIENT["📱 Client (PWA / Browser / Mobile)"]
+        UI["Next.js PWA"]
+        LocalDB["Local Cache / Service Worker"]
+        UI --> LocalDB
+    end
 
-Client (PWA/Browser/Mobile)
-    |
-    v
- [DNS] -> [CDN/Edge Cache]
-    |
-    v
- [Load Balancer]
-    |
-    v
- [API Gateway / Reverse Proxy] -- auth/ratelimit --> [Auth Service]
-    |
-    +--> [API: User Service]
-    +--> [API: Consent Service] --> [Postgres Primary]
-    +--> [API: Tasks Service]  --> [Redis Cache]
-    +--> [AI Gateway Service] --> [Google Gemini] (async via Queue)
-    +--> [Notification Service] --> [Twilio / SMS Gateway]
-    +--> [File Service] --> [S3]
-    |
-    v
- [Workers (Consumer Group)] <-- [Kafka / SQS] --> background jobs (audit, notifications, sync)
-    |
-    v
- [Analytics / Data Warehouse (Redshift / BigQuery)]
+    subgraph EDGE["⚡ CDN / Edge"]
+        CDN["CDN / Edge Cache"]
+    end
 
-Diagram explanation (clean, component-by-component)
-- Client: runs PWA, caches offline data, performs optimistic updates.
-- CDN: caches static assets and idempotent API responses like facility directory.
-- Load Balancer: distributes connections across app instances; health checks to auto-scaling.
-- API Gateway: central place for auth, metrics, request shaping.
-- Auth Service: issues JWTs with short TTLs + refresh tokens; integrates with identity provider.
-- AI Gateway: orchestrates requests to the model, caches responses by (input, locale), and funnels expensive ops through a job queue if needed.
-- Notification Service: handles SMS, push, and email; decoupled via queue for reliability.
-- Database: PostgreSQL for relational data, with read replicas and automatic backups.
-- Queue: Kafka for high-throughput event streaming; SQS for simpler FIFO tasks.
-- Workers: scale independently to process heavy tasks (sync reconciliation, audit ingestion, media transcoding).
-- Data Warehouse: ETL from primary DB via streaming for analytics and ML.
+    subgraph LB["🌐 Load Balancer & API Gateway"]
+        LBNode["Load Balancer"]
+        APIGW["API Gateway / Reverse Proxy"]
+        LBNode --> APIGW
+    end
 
----
+    subgraph APP["🧭 Application Layer (Services)"]
+        Auth["Auth Service"]
+        UserSvc["User Service"]
+        ConsentSvc["Consent Service"]
+        TasksSvc["Tasks Service"]
+        AIGateway["AI Gateway Service"]
+        Notif["Notification Service"]
+        FileSvc["File Service"]
+    end
+
+    subgraph INFRA["☁️ Infrastructure & Storage"]
+        Postgres["Postgres Primary + Replicas"]
+        Redis["Redis Cache / Session"]
+        S3["Object Storage - S3 / GCS"]
+        Queue["Kafka / SQS Queue"]
+        Workers["Worker Pool (Consumer Group)"]
+        DW["Data Warehouse (Redshift/BigQuery)"]
+    end
+
+    CLIENT -->|Requests| CDN
+    CDN --> LBNode
+    APIGW --> Auth
+    APIGW --> UserSvc
+    APIGW --> ConsentSvc
+    APIGW --> TasksSvc
+    APIGW --> AIGateway
+    APIGW --> Notif
+    APIGW --> FileSvc
+    
+    ConsentSvc --> Postgres
+    UserSvc --> Postgres
+    TasksSvc --> Redis
+    AIGateway -->|async| Queue
+    Notif -->|async| Queue
+    FileSvc --> S3
+    Queue --> Workers
+    Workers --> Postgres
+    Postgres --> DW
+    
+    classDef client fill:#e1f5ff,stroke:#01579b,color:#000
+    classDef app fill:#f3e5f5,stroke:#4a148c,color:#000
+    classDef infra fill:#e8f5e9,stroke:#1b5e20,color:#000
+    classDef edge fill:#fff3e0,stroke:#e65100,color:#000
+    
+    class CLIENT client
+    class EDGE edge
+    class LB app
+    class APP app
+    class INFRA infra
+```
+
+**Diagram Explanation (Component by Component):**
+
+- **Client Layer (PWA):** Runs Next.js PWA, caches offline data locally, performs optimistic updates via Service Worker.
+- **CDN/Edge:** Caches static assets and idempotent API responses (facility directory, locale-specific content).
+- **Load Balancer:** Distributes connections across multiple app instances; performs health checks for auto-scaling.
+- **API Gateway:** Central hub for auth enforcement, rate limiting, request shaping, and routing to services.
+- **Auth Service:** Issues short-lived JWTs + refresh tokens; integrates with identity provider (NextAuth).
+- **User Service:** Manages user profiles, roles, and permissions.
+- **Consent Service:** Handles privacy consent with version history, revoke flows, and audit trails.
+- **Tasks Service:** ASHA task management, scheduling, and priority queuing.
+- **AI Gateway Service:** Orchestrates requests to Google Gemini, caches responses by (input, locale), queues expensive operations asynchronously.
+- **Notification Service:** Handles SMS (Twilio), push, and email; decoupled via queue for reliability.
+- **File Service:** Manages lab reports, images, videos; issues pre-signed S3 URLs for secure uploads/downloads.
+- **PostgreSQL (Primary + Replicas):** Relational data store with read replicas for dashboards and analytics; streaming replication across AZs.
+- **Redis Cache:** Session store, short-lived tokens, locks for background jobs, hot data caching.
+- **Object Storage (S3/GCS):** Stores large artifacts (lab PDFs, images, videos) with lifecycle rules for archival.
+- **Kafka/SQS Queue:** Decouples async processing; high-throughput event streaming for audit logs, notifications, and background jobs.
+- **Worker Pool:** Independently scalable consumer group processing queue tasks (sync reconciliation, transcoding, audit ingestion).
+- **Data Warehouse:** ETL from primary DB via streaming; powers analytics, reporting, and ML pipelines.
 
 **4. DATABASE DESIGN**
 
