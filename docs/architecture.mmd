@@ -1,0 +1,62 @@
+---
+title: Sehat Saheli Architecture
+---
+
+```mermaid
+flowchart TB
+    subgraph CLIENT["📱 Client (PWA / Browser / Mobile)"]
+        UI[Next.js PWA]
+        LocalDB[(Local Cache / Service Worker)]
+        UI --> LocalDB
+    end
+
+    subgraph EDGE["⚡ CDN / Edge"]
+        CDN[CDN / Edge Cache]
+    end
+
+    subgraph LB["🌐 Load Balancer & API Gateway"]
+        LBNode[Load Balancer]
+        APIGW[API Gateway / Reverse Proxy]
+        LBNode --> APIGW
+    end
+
+    subgraph APP["🧭 Application Layer"]
+        Auth[Auth Service]
+        UserSvc[User Service]
+        ConsentSvc[Consent Service]
+        TasksSvc[Tasks Service]
+        AIGateway[AI Gateway Service]
+        Notif[Notification Service]
+        FileSvc[File Service]
+    end
+
+    subgraph INFRA["☁️ Infrastructure & Storage"]
+        Postgres[(Postgres Primary + Replicas)]
+        Redis[(Redis Cache / Session)]
+        S3[(Object Storage - S3 / GCS)]
+        Queue[(Kafka / SQS)]
+        DW[(Data Warehouse)]
+    end
+
+    UI -->|Requests| CDN
+    CDN --> LBNode
+    APIGW --> Auth
+    APIGW --> UserSvc
+    APIGW --> ConsentSvc
+    APIGW --> TasksSvc
+    APIGW --> AIGateway
+    APIGW --> Notif
+    APIGW --> FileSvc
+
+    ConsentSvc --> Postgres
+    TasksSvc --> Redis
+    UserSvc --> Postgres
+    AIGateway -->|async| Queue
+    Notif --> Queue
+    Queue -->|workers| Postgres
+    FileSvc --> S3
+    Postgres --> DW
+
+    classDef infra fill:#f9f9f9,stroke:#ddd
+    class INFRA infra
+```

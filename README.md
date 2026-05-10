@@ -382,22 +382,399 @@ To run the project locally:
 The following high-priority foundation work has been implemented in this update:
 
 1. **Authentication System**
-    - NextAuth-based auth flow with credentials and optional Google OAuth.
-    - Role-ready user model (`MOTHER`, `ASHA`, `DOCTOR`).
-    - Signup API and signin/register pages.
-    - Protected route middleware for `/mother/*`, `/asha/*`, and `/doctor/*`.
+        - NextAuth-based auth flow with credentials and optional Google OAuth.
+        - Role-ready user model (`MOTHER`, `ASHA`, `DOCTOR`).
+        - Signup API and signin/register pages.
+        - Protected route middleware for `/mother/*`, `/asha/*`, and `/doctor/*`.
 
 2. **Database Integration (Prisma + PostgreSQL)**
-    - Prisma schema added for `User`, `ChatRoom`, `ChatMessage`, and `VideoConsultation`.
-    - Shared Prisma client utility in `lib/prisma.ts`.
-    - Prisma scripts added: `prisma:generate`, `prisma:push`, `prisma:studio`.
+        - Prisma schema added for `User`, `ChatRoom`, `ChatMessage`, and `VideoConsultation`.
+        - Shared Prisma client utility in `lib/prisma.ts`.
+        - Prisma scripts added: `prisma:generate`, `prisma:push`, `prisma:studio`.
 
 3. **Real-time Chat Infrastructure**
-    - New persistent messaging endpoints:
-      - `GET/POST /api/chat/messages`
-      - `GET /api/chat/stream` (SSE stream for near real-time updates)
-    - Database-backed conversation and message storage.
-        - Mother chat screen now supports **Doctor Chat mode** wired to these endpoints.
+        - New persistent messaging endpoints:
+            - `GET/POST /api/chat/messages`
+            - `GET /api/chat/stream` (SSE stream for near real-time updates)
+        - Database-backed conversation and message storage.
+                - Mother chat screen now supports **Doctor Chat mode** wired to these endpoints.
+
+---
+
+## **System Design (Complete) for Sehat Saheli**
+
+Below is a production-ready, interview-style system design for Sehat Saheli. It contains both high-level and low-level design decisions, tradeoffs, diagrams, and an actionable README-ready spec you can use for architecture discussions or interview prep.
+
+**Assumptions & Scale Targets**
+- Project: Sehat Saheli — maternal health companion for mothers and ASHA workers.
+- Target scale (design point): 100k — 1M monthly active users (design to support spikes up to millions of users across regions).
+- Peak concurrent requests: 5k — 50k depending on campaigns or emergency alerts.
+- Data types: small JSON records (consent, tasks) + occasional large objects (images, videos, lab PDFs).
+
+---
+
+**1. REQUIREMENTS ANALYSIS**
+
+- Functional Requirements
+    - User registration, role-based access (MOTHER, ASHA, DOCTOR, ADMIN).
+    - Voice/text symptom checker and AI response pipeline.
+    - Save/read/update privacy consent with history & revoke support.
+    - ASHA patient registry and task management.
+    - Emergency SOS + location sharing + SMS alerts.
+    - Offline-first client sync with conflict resolution.
+    - Audit logging and secure referral flows.
+
+- Non-Functional Requirements
+    - Latency: 100–300ms for UI API calls; < 1s for AI fingerprint responses (edge+async OK).
+    - Availability: 99.9% for core flows; 99.95% for notification pipelines.
+    - Durability: user data persisted with backups and WAL.
+    - Compliance: PII handling, encryption at rest/in transit, GDPR-like consent tracking.
+
+- Scalability Requirements
+    - Horizontal scale of stateless API servers and worker fleets.
+    - Database read replicas for analytics and reporting.
+    - CDN caching for static assets and some API responses.
+
+- Availability Requirements
+    - Multi-AZ deployment for DB and app tier.
+    - Retry and circuit-breaker policies for external APIs (Twilio, Gemini).
+
+- Security Considerations
+    - End-to-end TLS, OAuth/JWT for API auth.
+    - RBAC with least privilege.
+    - WAF for API endpoints, rate limiting per IP and user.
+
+- Latency Expectations
+    - Edge responses (static/SSR): < 100ms.
+    - AI responses (3rd-party): 500ms — 3s depending on model, show spinner and return cached fallback.
+
+---
+
+**2. HIGH LEVEL ARCHITECTURE**
+
+Request Flow (step-by-step): Client → DNS → CDN → Load Balancer → API Gateway → Auth Layer → Microservices → Cache → DB → Object Storage
+
+- Client: Next.js PWA (mobile-first) — interacts with Edge / CDN for static assets. Uses Service Worker for offline caching.
+- DNS: Route53/Cloud DNS — routes domain to CDN/Load Balancer.
+- CDN: CloudFront / Fastly / Vercel Edge — caches static assets and caches safe API responses.
+- Load Balancer: ALB / Cloud Load Balancer — routes to API Gateway/ingress.
+- API Gateway: Kong/NGINX/Cloud API Gateway — central auth, throttling, routing, API versioning.
+- Authentication Flow: Client obtains token via NextAuth (cookie + JWT). API Gateway validates token signature, passes user context to services.
+- Microservices vs Monolith: Recommended hybrid—start modular-monolith or microservices with clear Bounded Contexts: Auth, User, Consent, Tasks, AI Gateway, Notification, Analytics. Rationale: faster iteration early, incremental decomposition later.
+
+Components & why:
+- CDN: offload static content and reduce latency.
+- Reverse proxy (NGINX on edge): TLS termination, basic routing, and health checks.
+- API Gateway: central policy enforcement (rate-limits, API keys), authentication enforcement.
+- AI Gateway: shielded service that orchestrates requests to Google Gemini and caches results.
+- Cache: Redis (session store + hot data) for short-lived reads and locks.
+- DB: PostgreSQL primary for OLTP, with read replicas.
+- Object Storage: AWS S3 for images, lab reports, videos.
+- Queue: Kafka or SQS for async processing (notifications, audit ingestion, offline sync replay).
+
+---
+
+**3. COMPLETE SYSTEM DESIGN DIAGRAM**
+
+ASCII Architecture Diagram
+
+Client (PWA/Browser/Mobile)
+    |
+    v
+ [DNS] -> [CDN/Edge Cache]
+    |
+    v
+ [Load Balancer]
+    |
+    v
+ [API Gateway / Reverse Proxy] -- auth/ratelimit --> [Auth Service]
+    |
+    +--> [API: User Service]
+    +--> [API: Consent Service] --> [Postgres Primary]
+    +--> [API: Tasks Service]  --> [Redis Cache]
+    +--> [AI Gateway Service] --> [Google Gemini] (async via Queue)
+    +--> [Notification Service] --> [Twilio / SMS Gateway]
+    +--> [File Service] --> [S3]
+    |
+    v
+ [Workers (Consumer Group)] <-- [Kafka / SQS] --> background jobs (audit, notifications, sync)
+    |
+    v
+ [Analytics / Data Warehouse (Redshift / BigQuery)]
+
+Diagram explanation (clean, component-by-component)
+- Client: runs PWA, caches offline data, performs optimistic updates.
+- CDN: caches static assets and idempotent API responses like facility directory.
+- Load Balancer: distributes connections across app instances; health checks to auto-scaling.
+- API Gateway: central place for auth, metrics, request shaping.
+- Auth Service: issues JWTs with short TTLs + refresh tokens; integrates with identity provider.
+- AI Gateway: orchestrates requests to the model, caches responses by (input, locale), and funnels expensive ops through a job queue if needed.
+- Notification Service: handles SMS, push, and email; decoupled via queue for reliability.
+- Database: PostgreSQL for relational data, with read replicas and automatic backups.
+- Queue: Kafka for high-throughput event streaming; SQS for simpler FIFO tasks.
+- Workers: scale independently to process heavy tasks (sync reconciliation, audit ingestion, media transcoding).
+- Data Warehouse: ETL from primary DB via streaming for analytics and ML.
+
+---
+
+**4. DATABASE DESIGN**
+
+- Which DB & Why
+    - Primary: PostgreSQL — ACID guarantees, relational joins, strong schema (consent history), and good ecosystem (Prisma).
+    - Secondary: Redis — in-memory cache, session store, locks; S3 for files; Data Warehouse (BigQuery/Redshift) for analytics.
+
+- SQL vs NoSQL
+    - Use SQL (Postgres) for user records, consent history, tasks and audit logs.
+    - Use NoSQL (Cassandra/DynamoDB) only if you anticipate enormous write throughput and relaxed consistency for certain telemetry; otherwise Postgres scales well with sharding and read-replicas for our use-case.
+
+- Core Schema (high-level)
+    - users (id PK, role, email, phone, name, locale, createdAt, lastSeen)
+    - consents (id PK, userId FK, consentDataShare boolean, consentAiTraining boolean, version int, metadata JSONB, createdAt)
+    - consent_history (id PK, consentId FK, action ENUM, actorId, snapshot JSONB, timestamp)
+    - tasks (id, patientId, assignedTo, status, dueAt, metadata JSONB)
+    - audit_logs (id, userId, action, resourceType, resourceId, payload JSONB, createdAt)
+    - messages (id, chatRoomId, senderId, body TEXT, attachments JSONB, createdAt)
+
+- Indexing Strategy
+    - PK indexes on id.
+    - Compound index on (userId, createdAt) for time window reads.
+    - GIN index on JSONB (metadata) for specific searching needs.
+    - Partial indexes for active tasks and unresolved referrals.
+
+- Read-heavy vs Write-heavy Handling
+    - Use read replicas for dashboards and analytics.
+    - Use write-optimized primary with connection pooling (PgBouncer) and batching for bulk inserts.
+
+- Replication, Sharding, Partitioning
+    - Replication: Postgres streaming replication across AZs.
+    - Sharding: Evaluate only when single-node limits reached; use application-level sharding by tenant/region.
+    - Partitioning: Time-based partitioning for audit_logs and messages.
+
+- CAP theorem
+    - Postgres is CA in a single region; to handle network partitions across regions, accept eventual consistency for non-critical flows (analytics, notifications), while keeping critical flows ACID-local.
+
+---
+
+**5. CACHING STRATEGY**
+
+- Redis usage
+    - Session store + short-lived tokens.
+    - Hot data cache (patient summary, ASHA task list) with TTLs.
+    - Leader election using Redis locks for background jobs.
+
+- Server-side cache
+    - Application-level caching for expensive reads (facility lists, AI templates).
+
+- CDN caching
+    - Cache static assets and idempotent API responses like facility directory. Use Cache-Control headers and stale-while-revalidate.
+
+- Cache invalidation
+    - On write, invalidate relevant keys or publish cache-bust events via pub/sub.
+    - Use cache versioning keys for global invalidation.
+
+- Session storage
+    - Redis with TTL and token rotation.
+
+- Hot data optimization
+    - Promote frequently accessed patient summaries into Redis with adaptive TTLs.
+
+---
+
+**6. STORAGE DESIGN**
+
+- Object storage: AWS S3 (or GCS/Azure Blob)
+    - Store lab reports, images, videos, and large artifacts.
+    - Use lifecycle rules for archival (move older than 90 days to Glacier/Coldline).
+
+- Image/video handling
+    - Uploads via pre-signed URLs to S3 (server issues short-lived PUT URL).
+    - Server triggers background workers for transcoding/resizing.
+
+- Pre-signed URLs
+    - Use short TTLs; respect RBAC by scoping object keys by userId/tenant.
+
+- Compression strategy
+    - Store compressed versions for large objects; periodically recompress using worker jobs.
+
+- Backup strategy
+    - DB automated snapshot daily + PITR (Point-in-Time-Recovery) for critical tables.
+    - S3 cross-region replication for disaster recovery.
+
+---
+
+**7. LOAD BALANCING & SCALING**
+
+- Horizontal scaling
+    - Stateless API instances behind load balancer; auto-scale based on CPU/RPS/latency.
+
+- Vertical scaling
+    - Reserved for DB and other monolithic stateful services; prefer read replicas over vertical scaling when possible.
+
+- Stateless servers
+    - Push session state to Redis; store user-uploaded content in S3 to keep instances stateless.
+
+- Auto-scaling
+    - Use target tracking (e.g., keep avg CPU at 40%) and scheduled scaling for predictable peaks.
+
+- Traffic distribution
+    - Use weighted routing per region; geolocation-based DNS to route clients to nearest edge.
+
+- Multi-region deployment
+    - Deploy read-only edge cache and regionally closer app nodes; active-write region model with async cross-region replication for user data.
+
+- Failover strategy
+    - DB: promote read replica on failure.
+    - DNS: Route53 health checks and failover.
+
+---
+
+**8. MESSAGE QUEUES / EVENT DRIVEN DESIGN**
+
+- Pub/Sub architecture
+    - Kafka for internal event streaming (high-throughput telemetry and analytics).
+    - SQS (or Redis streams) for simpler job queues and retries.
+
+- Async processing
+    - Offline sync replay, notification sending, and AI batching via queues.
+
+- Background jobs
+    - Workers process tasks: file transcoding, analytics aggregation, audit ingestion.
+
+- Retry & DLQ
+    - Exponential backoff with dead-letter queue after N attempts.
+
+---
+
+**9. API DESIGN**
+
+- REST API basics
+    - Use consistent resource naming and versioning (`/api/v1/consent`).
+
+- Example: Save consent
+    - POST /api/v1/privacy-consent
+    - Body: { userId, consentDataShare, consentAiTraining, retentionDays }
+    - Responses: 200 OK + { success: true, consentId }
+
+- Example: Revoke consent
+    - POST /api/v1/privacy-consent
+    - Body: { action: "revoke", userId }
+    - Responses: 200 OK
+
+- Pagination
+    - Use cursor-based pagination for large lists: `GET /api/v1/patients?limit=50&cursor=abc`
+
+- Authentication APIs
+    - `POST /api/v1/auth/login` (issue access + refresh token)
+    - `POST /api/v1/auth/refresh`
+
+- Rate limiting
+    - Per-IP + per-user rate limits (burst + sustained) enforced at API Gateway.
+
+- GraphQL vs REST
+    - REST is simpler for bounded endpoints. GraphQL can be added for highly-client-driven queries (dashboard) with caution on complexity and caching.
+
+---
+
+**10. SECURITY**
+
+- JWT & Auth
+    - Short-lived JWTs + refresh tokens stored securely; rotate refresh tokens.
+
+- OAuth
+    - Support optional OAuth providers for convenience (Google), keep server-side token handling minimal.
+
+- API security
+    - Validate input with a schema (Zod), use parameterized queries via Prisma.
+
+- HTTPS
+    - Enforce HSTS and TLS 1.2+.
+
+- Encryption
+    - Encrypt PII at rest (column-level encryption for sensitive fields) and use KMS for keys.
+
+- Injection/XSS/CSRF
+    - Use parameterized queries, escape outputs, CSRF tokens for cookie flows, Content Security Policy.
+
+- RBAC
+    - Central role-check middleware with least privilege.
+
+---
+
+**11. MONITORING & OBSERVABILITY**
+
+- Logging
+    - Structured logs (JSON) to a central aggregator (Elastic/Datadog/CloudWatch).
+
+- Metrics
+    - Prometheus + Grafana; track request latency, error rates, queue lag, worker throughput.
+
+- Tracing
+    - OpenTelemetry + Jaeger for distributed tracing across edge → API → AI service.
+
+- Alerting
+    - PagerDuty + Slack for incidents; SLO-based alert thresholds.
+
+- Health checks
+    - Liveness & readiness endpoints; synthetic monitoring of core flows.
+
+---
+
+**12. BOTTLENECKS & OPTIMIZATIONS**
+
+- Potential bottlenecks
+    - DB write spikes (audit logs) — use batching and partitioning.
+    - AI third-party latency — cache responses and pre-warm frequent intents.
+    - SMS provider limits — implement provider-fallback strategy.
+
+- Solutions
+    - Backpressure using queue + circuit breaker.
+    - Rate-limiting & graceful degradation for non-critical features.
+
+---
+
+**13. INTERVIEW QUESTIONS**
+
+- Design prompts
+    - How would you design consent revocation so it is legally sound and reversible?
+    - How to ensure offline-first sync preserves data correctness across multiple devices?
+    - Tradeoffs of Edge AI vs centralized AI inference for medical advice?
+
+- Tradeoffs explained
+    - Edge inference reduces latency and increases privacy but incurs complexity and model size concerns.
+
+---
+
+**14. TECH STACK RECOMMENDATION**
+
+- Frontend: Next.js (PWA), TypeScript, TailwindCSS
+- Backend: Node.js / NestJS or Next.js Edge + API routes
+- Database: PostgreSQL (primary), BigQuery/Redshift (analytics)
+- Cache: Redis
+- Queue: Kafka or AWS SQS + Lambda workers
+- Cloud provider: AWS / GCP / Vercel for hosting front-end Edge
+- DevOps: Terraform, GitHub Actions, Docker
+- CI/CD: GitHub Actions (lint/test/build/deploy pipeline)
+
+---
+
+**15. FINAL SUMMARY**
+
+- End-to-end lifecycle: Client → Edge → API Gateway → Services → DB / Cache → S3 → Workers → Analytics.
+- Scalability summary: stateless app layer, DB replicas, queue-based async processing, CDN for static content.
+- Estimated maturity: production-ready with baseline for 100k+ monthly users; incremental improvements for multi-region active-active required at >1M scale.
+- Real-world comparison: architecture aligns with telemedicine platforms like Practo / telehealth smaller scale deployments.
+
+---
+
+If you want, I can:
+- commit this README update to your local git branch and make a PR
+- add a PlantUML or Mermaid diagram file (svg) into `/docs/`
+- generate a shorter 1-page cheat-sheet for interview prep
+
+File updated: [README.md](README.md)
+
+Next step: tell me which of the follow-ups you want me to do (commit & push, add diagram file, or produce interview cheat-sheet). 
+
 
 4. **Video Consultation Persistence**
     - `app/api/video-consultation/route.ts` migrated from mock-only to DB-backed CRUD.
