@@ -817,48 +817,8 @@ flowchart TB
 
 ---
 
-**13. INTERVIEW QUESTIONS**
-
-- Design prompts
-    - How would you design consent revocation so it is legally sound and reversible?
-    - How to ensure offline-first sync preserves data correctness across multiple devices?
-    - Tradeoffs of Edge AI vs centralized AI inference for medical advice?
-
-- Tradeoffs explained
-    - Edge inference reduces latency and increases privacy but incurs complexity and model size concerns.
-
----
-
-**14. TECH STACK RECOMMENDATION**
-
-- Frontend: Next.js (PWA), TypeScript, TailwindCSS
-- Backend: Node.js / NestJS or Next.js Edge + API routes
-- Database: PostgreSQL (primary), BigQuery/Redshift (analytics)
-- Cache: Redis
-- Queue: Kafka or AWS SQS + Lambda workers
-- Cloud provider: AWS / GCP / Vercel for hosting front-end Edge
-- DevOps: Terraform, GitHub Actions, Docker
-- CI/CD: GitHub Actions (lint/test/build/deploy pipeline)
-
----
-
-**15. FINAL SUMMARY**
-
-- End-to-end lifecycle: Client → Edge → API Gateway → Services → DB / Cache → S3 → Workers → Analytics.
-- Scalability summary: stateless app layer, DB replicas, queue-based async processing, CDN for static content.
-- Estimated maturity: production-ready with baseline for 100k+ monthly users; incremental improvements for multi-region active-active required at >1M scale.
-- Real-world comparison: architecture aligns with telemedicine platforms like Practo / telehealth smaller scale deployments.
-
----
-
-If you want, I can:
-- commit this README update to your local git branch and make a PR
-- add a PlantUML or Mermaid diagram file (svg) into `/docs/`
-- generate a shorter 1-page cheat-sheet for interview prep
 
 File updated: [README.md](README.md)
-
-Next step: tell me which of the follow-ups you want me to do (commit & push, add diagram file, or produce interview cheat-sheet). 
 
 
 4. **Video Consultation Persistence**
