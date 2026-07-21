@@ -1,22 +1,47 @@
-export const runtime = "edge"
+import { z } from "zod"
+import { requireSessionUser, hasRole } from "@/lib/api-auth"
+import { clientIp, rateLimit } from "@/lib/rate-limit"
 
-interface SMSRequest {
-  to: string
-  message: string
-  patientName?: string
-}
+export const runtime = "nodejs"
+
+const smsSchema = z.object({
+  to: z.string().min(8).max(20),
+  message: z.string().min(1).max(1000),
+  patientName: z.string().optional(),
+})
 
 export async function POST(req: Request) {
   try {
-    const { to, message, patientName }: SMSRequest = await req.json()
+    // This is a real SMS relay once TWILIO_AUTH_TOKEN is configured — it must
+    // never be reachable without auth, or it becomes a free spam/phishing
+    // relay on the project's Twilio bill the moment credentials are live.
+    const user = await requireSessionUser()
+    if (!user) {
+      return Response.json({ success: false, error: "Authentication required" }, { status: 401 })
+    }
+    if (!hasRole(user.role, ["ASHA", "DOCTOR"])) {
+      return Response.json({ success: false, error: "Only ASHA/doctor accounts can send SMS" }, { status: 403 })
+    }
 
-    const accountSid = process.env.TWILIO_ACCOUNT_SID || "" 
+    const rl = await rateLimit(`sms:${user.id}:${clientIp(req)}`, 20, 60_000)
+    if (!rl.allowed) {
+      return Response.json({ success: false, error: "Too many SMS requests" }, { status: 429 })
+    }
+
+    const body = await req.json()
+    const parsed = smsSchema.safeParse(body)
+    if (!parsed.success) {
+      return Response.json({ success: false, error: "Invalid payload" }, { status: 400 })
+    }
+    const { to, message, patientName } = parsed.data
+
+    const accountSid = process.env.TWILIO_ACCOUNT_SID || ""
     const authToken = process.env.TWILIO_AUTH_TOKEN || ""
     const fromNumber = process.env.TWILIO_PHONE_NUMBER || "+1234567890"
 
     // In demo mode, just log and return success
     if (!authToken) {
-      console.log("[v0] Demo SMS:", { to, message, patientName })
+      console.log("[v0] Demo SMS:", { to, message, patientName, sentBy: user.id })
       return Response.json({
         success: true,
         message: "SMS sent (demo mode)",
@@ -28,7 +53,7 @@ export async function POST(req: Request) {
     const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`
     const auth = btoa(`${accountSid}:${authToken}`)
 
-    const body = new URLSearchParams({
+    const twilioBody = new URLSearchParams({
       To: to,
       From: fromNumber,
       Body: message,
@@ -40,7 +65,7 @@ export async function POST(req: Request) {
         Authorization: `Basic ${auth}`,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: body.toString(),
+      body: twilioBody.toString(),
     })
 
     const data = await response.json()

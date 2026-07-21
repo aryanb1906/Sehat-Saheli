@@ -245,7 +245,7 @@ export default function ASHADashboard() {
                         </button>
 
                         <button
-                            className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-white p-5 text-left text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                            className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-card p-5 text-left text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                             onClick={() => router.push("/asha/appointment-reminders")}
                         >
                             <div className="flex items-start justify-between">
@@ -259,7 +259,7 @@ export default function ASHADashboard() {
                         </button>
 
                         <button
-                            className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-white p-5 text-left text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                            className="group flex min-h-[126px] flex-col justify-between rounded-xl border border-border bg-card p-5 text-left text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                             onClick={() => router.push("/asha/home-visits")}
                         >
                             <div className="flex items-start justify-between">
@@ -340,7 +340,7 @@ export default function ASHADashboard() {
                 {t({ en: "Voice Assist", hi: "वॉइस सहायता", or: "ଭଏସ୍ ସହାୟତା", bn: "ভয়েস সহায়তা", te: "వాయిస్ సహాయం", ta: "குரல் உதவி", mr: "व्हॉइस सहाय्य", gu: "વોઇસ સહાય" })}
             </button>
 
-            <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-white/95 p-2 shadow-lg backdrop-blur md:hidden">
+            <div className="fixed bottom-4 left-1/2 z-40 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-2xl border border-border/70 bg-card/95 p-2 shadow-lg backdrop-blur md:hidden">
                 <div className="grid grid-cols-4 gap-1">
                     <button onClick={() => router.push("/asha")} className="flex flex-col items-center gap-1 rounded-lg py-2 text-xs font-medium text-trust">
                         <Home className="h-4 w-4" />

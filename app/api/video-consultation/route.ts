@@ -3,8 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { clientIp, rateLimit } from "@/lib/rate-limit";
 import type { VideoConsultation as PrismaVideoConsultation } from "@prisma/client";
-import { failBadRequest, failInternal, failTooManyRequests, okWithRequestId } from "@/lib/api-response";
+import { failBadRequest, failForbidden, failInternal, failTooManyRequests, failUnauthorized, okWithRequestId } from "@/lib/api-response";
 import { getRequestId } from "@/lib/observability";
+import { requireSessionUser } from "@/lib/api-auth";
 
 interface VideoConsultation {
     id: string;
@@ -19,61 +20,54 @@ interface VideoConsultation {
     rating?: number;
 }
 
+// A mother may only ever see/book/rate her own consultations; a doctor may
+// only see/act on consultations where they are the assigned doctor. There
+// used to be no such check at all — patientId/doctorId came straight from
+// the request with a "demo-mother" default, so any caller could read or
+// mutate another patient's private consultation by guessing IDs.
+function assertOwnsPatientRecord(userId: string, role: string, patientId: string) {
+    if (role === "MOTHER") return patientId === userId
+    // ASHA/DOCTOR access is scoped by doctorId ownership on mutating routes below;
+    // GET-by-patientId is reserved for the mother themselves.
+    return role === "DOCTOR"
+}
+
 export async function GET(req: NextRequest) {
     const requestId = getRequestId(req)
     try {
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+
         const ip = clientIp(req)
-        const rl = await rateLimit(`video-consultation-get:${ip}`, 90, 60_000)
+        const rl = await rateLimit(`video-consultation-get:${user.id}:${ip}`, 90, 60_000)
         if (!rl.allowed) {
             return failTooManyRequests("Too many requests", undefined, requestId)
         }
 
-        const consultations: VideoConsultation[] = [
-            {
-                id: "vc_001",
-                doctorName: "Dr. Rajesh Kumar",
-                specialization: "Obstetrics & Gynecology",
-                date: "2024-03-25",
-                time: "10:00 AM",
-                duration: 30,
-                status: "scheduled",
-                roomId: "sehat-saheli-vc-001",
-            },
-            {
-                id: "vc_002",
-                doctorName: "Dr. Priya Singh",
-                specialization: "Maternal Health",
-                date: "2024-03-10",
-                time: "2:00 PM",
-                duration: 25,
-                status: "completed",
-                notes: "Everything progressing well. See in 2 weeks.",
-                rating: 5,
-            },
-        ];
-
         const { searchParams } = new URL(req.url);
-        const patientId = z.string().min(1).safeParse(searchParams.get("patientId") || "demo-mother").data || "demo-mother";
+        const requestedPatientId = searchParams.get("patientId")
+        const patientId = requestedPatientId || user.id
+
+        if (!assertOwnsPatientRecord(user.id, user.role, patientId)) {
+            return failForbidden("Not allowed to view this patient's consultations", requestId)
+        }
 
         const dbConsultations = await prisma.videoConsultation.findMany({
             where: { patientId },
             orderBy: { createdAt: "desc" },
         });
 
-        if (dbConsultations.length === 0) {
-            return okWithRequestId({
-                consultations,
-                totalConsultations: consultations.length,
-            }, requestId);
-        }
-
+        // Previously two hardcoded "Dr. Rajesh Kumar" / "Dr. Priya Singh"
+        // consultations were injected whenever a patient had zero real rows,
+        // which meant every never-booked patient saw fake appointments
+        // indefinitely. Show a genuine empty state instead.
         const mapped: VideoConsultation[] = dbConsultations.map((row: PrismaVideoConsultation) => ({
             id: row.id,
             doctorName: row.doctorName,
             specialization: row.specialization,
             date: row.date,
             time: row.time,
-            duration: row.duration,
+            duration: 30,
             status: row.status.toLowerCase() as VideoConsultation["status"],
             roomId: row.roomId ?? undefined,
             notes: row.notes ?? undefined,
@@ -92,8 +86,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     const requestId = getRequestId(req)
     try {
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+
         const ip = clientIp(req)
-        const rl = await rateLimit(`video-consultation-post:${ip}`, 30, 60_000)
+        const rl = await rateLimit(`video-consultation-post:${user.id}:${ip}`, 30, 60_000)
         if (!rl.allowed) {
             return failTooManyRequests("Too many booking attempts", undefined, requestId)
         }
@@ -101,7 +98,6 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const parsed = z
             .object({
-                patientId: z.string().optional(),
                 doctorId: z.string().optional(),
                 doctorName: z.string().optional(),
                 specialty: z.string().optional(),
@@ -146,7 +142,13 @@ export async function POST(req: NextRequest) {
             return failBadRequest("date/time required", requestId)
         }
 
-        const patientId = parsed.data.patientId || "demo-mother";
+        // A mother can only ever book a consultation for herself — the
+        // authenticated session, not a client-supplied patientId, decides
+        // whose record this is.
+        if (user.role !== "MOTHER") {
+            return failForbidden("Only mother accounts can book a consultation", requestId)
+        }
+        const patientId = user.id;
         const doctorId = parsed.data.doctorId;
         const doctorName = parsed.data.doctorName || "Dr. Available";
 
@@ -186,8 +188,11 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
     const requestId = getRequestId(req)
     try {
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+
         const ip = clientIp(req)
-        const rl = await rateLimit(`video-consultation-put:${ip}`, 30, 60_000)
+        const rl = await rateLimit(`video-consultation-put:${user.id}:${ip}`, 30, 60_000)
         if (!rl.allowed) {
             return failTooManyRequests("Too many update attempts", undefined, requestId)
         }
@@ -204,6 +209,16 @@ export async function PUT(req: NextRequest) {
         }
 
         const { consultationId, rating, notes } = parsed.data;
+
+        const existing = await prisma.videoConsultation.findUnique({ where: { id: consultationId } })
+        if (!existing) return failBadRequest("Consultation not found", requestId)
+
+        const isOwner =
+            (user.role === "MOTHER" && existing.patientId === user.id) ||
+            (user.role === "DOCTOR" && existing.doctorId === user.id)
+        if (!isOwner) {
+            return failForbidden("Not allowed to update this consultation", requestId)
+        }
 
         await prisma.videoConsultation.update({
             where: { id: consultationId },

@@ -110,12 +110,22 @@ function isApiMutation(url: string, method: string) {
     }
 }
 
-function buildQueuedResponse(id: string) {
+const EMERGENCY_FALLBACK_EVENT = "sehat-emergency-offline-fallback"
+
+function buildQueuedResponse(id: string, options?: { emergencyFallbackTriggered?: boolean }) {
+    const isEmergency = options?.emergencyFallbackTriggered
     return new Response(
         JSON.stringify({
             queued: true,
             requestId: id,
-            message: "Request saved offline and will sync automatically.",
+            // The generic "will sync automatically" copy is deliberately NOT used
+            // for the emergency path — telling someone in a real emergency that
+            // the system "handled it" when nothing has actually reached anyone
+            // yet is unsafe. See triggerLocalEmergencyFallback below.
+            message: isEmergency
+                ? "No signal — this alert is saved and will notify your ASHA worker once connected, but it has NOT reached anyone yet. Call 108 directly now."
+                : "Request saved offline and will sync automatically.",
+            emergencyFallbackTriggered: Boolean(isEmergency),
         }),
         {
             status: 202,
@@ -125,6 +135,55 @@ function buildQueuedResponse(id: string) {
             },
         },
     )
+}
+
+/**
+ * The generic offline write-queue (queue silently, replay later) is the
+ * wrong trade-off specifically for SOS/emergency triggers: a mother pressing
+ * SOS with no signal needs something to happen on her device *right now*,
+ * not "eventually when back online." This fires a native tel:108 dial
+ * intent immediately and emits an event the SOS UI listens for, so the
+ * on-screen copy can say "call 108 now" instead of implying help is already
+ * on the way.
+ */
+function triggerLocalEmergencyFallback(request: QueuedRequest) {
+    if (typeof window === "undefined") return
+
+    let action: string | undefined
+    try {
+        action = request.body ? JSON.parse(request.body)?.action : undefined
+    } catch {
+        action = undefined
+    }
+
+    // Only escalate for actual SOS/ambulance actions, not e.g. add-contact.
+    if (action !== "trigger-sos" && action !== "call-108") return
+
+    window.dispatchEvent(
+        new CustomEvent(EMERGENCY_FALLBACK_EVENT, {
+            detail: { requestId: request.id, action, at: new Date().toISOString() },
+        }),
+    )
+
+    // Best-effort native dial intent. On a phone/PWA this opens the dialer
+    // pre-filled with 108; on desktop browsers it typically no-ops silently,
+    // which is fine — the UI banner is the fallback for that case.
+    try {
+        window.location.href = "tel:108"
+    } catch {
+        // ignore — not all environments support tel: links
+    }
+}
+
+export function subscribeEmergencyOfflineFallback(listener: (detail: { requestId: string; action?: string; at: string }) => void) {
+    if (typeof window === "undefined") return () => { }
+
+    const handler = (event: Event) => {
+        listener((event as CustomEvent<{ requestId: string; action?: string; at: string }>).detail)
+    }
+
+    window.addEventListener(EMERGENCY_FALLBACK_EVENT, handler)
+    return () => window.removeEventListener(EMERGENCY_FALLBACK_EVENT, handler)
 }
 
 async function toQueuedRequest(request: Request): Promise<QueuedRequest> {
@@ -314,10 +373,15 @@ export function initOfflineSync() {
             return originalFetch(input, init)
         }
 
+        const isEmergencyMutation = endpointTypeFromUrl(request.url) === "emergency"
+
         const queueAndReturn = async () => {
             const queued = await toQueuedRequest(request)
             enqueueRequest(queued)
-            return buildQueuedResponse(queued.id)
+            if (isEmergencyMutation) {
+                triggerLocalEmergencyFallback(queued)
+            }
+            return buildQueuedResponse(queued.id, { emergencyFallbackTriggered: isEmergencyMutation })
         }
 
         if (!navigator.onLine) {

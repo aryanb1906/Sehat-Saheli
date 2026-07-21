@@ -1,18 +1,37 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Phone, User, AlertCircle, Ambulance, Car } from "lucide-react"
+import { ArrowLeft, Phone, User, AlertCircle, Ambulance, Car, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useLanguage } from "@/lib/language-context"
+import { subscribeEmergencyOfflineFallback } from "@/lib/offline-sync-client"
 
 export default function Emergency() {
   const router = useRouter()
   const { language } = useLanguage()
   const [sosSent, setSosSent] = useState(false)
+  const [offlineFallback, setOfflineFallback] = useState(false)
   const t = (copy: Record<string, string>) => copy[language] || copy.en
+
+  useEffect(() => {
+    return subscribeEmergencyOfflineFallback(() => setOfflineFallback(true))
+  }, [])
+
+  const getCurrentLocation = () =>
+    new Promise<{ lat: number; lng: number }>((resolve) => {
+      if (typeof navigator === "undefined" || !navigator.geolocation) {
+        resolve({ lat: 20.59, lng: 78.96 })
+        return
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => resolve({ lat: position.coords.latitude, lng: position.coords.longitude }),
+        () => resolve({ lat: 20.59, lng: 78.96 }),
+        { timeout: 5000 },
+      )
+    })
 
   const emergencyContacts = [
     { name: "ASHA Worker - Meera Devi", number: "+91 98765 43210", type: "ASHA" },
@@ -39,15 +58,18 @@ export default function Emergency() {
   }
 
   const triggerSOS = async () => {
+    // No hardcoded userId here — /api/emergency derives the acting user from
+    // the authenticated session server-side, so this only needs to send the
+    // real device location and reason.
     try {
+      const location = await getCurrentLocation()
       await fetch("/api/emergency", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "trigger-sos",
           data: {
-            userId: "demo-mother",
-            location: { lat: 20.59, lng: 78.96 },
+            location,
             reason: t({ en: "Emergency from maternal danger signs", hi: "मातृ जोखिम संकेतों से आपातकाल", or: "ମାତୃ ବିପଦ ସଙ୍କେତରୁ ଜରୁରୀ ସ୍ଥିତି", bn: "মাতৃ ঝুঁকির সংকেত থেকে জরুরি অবস্থা", te: "మాతృ ప్రమాద సంకేతాల వల్ల అత్యవసరం", ta: "தாய்மை அபாய அறிகுறிகளால் அவசரம்", mr: "मातृ जोखीम चिन्हांमुळे आपत्काल", gu: "માતૃત્વ જોખમ સંકેતોને કારણે આપાતકાલ" }),
           },
         }),
@@ -55,6 +77,9 @@ export default function Emergency() {
       setSosSent(true)
     } catch {
       setSosSent(false)
+      // Whether this failed outright or was queued offline, the safest
+      // default is to also dial 108 directly rather than trust the app.
+      window.location.href = "tel:108"
     }
   }
 
@@ -107,7 +132,24 @@ export default function Emergency() {
               <AlertCircle className="mr-2 h-4 w-4" />
               {t({ en: "Trigger SOS to Family + ASHA", hi: "परिवार + आशा को SOS भेजें", or: "ପରିବାର + ଆଶା କୁ SOS ପଠାନ୍ତୁ", bn: "পরিবার + আশা-কে SOS পাঠান", te: "కుటుంబం + ఆశాకు SOS పంపండి", ta: "குடும்பம் + ஆஷாவுக்கு SOS அனுப்பு", mr: "कुटुंब + आशाला SOS पाठवा", gu: "પરિવાર + આશાને SOS મોકલો" })}
             </Button>
-            {sosSent && <p className="mt-3 text-xs font-medium text-success">{t({ en: "SOS alert sent to saved contacts.", hi: "सहेजे गए संपर्कों को SOS अलर्ट भेजा गया।", or: "ସେଭ୍ କରାଯାଇଥିବା ସଂପର୍କମାନଙ୍କୁ SOS ପଠାଯାଇଛି।", bn: "সংরক্ষিত যোগাযোগে SOS অ্যালার্ট পাঠানো হয়েছে।", te: "సేవ్ చేసిన కాంటాక్ట్‌లకు SOS అలర్ట్ పంపబడింది.", ta: "சேமிக்கப்பட்ட தொடர்புகளுக்கு SOS எச்சரிக்கை அனுப்பப்பட்டது.", mr: "जतन केलेल्या संपर्कांना SOS अलर्ट पाठवला.", gu: "સેવ કરેલા સંપર્કોને SOS અલર્ટ મોકલાયો." })}</p>}
+            {sosSent && !offlineFallback && (
+              <p className="mt-3 text-xs font-medium text-success">{t({ en: "SOS alert sent to saved contacts.", hi: "सहेजे गए संपर्कों को SOS अलर्ट भेजा गया।", or: "ସେଭ୍ କରାଯାଇଥିବା ସଂପର୍କମାନଙ୍କୁ SOS ପଠାଯାଇଛି।", bn: "সংরক্ষিত যোগাযোগে SOS অ্যালার্ট পাঠানো হয়েছে।", te: "సేవ్ చేసిన కాంటాక్ట్‌లకు SOS అలర్ట్ పంపబడింది.", ta: "சேமிக்கப்பட்ட தொடர்புகளுக்கு SOS எச்சரிக்கை அனுப்பப்பட்டது.", mr: "जतन केलेल्या संपर्कांना SOS अलर्ट पाठवला.", gu: "સેવ કરેલા સંપર્કોને SOS અલર્ટ મોકલાયો." })}</p>
+            )}
+            {offlineFallback && (
+              <p className="mt-3 flex items-center gap-2 rounded-lg border border-alert/40 bg-alert/15 px-3 py-2 text-xs font-semibold text-alert">
+                <WifiOff className="h-4 w-4 shrink-0" />
+                {t({
+                  en: "No signal — this alert has NOT reached anyone yet. Call 108 directly now.",
+                  hi: "कोई सिग्नल नहीं — यह अलर्ट अभी तक किसी तक नहीं पहुंचा। तुरंत 108 पर कॉल करें।",
+                  or: "କୌଣସି ସିଗନାଲ୍ ନାହିଁ — ଏହି ଆଲର୍ଟ ଏପର୍ଯ୍ୟନ୍ତ କାହାରିକୁ ପହଞ୍ଚିନାହିଁ। ତୁରନ୍ତ 108 କୁ କଲ୍ କରନ୍ତୁ।",
+                  bn: "কোনো সিগন্যাল নেই — এই সতর্কতা এখনও কারো কাছে পৌঁছায়নি। এখনই ১০৮-এ কল করুন।",
+                  te: "సిగ్నల్ లేదు — ఈ అలర్ట్ ఇంకా ఎవరికీ చేరలేదు. వెంటనే 108కు కాల్ చేయండి.",
+                  ta: "சிக்னல் இல்லை — இந்த எச்சரிக்கை இன்னும் யாரையும் சென்றடையவில்லை. உடனே 108-ஐ அழைக்கவும்.",
+                  mr: "सिग्नल नाही — हा अलर्ट अजून कोणापर्यंत पोहोचलेला नाही. लगेच 108 वर कॉल करा.",
+                  gu: "કોઈ સિગ્નલ નથી — આ અલર્ટ હજુ સુધી કોઈ સુધી પહોંચ્યો નથી. તરત 108 પર કૉલ કરો.",
+                })}
+              </p>
+            )}
           </Card>
         </div>
 

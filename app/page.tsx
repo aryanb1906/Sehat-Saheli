@@ -233,7 +233,7 @@ export default function LandingPage() {
     )
 
     return (
-        <div className="min-h-screen bg-[radial-gradient(circle_at_10%_10%,rgba(253,186,116,0.15),transparent_35%),radial-gradient(circle_at_90%_20%,rgba(96,165,250,0.14),transparent_35%),radial-gradient(circle_at_50%_90%,rgba(251,113,133,0.12),transparent_35%)] bg-background">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_10%_10%,color-mix(in_oklch,var(--color-warm)_18%,transparent),transparent_35%),radial-gradient(circle_at_90%_20%,color-mix(in_oklch,var(--color-trust)_14%,transparent),transparent_35%),radial-gradient(circle_at_50%_90%,color-mix(in_oklch,var(--color-care)_16%,transparent),transparent_35%)] bg-background">
             <header className="sticky top-0 z-50 border-b border-border/60 bg-background/85 backdrop-blur-xl">
                 <div className="container mx-auto flex items-center justify-between px-4 py-4 md:px-6">
                     <div className="flex items-center gap-3">
@@ -431,7 +431,7 @@ export default function LandingPage() {
                 <section className="bg-secondary/20 py-14">
                     <div className="container mx-auto px-4 md:px-6">
                         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-                            <Card className="border-border/70 bg-white p-6">
+                            <Card className="border-border/70 bg-card p-6">
                                 <Badge className="border-care/30 bg-care/10 text-care">Personalized onboarding</Badge>
                                 <h3 className="mt-3 text-2xl font-bold">Set up in under 60 seconds</h3>
                                 <p className="mt-2 text-sm text-muted-foreground">
@@ -450,7 +450,7 @@ export default function LandingPage() {
                                 </Button>
                             </Card>
 
-                            <Card className="border-border/70 bg-white p-6">
+                            <Card className="border-border/70 bg-card p-6">
                                 <h3 className="text-2xl font-bold">Family + emergency readiness</h3>
                                 <p className="mt-2 text-sm text-muted-foreground">
                                     Keep family informed and practice emergency actions before real incidents.

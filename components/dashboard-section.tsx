@@ -11,8 +11,11 @@ interface DashboardSectionProps {
 export function DashboardSection({ title, subtitle, className, children }: DashboardSectionProps) {
     return (
         <section className={cn("space-y-3", className)}>
-            <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold tracking-tight text-foreground">{title}</h2>
+            <div className="flex items-end justify-between gap-3 border-b border-border/60 pb-2">
+                <h2 className="flex items-center gap-2 text-xl font-bold tracking-tight text-foreground">
+                    <span className="h-5 w-1 rounded-full bg-gradient-to-b from-warm to-trust" aria-hidden="true" />
+                    {title}
+                </h2>
                 {subtitle ? <p className="text-sm font-medium text-muted-foreground">{subtitle}</p> : null}
             </div>
             {children}

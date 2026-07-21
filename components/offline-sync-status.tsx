@@ -51,7 +51,7 @@ export function OfflineSyncStatusWidget() {
                 <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.08)] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8] border border-white/70 gap-2 px-4 h-12 transition-all hover:scale-105 hover:bg-white/80 active:scale-95 text-foreground"
+                    className="rounded-full shadow-lg bg-card/80 backdrop-blur-xl backdrop-saturate-[1.8] border border-border/70 gap-2 px-4 h-12 transition-all hover:scale-105 hover:bg-card/90 active:scale-95 text-foreground"
                     onClick={() => setIsMinimized(false)}
                 >
                     {status.online ? (
@@ -67,13 +67,13 @@ export function OfflineSyncStatusWidget() {
 
     return (
         <div className="fixed bottom-4 left-4 z-50 w-[min(20rem,calc(100vw-2rem))] animate-fade-up">
-            <Card className="gap-3 border border-white/70 px-4 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8]">
+            <Card className="gap-3 border border-border/70 px-4 py-4 shadow-xl bg-card/90 backdrop-blur-xl backdrop-saturate-[1.8]">
                 <div className="flex items-center justify-between gap-2 mb-3">
                     <div className="flex items-center gap-2">
                         {status.online ? (
-                            <Wifi className="h-4 w-4 text-green-600" />
+                            <Wifi className="h-4 w-4 text-success" />
                         ) : (
-                            <WifiOff className="h-4 w-4 text-red-600" />
+                            <WifiOff className="h-4 w-4 text-alert" />
                         )}
                         <p className="text-xs font-semibold">
                             {status.online ? (status.isSyncing ? "Sync in progress" : "Online") : "Offline mode"}
@@ -88,7 +88,7 @@ export function OfflineSyncStatusWidget() {
                 </div>
 
                 {status.conflictsCount > 0 && (
-                    <p className="text-xs text-amber-700">{status.conflictsCount} conflict(s) captured for manual review.</p>
+                    <p className="text-xs font-medium text-foreground/80">{status.conflictsCount} conflict(s) captured for manual review.</p>
                 )}
 
                 {status.lastSyncAt && (

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireSessionUser } from "@/lib/api-auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 interface SupportGroup {
     id: string;
@@ -34,6 +36,8 @@ interface ExpertQA {
     likes: number;
 }
 
+// Community content (groups/stories/Q&A) is intentionally readable without
+// auth — it's public-facing peer support content, not patient data.
 export async function GET(req: NextRequest) {
     try {
         const { searchParams } = new URL(req.url);
@@ -59,8 +63,21 @@ export async function GET(req: NextRequest) {
     }
 }
 
+// Writing content (creating groups, posting stories/questions, joining) is
+// gated: previously any anonymous caller could spam these endpoints with no
+// auth and no rate limit.
 export async function POST(req: NextRequest) {
     try {
+        const user = await requireSessionUser()
+        if (!user) {
+            return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+        }
+
+        const rl = await rateLimit(`community-post:${user.id}:${clientIp(req)}`, 30, 60_000)
+        if (!rl.allowed) {
+            return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+        }
+
         const body = await req.json();
         const { action, data } = body;
 
@@ -222,7 +239,7 @@ function getExpertQA(): Response {
 }
 
 function createSupportGroup(data: any): Response {
-    const { name, topic, creator } = data;
+    const { name, topic } = data;
 
     const newGroup: SupportGroup = {
         id: `group_${Date.now()}`,
@@ -284,7 +301,7 @@ function postQuestion(data: any): Response {
 }
 
 function joinGroup(data: any): Response {
-    const { groupId, userId } = data;
+    const { groupId } = data;
 
     return NextResponse.json({
         success: true,

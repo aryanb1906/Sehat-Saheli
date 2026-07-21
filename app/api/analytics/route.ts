@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireSessionUser, hasRole } from "@/lib/api-auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 interface HealthMetrics {
     timestamp: string;
@@ -30,6 +32,22 @@ interface EngagementMetrics {
 
 export async function GET(req: NextRequest) {
     try {
+        // ASHA performance, per-user health trends, and government dashboard
+        // data are internal/aggregate program data, not something an
+        // anonymous or MOTHER-role caller should be able to read.
+        const user = await requireSessionUser()
+        if (!user) {
+            return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+        }
+        if (!hasRole(user.role, ["ASHA", "DOCTOR"])) {
+            return NextResponse.json({ error: "Not allowed to access this resource" }, { status: 403 })
+        }
+
+        const rl = await rateLimit(`analytics:${user.id}:${clientIp(req)}`, 60, 60_000)
+        if (!rl.allowed) {
+            return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+        }
+
         const { searchParams } = new URL(req.url);
         const type = searchParams.get("type"); // "government", "engagement", "user-health", "asha-performance"
         const period = searchParams.get("period"); // "weekly", "monthly", "yearly"

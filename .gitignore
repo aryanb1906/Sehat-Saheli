@@ -12,3 +12,7 @@ playwright-report/
 logs/
 smoke-results/
 smoke-results-*/
+
+# Build/log artifacts should not be committed
+*.log
+build_output.log

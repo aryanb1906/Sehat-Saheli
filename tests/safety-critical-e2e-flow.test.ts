@@ -34,6 +34,10 @@ describe("Safety critical integration paths", () => {
   })
 
   it("covers symptom/risk to referral to status update", async () => {
+    // /api/check-symptom now requires an authenticated session (it used to
+    // accept anonymous callers — see remediation Phase 1), so this flow
+    // needs a session mock just like the referral/emergency calls below.
+    sessionMock.mockResolvedValue({ id: "mother_1", role: "MOTHER", email: "mother@example.com" })
     const { POST: checkSymptom } = await import("@/app/api/check-symptom/route")
     const symptomRes = await checkSymptom(
       new Request("http://localhost/api/check-symptom", {

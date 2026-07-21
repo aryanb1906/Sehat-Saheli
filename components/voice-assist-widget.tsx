@@ -124,7 +124,7 @@ export function VoiceAssistWidget() {
                 <Button
                     variant="default"
                     size="icon"
-                    className={`h-14 w-14 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-all hover:scale-105 active:scale-95 ${isListening ? "voice-mic-glow bg-alert hover:bg-alert/90 text-white" : "bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8] border border-white/70 text-foreground hover:bg-white/80"} animate-fade-up`}
+                    className={`h-14 w-14 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 ${isListening ? "voice-mic-glow bg-alert hover:bg-alert/90 text-white" : "bg-card/80 backdrop-blur-xl backdrop-saturate-[1.8] border border-border/70 text-foreground hover:bg-card/90"} animate-fade-up`}
                     onClick={() => setIsMinimized(false)}
                     aria-label={t({ en: "Expand voice assist", hi: "वॉइस असिस्ट फैलाएं", or: "ଭଏସ୍ ଅସିଷ୍ଟ ବଡ଼ କରନ୍ତୁ", bn: "ভয়েস অ্যাসিস্ট বড় করুন", te: "వాయిస్ అసిస్టెంట్ విస్తరించండి", ta: "குரல் உதவியை விரிவாக்கவும்", mr: "व्हॉइस असिस्ट विस्तारवा", gu: "વોઇસ સહાય વિસ્તારો" })}
                 >
@@ -136,7 +136,7 @@ export function VoiceAssistWidget() {
 
     return (
         <div className="fixed bottom-4 right-4 z-50 w-[min(24rem,calc(100vw-2rem))]">
-            <Card className="gap-3 border border-white/70 px-3 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] bg-white/70 backdrop-blur-xl backdrop-saturate-[1.8] animate-fade-up">
+            <Card className="gap-3 border border-border/70 px-3 py-3 shadow-xl bg-card/90 backdrop-blur-xl backdrop-saturate-[1.8] animate-fade-up">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <Languages className="h-4 w-4 text-trust" />
@@ -144,7 +144,7 @@ export function VoiceAssistWidget() {
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-[11px] font-medium text-muted-foreground">{stateLabel}</span>
-                        <span className={`h-2.5 w-2.5 rounded-full ${isListening ? "bg-red-500 animate-pulse" : "bg-green-500"}`} />
+                        <span className={`h-2.5 w-2.5 rounded-full ${isListening ? "bg-alert animate-pulse" : "bg-success"}`} />
                         <Button variant="ghost" size="icon" className="h-6 w-6 ml-1 -mr-2 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors" onClick={() => setIsMinimized(true)}>
                             <ChevronDown className="h-4 w-4" />
                         </Button>

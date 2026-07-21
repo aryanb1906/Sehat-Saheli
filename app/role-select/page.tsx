@@ -40,7 +40,7 @@ export default function RoleSelect() {
           <Button
             onClick={() => selectRole("mother")}
             type="button"
-            className="h-auto p-0 overflow-hidden group bg-white hover:bg-white/95 border-0 whitespace-normal"
+            className="h-auto p-0 overflow-hidden group bg-card hover:bg-card/95 border-0 whitespace-normal shadow-xl"
           >
             <div className="p-8 flex flex-col items-center text-center">
               <div className="w-24 h-24 bg-gradient-to-br from-warm to-care rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
@@ -54,7 +54,7 @@ export default function RoleSelect() {
           <Button
             onClick={() => selectRole("asha")}
             type="button"
-            className="h-auto p-0 overflow-hidden group bg-white hover:bg-white/95 border-0 whitespace-normal"
+            className="h-auto p-0 overflow-hidden group bg-card hover:bg-card/95 border-0 whitespace-normal shadow-xl"
           >
             <div className="p-8 flex flex-col items-center text-center">
               <div className="w-24 h-24 bg-gradient-to-br from-trust to-accent rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">

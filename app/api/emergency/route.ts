@@ -234,11 +234,16 @@ function initiateAmbulanceCall(data: Record<string, unknown>, requestId: string)
 
     const { location, reason } = parsed.data
 
-    // In production: Integrate with ambulance service API
+    // There is no real ambulance-dispatch integration wired up yet (no state
+    // 108 aggregator / partner API). Do NOT fabricate an ETA or driver phone
+    // number here — a fake confirmation in a real emergency is worse than no
+    // confirmation. Tell the caller to dial 108 directly; the client is
+    // responsible for firing a native tel:108 intent immediately alongside
+    // this call (see lib/offline-sync-client.ts triggerLocalEmergencyFallback).
     return okWithRequestId({
-        message: "Ambulance request sent. You will receive a call shortly.",
-        ambulanceETA: "8-10 minutes",
-        driverContact: "+91-XXXXXXXXXX",
+        message: "No automated ambulance dispatch is connected yet. Call 108 directly now — do not wait for this app.",
+        realDispatchIntegrated: false,
+        callNowNumber: "108",
     }, requestId);
 }
 

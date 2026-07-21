@@ -1,0 +1,34 @@
+node_modules
+.next
+.git
+.github
+.vscode
+.agents
+
+# env files (never bake secrets into the image)
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# test artifacts
+test-results
+playwright-report
+smoke-results
+smoke-results-*
+coverage
+
+# build artifacts / caches
+*.tsbuildinfo
+build_output.log
+
+# docs (not needed in the image)
+*.md
+
+# misc
+README.md
+.dockerignore
+Dockerfile

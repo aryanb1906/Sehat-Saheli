@@ -435,8 +435,8 @@ export default function MotherDashboard() {
                                 action.tone === "danger"
                                     ? "border-alert/30 bg-alert text-white"
                                     : action.tone === "primary"
-                                        ? "border-[#BEDBF6] bg-[#E3F2FD] text-foreground"
-                                        : "border-[#F2DFDF] bg-[#FFF7F7] text-foreground"
+                                        ? "border-primary/25 bg-primary/10 text-foreground"
+                                        : "border-care/30 bg-care/10 text-foreground"
 
                             return (
                                 <button
@@ -660,7 +660,7 @@ export default function MotherDashboard() {
                 </DashboardSection>
 
                 <DashboardSection title={t({ en: "Tools", hi: "उपकरण", or: "ସାଧନ", bn: "টুলস", te: "సాధనాలు", ta: "கருவிகள்", mr: "साधने", gu: "સાધનો" })} subtitle={t({ en: "Organized by category", hi: "श्रेणी अनुसार व्यवस्थित", or: "ଶ୍ରେଣୀ ଅନୁସାରେ ସଂଗଠିତ", bn: "বিভাগ অনুযায়ী সাজানো", te: "వర్గాలవారీగా నిర్వహణ", ta: "வகைபடி ஒழுங்குபடுத்தப்பட்டது", mr: "वर्गानुसार आयोजित", gu: "શ્રેણી મુજબ ગોઠવાયેલ" })} className="mt-6 animate-fade-up">
-                    <div className="flex w-full items-center justify-between rounded-full border border-princess-1 bg-white p-1.5 shadow-[0_2px_12px_rgba(255,194,205,0.3)]">
+                    <div className="flex w-full items-center justify-between rounded-full border border-princess-1 bg-card p-1.5 shadow-[0_2px_12px_rgba(217,79,43,0.18)]">
                         <button
                             onClick={() => setActiveCategory("tracking")}
                             className={`flex-1 rounded-full px-4 py-3 text-[15px] font-bold transition-all duration-300 ${activeCategory === "tracking" ? "bg-primary text-white shadow-md shadow-primary/20 scale-[1.02]" : "text-primary/70 hover:bg-secondary/50"}`}
@@ -689,10 +689,10 @@ export default function MotherDashboard() {
                                     <button
                                         key={item.route}
                                         onClick={() => router.push(item.route)}
-                                        className="group flex min-h-[96px] items-center justify-between rounded-[24px] border border-princess-1 bg-white px-5 py-4 text-left shadow-[0_4px_16px_rgba(255,194,205,0.15)] transition-all duration-300 hover:-translate-y-1 hover:border-princess-4 hover:shadow-[0_8px_24px_rgba(252,52,104,0.2)] active:scale-[0.98]"
+                                        className="group flex min-h-[96px] items-center justify-between rounded-[24px] border border-princess-1 bg-card px-5 py-4 text-left shadow-[0_4px_16px_rgba(217,79,43,0.1)] transition-all duration-300 hover:-translate-y-1 hover:border-princess-4 hover:shadow-[0_8px_24px_rgba(217,79,43,0.2)] active:scale-[0.98]"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-princess-1/40 text-primary transition-colors duration-300 group-hover:bg-princess-2 group-hover:text-[#660022]">
+                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-princess-1/40 text-primary transition-colors duration-300 group-hover:bg-princess-2 group-hover:text-[color:var(--princess-5)]">
                                                 <Icon className="h-5 w-5" />
                                             </div>
                                             <p className="text-[15px] font-bold text-foreground">{item.label}</p>

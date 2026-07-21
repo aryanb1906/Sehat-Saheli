@@ -13,6 +13,7 @@
 ## 📖 Table of Contents
 - [The Problem](#-the-problem)
 - [Our Solution](#-our-solution)
+- [Production Remediation Log (July 21, 2026)](#-production-remediation-log-july-21-2026)
 - [Latest Platform Update (March 2026)](#-latest-platform-update-march-2026)
 - [Critical Hardening Log (March 30, 2026)](#-critical-hardening-log-march-30-2026)
 - [Key Features](#-key-features)
@@ -33,6 +34,44 @@ In rural India, maternal mortality remains a critical challenge due to:
 
 ## 💡 Our Solution
 **Sehat Saheli** is an AI-powered digital companion that empowers both expectant mothers and ASHA workers. It acts as a bridge, providing 24/7 medical guidance in native languages while streamlining patient management for healthcare workers.
+
+---
+
+## 🛡️ Production Remediation Log (July 21, 2026)
+
+A full code-level audit (not a documentation review) was run against this repository to check what was genuinely production-ready versus what was a mockup pretending to be functional, given the app's real intended users: ASHA community health workers and pregnant mothers in low-connectivity rural India. The audit found several real security and clinical-safety gaps. This section is a dated, honest record of what was found and what was fixed on **July 21, 2026** — written so the gap between documentation claims and actual code doesn't recur.
+
+### 🚨 What the audit found (before today's fixes)
+
+- **IDOR on chat and video-consultation** — `patientId`/`motherId`/`doctorId` were trusted directly from the request with no check that the caller actually owned that record; any authenticated (or in chat's case, anonymous) caller could read or write another patient's private conversation or consultation by guessing IDs.
+- **Two contradictory, unauthenticated maternal-risk scoring engines** — `/api/ai-assessment` and `/api/maternal-risk` computed risk with two separate, differently-weighted formulas, so the same patient could get a different risk tier depending on which screen ran the check.
+- **`/api/check-symptom` was plain keyword matching** labeled "AI risk analysis" — e.g. any mention of "headache" always scored High regardless of context, with no auth or rate limiting.
+- **SOS triggered while offline was queued silently** — the generic offline write-queue told the user "will sync automatically" even for an emergency alert, with no local fallback (no auto-dial, no honest "this hasn't reached anyone" messaging). A second SOS entry point (`app/mother/sos-emergency`) didn't call the real emergency API at all — it only showed a toast.
+- **Fabricated ambulance dispatch** — `/api/emergency`'s `call-108` action returned a made-up "8-10 minutes" ETA and a placeholder phone number with no real dispatch integration behind it.
+- **Silent-fake data paths** — `/api/chat/messages` returned `success: true` with a fabricated "sent" message on database failure (a message could vanish while the UI said it was delivered); `/api/video-consultation` injected two hardcoded fake appointments ("Dr. Rajesh Kumar", 2024-03-25) whenever a patient had zero real bookings; `/api/nutrition-recipes` discarded custom recipes entirely after claiming "Recipe saved successfully."
+- **Missing auth/rate-limiting** on `/api/sms` (would become an open, abusable SMS relay the moment Twilio credentials are added), `/api/medication-safety`, `/api/community` (write actions), and `/api/analytics` (exposed individual ASHA worker performance data and aggregate program data with no role check).
+- **No CI/CD, no Docker/deploy config** despite multiple docs claiming "production-ready."
+- **Dark mode was broken** — the `.dark` theme class forced the light color palette instead of an independently tuned dark theme.
+- Two lockfiles (`package-lock.json` and `pnpm-lock.yaml`) committed simultaneously, and a build log (`build_output.log`) committed to the repo.
+
+### ✅ What was fixed today
+
+1. **Auth/ownership hardening** — added session + ownership checks to `chat/messages`, `video-consultation`, `medication-safety`, `sms` (ASHA/DOCTOR only), `community` (write actions), and role-gated `analytics` to ASHA/DOCTOR accounts only. `chat/messages` and `video-consultation` now derive the acting user's identity from the session instead of trusting client-supplied IDs.
+2. **Unified clinical risk engine** — added `lib/clinical/maternal-risk-engine.ts` as the single source of truth for maternal-risk scoring. `/api/maternal-risk`, `/api/ai-assessment`, and `/api/check-symptom` all now call the same engine, so a patient can no longer get different risk tiers from different screens. Hard emergency overrides (heavy bleeding, severe hypertension, reduced fetal movement past 28 weeks) bypass the point total entirely so they can never be diluted into a "medium" score. **This rubric still needs sign-off from a clinician (ASHA supervisor/ANM) before being relied on for real triage** — it is a best-effort merge of the two prior implementations, not a validated clinical scoring system.
+3. **Offline SOS safety fix** — `lib/offline-sync-client.ts` now special-cases emergency mutations: when offline, it immediately fires a native `tel:108` dial intent and emits an event the SOS UI listens for, and the queued-response copy explicitly says the alert has **not** reached anyone yet rather than implying it "synced." Both `app/mother/emergency` and `app/mother/sos-emergency` now show this banner and call the real `/api/emergency` endpoint (`sos-emergency` previously only showed a toast and never called the API). `/api/emergency`'s ambulance-call action no longer fabricates an ETA/phone number — it's now honest that no real dispatch integration exists yet and tells the user to call 108 directly.
+4. **Removed silent-fake data paths** — `chat/messages` now returns a real 503 on database failure instead of a fabricated "sent" message; `video-consultation` shows a genuine empty state instead of injecting fake appointments; `nutrition-recipes` custom saves are now actually retrievable (in-process, with an honest `persisted: false` flag — full durability still needs a `CustomRecipe` Prisma model).
+5. **CI/CD and Docker** — added `.github/workflows/ci.yml` (lint, typecheck, test, build against a real Postgres service container), a multi-stage `Dockerfile` + `.dockerignore`, and `output: "standalone"` in `next.config.mjs`. Removed the duplicate `pnpm-lock.yaml` (standardized on npm/`package-lock.json`) and the committed `build_output.log`.
+6. **UI/UX and theme pass** — redesigned the color system in `app/globals.css` (and synced `styles/globals.css`) around a warm terracotta/marigold primary and deep teal "trust" secondary on warm ivory/near-black-brown neutrals, appropriate to a maternal-health context in India rather than a generic SaaS look. Fixed dark mode, which previously just re-applied the light palette. Emergency/SOS UI keeps its own distinct red `alert` token so it never blends into the calm primary accent. Polished shared chrome (`app-sidebar`, `dashboard-section`, `notification-center`, `guest-mode-banner`, `offline-sync-status`, `voice-assist-widget`) to read as one coherent system, and applied the new tokens to the landing page, role-select, mother dashboard, and ASHA dashboard.
+7. **Validation** — `npx tsc --noEmit` clean, `npx vitest run` 16/16 passing (9 test files), `npm run build` succeeds across all 80 routes/pages.
+
+### ⚠️ Still open — needs a human, not just more code
+
+- **Clinical sign-off on the unified risk engine's weights/thresholds** (Phase 3 above) — this was written by an engineer reading two prior implementations, not a clinician.
+- **Real third-party credentials** — `GEMINI_API_KEY`, `TWILIO_*`, `GOOGLE_CLIENT_ID/SECRET`, and `UPSTASH_REDIS_REST_URL/TOKEN` are still placeholders in `.env.local`. Until they're provisioned with real accounts and spend caps, AI chat/voice parsing, Google sign-in, real SMS, and multi-instance-safe rate limiting are all inert or degraded to single-instance in-memory behavior.
+- **No real ambulance dispatch integration** — `/api/emergency` is now honest about this instead of faking it, but a real 108/state-ambulance-aggregator integration is still unbuilt.
+- **`/api/translate` is still 6 hardcoded phrases** standing in for a real Bhashini integration — not touched in this pass; a real translation strategy decision (Bhashini vs. relying on Gemini's native multilingual generation) is still needed.
+- **`community` route writes are still not persisted to a database** (only patient-facing chat/video/emergency data was brought under real persistence discipline this pass) — lower stakes than patient data, but not durable.
+- Guest-mode users now lose access to chat/video-consultation (both now require a real authenticated session, closing the IDOR) — this is a deliberate security/UX tradeoff, not an oversight.
 
 ---
 

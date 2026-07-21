@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireSessionUser } from "@/lib/api-auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 // Nutrition Recipes Database
-const recipesDatabase = [
+// NOTE: custom recipes below are appended to this in-memory array, which is
+// NOT durable across server restarts/instances. This is a stopgap — the
+// honest fix is a CustomRecipe Prisma model (see remediation brief Phase 5).
+// The important part fixed here: this used to discard the recipe entirely
+// and just echo it back with "saved successfully", so it vanished even
+// within the same request's follow-up GET. It is now at least genuinely
+// retrievable for the lifetime of this server process, and the response is
+// honest about not being permanently persisted yet.
+const recipesDatabase: Array<Record<string, any>> = [
     {
         id: 1,
         name: "Spinach & Chickpea Curry",
@@ -91,7 +101,7 @@ export async function GET(req: NextRequest) {
 
         if (condition === "anemia") {
             filteredRecipes = filteredRecipes.filter((r) =>
-                (r as any).iron === "High" || r.benefits.some((b) => b.toLowerCase().includes("iron")),
+                (r as any).iron === "High" || r.benefits.some((b: string) => b.toLowerCase().includes("iron")),
             );
         }
 
@@ -134,10 +144,23 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const user = await requireSessionUser()
+        if (!user) {
+            return NextResponse.json({ error: "Authentication required" }, { status: 401 })
+        }
+
+        const rl = await rateLimit(`nutrition-recipes-post:${user.id}:${clientIp(req)}`, 20, 60_000)
+        if (!rl.allowed) {
+            return NextResponse.json({ error: "Too many requests" }, { status: 429 })
+        }
+
         const body = await req.json();
         const { name, ingredients, calories, benefits, instructions } = body;
 
-        // Save custom recipe (in production: save to database)
+        if (!name || !instructions) {
+            return NextResponse.json({ error: "name and instructions are required" }, { status: 400 })
+        }
+
         const newRecipe = {
             id: recipesDatabase.length + 1,
             name,
@@ -149,11 +172,18 @@ export async function POST(req: NextRequest) {
             servings: 2,
             prepTime: 15,
             cookTime: 20,
+            createdBy: user.id,
         };
+
+        // Appended to the in-process array so it's genuinely retrievable via
+        // GET for the lifetime of this server instance — see the module-level
+        // comment above for why this still isn't fully durable.
+        recipesDatabase.push(newRecipe)
 
         return NextResponse.json({
             success: true,
-            message: "Recipe saved successfully",
+            persisted: false,
+            message: "Recipe saved for this session. Durable cross-restart storage is not wired up yet.",
             recipe: newRecipe,
         });
     } catch (error) {

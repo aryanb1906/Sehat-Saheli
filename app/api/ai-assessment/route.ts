@@ -1,13 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-
-interface RiskAssessment {
-    riskScore: number; // 0-100
-    riskLevel: "Low" | "Medium" | "High";
-    factors: string[];
-    recommendations: string[];
-    nextCheckupDate: string;
-    monitoringFrequency: string;
-}
+import { NextRequest } from "next/server";
+import { z } from "zod";
+import { requireSessionUser } from "@/lib/api-auth";
+import { failBadRequest, failInternal, failTooManyRequests, failUnauthorized, okWithRequestId } from "@/lib/api-response";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { getRequestId } from "@/lib/observability";
+import { toLegacyRiskAssessment } from "@/lib/clinical/maternal-risk-engine";
 
 interface SymptomCheckResult {
     symptom: string;
@@ -18,105 +15,66 @@ interface SymptomCheckResult {
     whenToSeekHelp: string[];
 }
 
-export async function POST(req: NextRequest) {
-    try {
-        const body = await req.json();
-        const { type, data } = body;
+const riskAssessmentSchema = z.object({
+    age: z.number().min(10).max(60).optional(),
+    bmi: z.number().min(10).max(60).optional(),
+    prevComplications: z.boolean().optional(),
+    hasAnemia: z.boolean().optional(),
+    hasGestationalDiabetes: z.boolean().optional(),
+    multiplePregnancy: z.boolean().optional(),
+})
 
-        if (type === "risk-assessment") {
-            return assessRisk(data);
-        } else if (type === "symptom-check") {
-            return checkSymptom(data);
+const symptomCheckSchema = z.object({
+    symptom: z.string().min(1),
+    severity: z.string().optional(),
+    frequency: z.string().optional(),
+})
+
+const requestSchema = z.discriminatedUnion("type", [
+    z.object({ type: z.literal("risk-assessment"), data: riskAssessmentSchema }),
+    z.object({ type: z.literal("symptom-check"), data: symptomCheckSchema }),
+])
+
+export async function POST(req: NextRequest) {
+    const requestId = getRequestId(req)
+    try {
+        const user = await requireSessionUser()
+        if (!user) return failUnauthorized("Authentication required", requestId)
+
+        const rl = await rateLimit(`ai-assessment:${user.id}:${clientIp(req)}`, 60, 60_000)
+        if (!rl.allowed) return failTooManyRequests("Too many requests", undefined, requestId)
+
+        const body = await req.json();
+        const parsed = requestSchema.safeParse(body)
+        if (!parsed.success) return failBadRequest("Invalid assessment payload", requestId)
+
+        if (parsed.data.type === "risk-assessment") {
+            return assessRisk(parsed.data.data, requestId)
         }
 
-        return NextResponse.json(
-            { error: "Invalid assessment type" },
-            { status: 400 }
-        );
-    } catch (error) {
-        return NextResponse.json(
-            { error: "Failed to process assessment" },
-            { status: 500 }
-        );
+        return checkSymptom(parsed.data.data, requestId)
+    } catch {
+        return failInternal("Failed to process assessment", requestId)
     }
 }
 
-function assessRisk(data: any): Response {
-    const {
-        age,
-        bmi,
-        prevComplications,
-        hasAnemia,
-        hasGestationalDiabetes,
-        multiplePregnancy,
-    } = data;
+function assessRisk(data: z.infer<typeof riskAssessmentSchema>, requestId: string) {
+    // Delegates to the shared maternal-risk engine (lib/clinical/maternal-risk-engine.ts)
+    // so this screen and /api/maternal-risk never disagree on the same patient.
+    const assessment = toLegacyRiskAssessment({
+        age: data.age,
+        bmi: data.bmi,
+        priorComplications: data.prevComplications,
+        hasAnemia: data.hasAnemia,
+        hasGestationalDiabetes: data.hasGestationalDiabetes,
+        multiplePregnancy: data.multiplePregnancy,
+    })
 
-    let riskScore = 0;
-    const factors: string[] = [];
-    const recommendations: string[] = [];
-
-    // Age risk
-    if (age < 18 || age > 35) {
-        riskScore += 15;
-        factors.push(`Age ${age} carries higher maternal risk`);
-    }
-
-    // BMI risk
-    if (bmi < 18.5 || bmi > 30) {
-        riskScore += 10;
-        factors.push(`BMI ${bmi} is outside healthy range`);
-    }
-
-    // Previous complications
-    if (prevComplications) {
-        riskScore += 20;
-        factors.push("Previous pregnancy complications detected");
-    }
-
-    // Anemia
-    if (hasAnemia) {
-        riskScore += 15;
-        factors.push("Anemia detected - requires close monitoring");
-        recommendations.push("Take iron supplements daily");
-    }
-
-    // Gestational diabetes
-    if (hasGestationalDiabetes) {
-        riskScore += 25;
-        factors.push("Gestational diabetes detected");
-        recommendations.push("Follow strict diet and glucose monitoring");
-    }
-
-    // Multiple pregnancy
-    if (multiplePregnancy) {
-        riskScore += 20;
-        factors.push("Multiple pregnancy - higher risk");
-    }
-
-    const riskLevel =
-        riskScore >= 50 ? "High" : riskScore >= 25 ? "Medium" : "Low";
-
-    recommendations.push("Attend all ANC appointments");
-    recommendations.push("Maintain balanced nutrition");
-    recommendations.push("Report any warning signs immediately");
-
-    const assessment: RiskAssessment = {
-        riskScore: Math.min(riskScore, 100),
-        riskLevel,
-        factors,
-        recommendations,
-        nextCheckupDate: calculateNextCheckup(riskLevel),
-        monitoringFrequency: getMonitoringFrequency(riskLevel),
-    };
-
-    return NextResponse.json({
-        success: true,
-        assessment,
-    });
+    return okWithRequestId({ assessment }, requestId);
 }
 
-function checkSymptom(data: any): Response {
-    const { symptom, severity, frequency } = data;
+function checkSymptom(data: z.infer<typeof symptomCheckSchema>, requestId: string) {
+    const { symptom } = data;
 
     const symptomDatabase: Record<string, SymptomCheckResult> = {
         severe_bleeding: {
@@ -162,30 +120,18 @@ function checkSymptom(data: any): Response {
         },
     };
 
-    const result =
-        symptomDatabase[symptom.toLowerCase().replace(/\s+/g, "_")] ||
-        symptomDatabase["fever"];
+    const key = symptom.toLowerCase().replace(/\s+/g, "_")
+    // Unknown symptoms must not silently default to a low-severity entry ("fever") —
+    // that previously meant an unrecognized report like "severe bleeding at night"
+    // (typo'd key) could be quietly downgraded. Unknowns are routed to a
+    // human instead of guessed at.
+    const result = symptomDatabase[key] || {
+        symptom,
+        severityLevel: "Moderate",
+        possibleConditions: ["Not in local reference list — needs clinical review"],
+        recommendedAction: "Contact ASHA",
+        whenToSeekHelp: ["Describe the symptom to your ASHA worker or doctor as soon as possible"],
+    };
 
-    return NextResponse.json({
-        success: true,
-        result,
-    });
-}
-
-function calculateNextCheckup(riskLevel: string): string {
-    const today = new Date();
-    const days = riskLevel === "High" ? 7 : riskLevel === "Medium" ? 14 : 28;
-    const nextDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
-    return nextDate.toISOString().split("T")[0];
-}
-
-function getMonitoringFrequency(riskLevel: string): string {
-    switch (riskLevel) {
-        case "High":
-            return "Weekly monitoring required";
-        case "Medium":
-            return "Bi-weekly monitoring required";
-        default:
-            return "Monthly monitoring";
-    }
+    return okWithRequestId({ result }, requestId);
 }

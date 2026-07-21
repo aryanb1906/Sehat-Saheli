@@ -1,7 +1,9 @@
 import { NextRequest } from "next/server"
 import { z } from "zod"
-import { failBadRequest, failInternal, okWithRequestId } from "@/lib/api-response"
+import { failBadRequest, failInternal, failTooManyRequests, failUnauthorized, okWithRequestId } from "@/lib/api-response"
 import { getRequestId } from "@/lib/observability"
+import { requireSessionUser } from "@/lib/api-auth"
+import { clientIp, rateLimit } from "@/lib/rate-limit"
 
 const requestSchema = z.object({
   medicationName: z.string().min(2),
@@ -20,6 +22,12 @@ const safetyDatabase: Record<string, { safety: "safe" | "caution" | "avoid"; not
 export async function POST(req: NextRequest) {
   const requestId = getRequestId(req)
   try {
+    const user = await requireSessionUser()
+    if (!user) return failUnauthorized("Authentication required", requestId)
+
+    const rl = await rateLimit(`medication-safety:${user.id}:${clientIp(req)}`, 60, 60_000)
+    if (!rl.allowed) return failTooManyRequests("Too many requests", undefined, requestId)
+
     const body = await req.json()
     const parsed = requestSchema.safeParse(body)
     if (!parsed.success) {

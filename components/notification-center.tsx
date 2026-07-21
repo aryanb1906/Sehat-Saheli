@@ -89,9 +89,9 @@ export function NotificationCenter() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 w-80 md:w-96 z-50">
-          <Card className="shadow-lg border-2">
-            <div className="p-4 border-b">
+        <div className="absolute right-0 top-12 w-80 md:w-96 z-50 animate-fade-up">
+          <Card className="rounded-2xl border-border/70 shadow-xl gap-0 py-0 overflow-hidden">
+            <div className="p-4 border-b border-border/70 bg-secondary/30">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-lg">Notifications</h3>
                 <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
